@@ -1,0 +1,22 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "description": "CSC309: Assignment 4",
+  "main": "server.js",
+  "dependencies": {
+    "angular": "~1.4.7",
+    "express": "~4.13.3",
+    "mongoose": "~4.2.4",
+    "body-parser": "~1.14.1",
+    "bcrypt": "~0.8.5",
+    "client-sessions": "~0.7.0",
+    "jade": "~1.11.0",
+    "swig": "~1.4.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD-2-Clause"
+}
