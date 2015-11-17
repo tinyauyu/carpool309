@@ -40,7 +40,7 @@ function AccountManager(url){  //mongodb://localhost/
 		if(user){
 			nextId = user.id+1;
 		} else {
-			nextId = 1;
+			nextId = 0;
 		}
   	});
 }
