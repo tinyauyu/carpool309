@@ -71,7 +71,7 @@ $(document).on('change', '#profilePic', function() {
 $( document ).ready( function(){
   $.ajax({
     type: "GET",
-    url: "/api/profilePic/"+$('#profilePic_preview').data('id'),
+    url: "/api/users/"+$('#profilePic_preview').data('id')+"/profilePic",
     success: function(data){
       $('#profilePic_preview').attr("src",data);
     },
@@ -116,7 +116,7 @@ $( document ).ready( function(){
   $('#delete').click(function(){
     $.ajax({
       type: "DELETE",
-      url: "/users/"+$('#profilePic_preview').data('id'),
+      url: "/api/users/"+$('#profilePic_preview').data('id'),
       success: function(data){
         window.location.href="/users";
       },
@@ -137,7 +137,7 @@ $( document ).ready( function(){
     var userType = $('#userType').editable('getValue').userType;
 
     var profile = {
-      id: $('#profile').data('value'),
+      _id: $('#profile').data('value'),
       displayName: $('#displayName').html(),
       description: $('#description').html(),
       userType: userType,
@@ -150,8 +150,8 @@ $( document ).ready( function(){
 
     if(isValidProfile(profile)){
       $.ajax({
-        type: "POST",
-        url: "/api/updateProfile",
+        type: "PATCH",
+        url: "/api/users/"+profile._id,
         data: {json: JSON.stringify(profile)},
         success: function(data){
           $(".editableform-loading").addClass('hidden');
@@ -194,7 +194,7 @@ $( document ).ready( function(){
     }
 
     $.ajax({
-      type: "POST",
+      type: "PUT",
       url: "/api/changePassword",
       data: {json: JSON.stringify(profile)},
       success: function(data){

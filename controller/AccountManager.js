@@ -1,63 +1,39 @@
+var debug = require('debug')('AccountManager.js');
 var mongoose = require('mongoose');
+var autoIncrement = require('mongoose-auto-increment');
 var path = require('path');
 var bcrypt = require('bcrypt');
 var salt = bcrypt.genSaltSync(10);
 
-var UserSchema = mongoose.Schema({
-	id: {type:Number, required: true},
-	userType: {type:Number, required: true},
-	email: {type:String, required: true, trim: true},
-	passwordHash: {type:String, required: true},
-	description: String,
-	profilePic: Buffer,
-	displayName: String,
-	behavior: {
-		ip_addr: String,
-		browser: String,
-		os: String,
-		mobile: String,
-		screenSize: String,
-		location: {
-			latitude: Number,
-			longitude: Number
-		},
-	},
-	pageHistory:[String]
-});
-
-var User = mongoose.model('User', UserSchema);
-
-var nextId = -1;
+var UserSchema, User;
 
 function AccountManager(url){  //mongodb://localhost/
 	mongoose.connect(url);
 	this.db = mongoose.connection;
+	autoIncrement.initialize(this.db);
 	this.db.on('error', console.error.bind(console, 'connection error:'));
 	this.db.once('open', function (callback) {
-		console.log("[info]\t[AccountManager.js]\tConnected to mongodb!");
+		debug("Connected to mongodb");
 	});
-	User.findOne({}).sort('-id').exec(function (err, user) {
-		if(user){
-			nextId = user.id+1;
-		} else {
-			nextId = 1;
-		}
-  	});
+
+	/*** initialize variables ***/
+	UserSchema = require('./UserSchema.js').UserSchema;
+	User = mongoose.model('User', UserSchema);
+
 }
 
 AccountManager.prototype.login = function(profile, callback){
-	console.log('[info]\t[AccountManager.js]\tLogin attempt by '+ profile.email);
-
+	debug("Login attempt by " + profile.email);
 	User.findOne({ email: profile.email }, function(err, user) {
 	    if (!user) {
-	    	console.log('[info]\t[AccountManager.js]\tNo such email registered');
+	    	debug("No such email registered");
 	    	callback(false,"Invalid email or password");
 	    } else {
 	      if (bcrypt.compareSync(profile.password, user.passwordHash)) {
-	      	console.log('[info]\t[AccountManager.js]\tLogin success!');
+	      	debug("Login success!")
 	        callback(true,user);
 	      } else {
-	      	console.log('[info]\t[AccountManager.js]\tWrong Password!');
+	      	debug("Wrong Password");
 	        callback(false,"Invalid email or password");
 	      }
 	    }
@@ -66,15 +42,17 @@ AccountManager.prototype.login = function(profile, callback){
 }
 
 AccountManager.prototype.getUserList = function(callback){
-	User.find({},'id email displayName', function(err, users){
-		if(err) {throw err;}
-
-		callback(users);
+	User.find({},'_id email displayName', function(err, users){
+		if(err) {
+			throw err;
+		} else {
+			callback(users);
+		}
 	})
 }
 
 AccountManager.prototype.getUser = function(id,callback){
-	User.findOne({id: id}, function(err, user){
+	User.findOne({_id: id}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
 			callback(false,null)
@@ -85,8 +63,7 @@ AccountManager.prototype.getUser = function(id,callback){
 }
 
 AccountManager.prototype.getUserPic = function(id,callback){
-	console.log("find user #"+id+" profile pic");
-	User.findOne({id: id},'profilePic', function(err, user){
+	User.findOne({_id: id},'profilePic', function(err, user){
 		if (err) {throw err;}
 		if(!user){callback(null)} else {
 			callback(user.profilePic);
@@ -95,11 +72,7 @@ AccountManager.prototype.getUserPic = function(id,callback){
 }
 
 AccountManager.prototype.createUser = function(profile, callback){
-	console.log('[info]\t[AccountManager.js]\tcreating user...');
-
-	if(nextId <= 0){
-		callback(false,"Server initializing, please try again later.")
-	}
+	debug("Creating user ("+profile.email+")");
 
 	User.count({}, function(err, count){
 
@@ -128,19 +101,22 @@ AccountManager.prototype.createUser = function(profile, callback){
 				return;
 			} else {
 				var userType = 0;
-				if(count==0){userType = 2;}
+				if(count==0){
+					User.resetCount(function(err, nextCount){});
+					userType = 2;
+				}
 
 
 				var passwordHash = bcrypt.hashSync(profile.password, salt);
 
 				var newUser = new User({
-					id: nextId,
 					userType: userType,
 					email: profile.email,
 					passwordHash: passwordHash,
 					description: profile.description,
 					displayName: profile.displayName,
-					profilePic: profilePic
+					profilePic: profilePic,
+					admin: false
 				});
 
 				newUser.save(function(error, data){
@@ -149,8 +125,7 @@ AccountManager.prototype.createUser = function(profile, callback){
 			        	callback(false,"Internal Server Error");
 			        	return;
 			    	} else {
-			    		console.log("[info]\t[AccountManager.js]\tUser #"+count+" ("+profile.email+") created.")
-			    		nextId++;
+			    		debug("User #"+count+" ("+profile.email+") created");
 			    	    callback(true,"OK");
 			    	    return;
 			    	}
@@ -161,13 +136,13 @@ AccountManager.prototype.createUser = function(profile, callback){
 }
 
 AccountManager.prototype.deleteUser = function(user, profile, callback){
-	if(user.id == profile.id){
+	if(user._id == profile._id){
 		callback(false,"You cannot delete your own account!");
 		return;
 	}
 	this.checkAccessRight(user, profile, function(isAuth){
 		if(isAuth){
-			User.findOneAndRemove({id: profile.id}, function(err){
+			User.findOneAndRemove({_id: profile._id}, function(err){
 				if(err){
 					callback(false,err);
 				} else {
@@ -183,16 +158,15 @@ AccountManager.prototype.checkAccessRight = function(user, profile, callback){
 	var user_type = -1;
 	var profile_type = -1;
 
-	if(user.id == profile.id){
+	if(user._id == profile._id){
 		callback(true);
 		return;
 	}
 
-	User.findOne({id: user.id}, 'userType', function(err, u){
+	User.findOne({_id: user._id}, 'userType', function(err, u){
 		user_type = u.userType;
-		User.findOne({id: profile.id}, 'userType', function(err, p){
+		User.findOne({_id: profile._id}, 'userType', function(err, p){
 			profile_type = p.userType;
-			console.log("accessRight: user="+user_type + "  |  profile=" + profile_type);
 
 			if(user_type<1){
 				callback(false);
@@ -217,13 +191,12 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 	// check right to update
 	this.checkAccessRight(user, profile, function(isAuth){
 		if(!isAuth){
-			console.log("Invalid access attempt by user#"+user.id);
-			console.log('5');
+			debug("Invalid access attempt by user#"+user._id);
 			callback(false,"You have no right to update this profile!");
 			return;
 		} else {
 			// check field to update
-			User.findOneAndUpdate({id: profile.id}, profile, function(err){
+			User.findOneAndUpdate({_id: profile._id}, profile, function(err){
 				if(err){
 					callback(false,err);
 					return;
@@ -250,7 +223,7 @@ AccountManager.prototype.changePassword = function(profile, callback){
 	newProfile.passwordHash = passwordHash;
 	delete newProfile.password;
 
-	User.findOneAndUpdate({id: profile.id}, profile, function(err){
+	User.findOneAndUpdate({_id: profile._id}, profile, function(err){
 		if(err){
 			callback(false,err);
 			return;
@@ -259,35 +232,6 @@ AccountManager.prototype.changePassword = function(profile, callback){
 			return;
 		}
 	});
-}
-
-AccountManager.prototype.log = function(user, callback){
-	User.findOneAndUpdate({id: user.id}, user, function(err){
-		if(err){
-			callback(false, err);
-			return;
-		} else {
-			callback(true,"OK");
-			return;
-		}
-	})
-}
-
-AccountManager.prototype.logPage = function(user, page){
-
-	var update = {
-		$push: {"pageHistory":page}
-	};
-
-	User.findOneAndUpdate({id: user.id}, update, function(err){
-		if(err){
-			console.log("!!!>>>>>>Page log failed! " + err);
-			return;
-		} else {
-			console.log("!!!>>>>>>Page log ok!");
-			return;
-		}
-	})
 }
 
 module.exports = AccountManager;

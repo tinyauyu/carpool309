@@ -2,7 +2,7 @@ $( document ).ready( function(){
   console.log('nav.js');
   $.ajax({
     type: "GET",
-    url: "/api/profilePic",
+    url: "/api/users/current/profilePic",
     success: function(data){
       $('#nav-profilePic').attr("src",data);
     },

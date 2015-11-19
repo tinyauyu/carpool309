@@ -11,7 +11,9 @@
     "bcrypt": "~0.8.5",
     "client-sessions": "~0.7.0",
     "jade": "~1.11.0",
-    "swig": "~1.4.2"
+    "swig": "~1.4.2",
+    "mongoose-auto-increment": "~5.0.1",
+    "debug": "~2.2.0"
   },
   "devDependencies": {},
   "scripts": {

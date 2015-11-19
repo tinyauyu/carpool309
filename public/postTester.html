@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<title>Post Tester</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	</head>
+	<body>
+		<span>type: </span>
+		<input id="type" type="text" value="POST">
+		<span>post url: </span>
+		<input id="url" type="text"><br><br>
+		<span>JSON content: </span><input id="add" type="button" value="Add"><br><br>
+		<div id="fields" data-num=0>
+		
+		</div><br>
+		<input id="submit" type="button" value="Submit">
+
+		<script>
+			$('#add').click(function(){
+				var num = $('#fields').data('num');
+				$('#fields').append("<span>name: </span><input id='"+num+"-name' type='text'><span> value:</span><input id='"+num+"-value' type='text'><br>");
+				$('#fields').data('num',num+1);
+			});
+
+			$('#submit').click(function(){
+				var i;
+				var num = $('#fields').data('num');
+				var content = new Object();
+				for(i=0;i<num;i++){
+					var key = $("#"+i+"-name").val();
+					var value = $("#"+i+"-value").val();
+					content[key] = value;
+				}
+				console.log(content);
+				$.ajax({
+			      type: $('#type').val(),
+			      url: $('#url').val(),
+			      data: {json: JSON.stringify(content)},
+			      success: function(data){
+			        alert(data);
+			      },
+			      error: function(jqxhr, textStatus, errorThrown){
+			        alert(errorThrown);
+			      }
+			    });
+			});			
+		</script>
+	</body>
+</html>

@@ -128,12 +128,12 @@ $('#submit').click(function(){
 	if(isValidProfile(profile)){
 		$.ajax({
 			type: "POST",
-			url: "./api/createUser",
+			url: "/api/users",
 			data: {json: JSON.stringify(profile)},
 			success: function(){
 				$.ajax({
 					type: "POST",
-					url: "./api/login",
+					url: "/api/login",
 					data: {json: JSON.stringify(profile)},
 					success: function(data){
 						window.location.href = "/users";

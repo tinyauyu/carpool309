@@ -1,8 +1,10 @@
-//var mongoose = require('mongoose');
-console.log("[info]\t[server.js]\tinitializing...");
+var debug = require('debug')('server.js');
+var debug_http = require('debug')('http');
 
+debug("Server initializing...");
+
+var mongoose = require('mongoose');
 var ROOT = { root: __dirname+'/public' };
-
 var express = require('express');
 var app = express();
 var bcrypt = require('bcrypt');
@@ -27,12 +29,14 @@ app.use(session({
 
 app.use(function(req, res, next) {
 
-	if(req.url=="/" || req.url=="/api/login" || req.url=="/api/createUser" || req.url=="/api/logout"){
+	debug_http(req.method + ' ' + req.url);
+
+	if(req.url=="/" || req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
 		next();
 		return;
 	} else {
 		if (req.session && req.session.email) {
-		    acManager.getUser(req.session.id, function(success, user) {
+		    acManager.getUser(req.session._id, function(success, user) {
 			    if (!user) {
 		   			res.redirect('/api/logout');
 		    		return;
@@ -47,16 +51,22 @@ app.use(function(req, res, next) {
 	}
 });
 
+var MONGODB_URL = 'mongodb://localhost/';
+//var MONGODB_URL = 'mongodb://carpool309:muchbetterthanuber@ds055564.mongolab.com:55564/heroku_7wrc6q07';
+
+/********************** Managers **********************/
 var AccountManager = require('./controller/AccountManager.js');
-var acManager = new AccountManager('mongodb://localhost/');
-//var acManager = new AccountManager('mongodb://carpool309:muchbetterthanuber@ds055564.mongolab.com:55564/heroku_7wrc6q07');
+var acManager = new AccountManager(MONGODB_URL);
+var FeedbackManager = require('./controller/FeedbackManager.js');
+var feedbackManager = new FeedbackManager(MONGODB_URL);
+var MessageManager = require('./controller/MessageManager.js');
+var msgManager = new MessageManager(MONGODB_URL);
 
-/*** Login Routine ***/
+/********************** Managers **********************/
 
-
-/*** UI ***/
+/********************** View *************************/
 app.all('/', function(req, res){
-	if(req.session.id || req.session.id == 0){
+	if(req.session._id || req.session._id == 0){
 		res.redirect('/users');
 	} else {
 		res.render('../public/getStarted.html');
@@ -66,11 +76,12 @@ app.all('/', function(req, res){
 app.get('/users/:id', function(req, res){
 	var page = "/users/" + req.params.id;
 	var user = {
-		id: req.session.id
+		_id: req.session._id
 	}
-	acManager.logPage(user,page);
 
-	acManager.getUser(req.session.id,function(success,profile){
+	//acManager.logPage(user,page);
+
+	acManager.getUser(req.session._id,function(success,profile){
 		if(!success){
 			res.redirect('/users');
 			return;
@@ -82,6 +93,7 @@ app.get('/users/:id', function(req, res){
 				return;
 			}
 
+			/*
 			var pageHistory = {}
 
 			for (i=0; i<user.pageHistory.length; i++){
@@ -103,9 +115,9 @@ app.get('/users/:id', function(req, res){
 				}
 			}
 			console.log("maxView: "+pageHistory[page]);
-
+			*/
 			res.render('profile.html', {
-   				profile: profile, user: user, mostVisitedPage: mostVisitedPage
+   				profile: profile, user: user, mostVisitedPage: "***disabled***"
 			});	
 
 			
@@ -114,7 +126,7 @@ app.get('/users/:id', function(req, res){
 });
 
 app.get('/users', function(req, res){
-	acManager.getUser(req.session.id,function(success, profile){
+	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
 			res.render('userList.html', {
    				profile: profile, users: users
@@ -122,21 +134,29 @@ app.get('/users', function(req, res){
 		})
 	});
 	var user = {
-		id: req.session.id
+		_id: req.session._id
 	}
 	var page = "/users";
-	acManager.logPage(user,page);
+	//acManager.logPage(user,page);
 	
 });
+/********************** View *************************/
 
-
-/*** API ***/
-app.delete('/users/:id', function(req, res){
-	var user_id = req.session.id;
+/********************** User Account *************************/
+app.delete('/api/users/:id', function(req, res){
+	var user_id = req.session._id;
 	var profile_id = req.params.id;
-	acManager.deleteUser({id: user_id},{id: profile_id},function(success, msg){
+	acManager.deleteUser({_id: user_id},{_id: profile_id},function(success, msg){
 		if(success){
-			res.send("OK");
+			feedbackManager.deleteFeedbacksByUser(profile_id,function(success, msg){
+				if(success){
+					res.send("OK");
+				} else {
+					res.writeHead(400,msg);
+					res.end(msg);
+				}
+				
+			});
 		} else {
 			res.writeHead(400,msg);
 			res.end(msg);
@@ -146,16 +166,15 @@ app.delete('/users/:id', function(req, res){
 
 app.post('/api/login', function(req, res) {
 	var profile = JSON.parse(req.body.json);
-	console.log("[info]\t[server.js:login]\treceiving profile: " + profile.email);
-	acManager.login(profile, function(success,msg){
+	acManager.login(profile, function(success,user){
 		if(success){
-			req.session.id = msg.id;
-			req.session.email = msg.email;
-			req.session.displayName = msg.displayName;
+			req.session._id = user._id;
+			req.session.email = user.email;
+			req.session.displayName = user.displayName;
 			res.end("OK");
 		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
+			res.writeHead(400,user);
+			res.end(user);
 		}
 	})
 });
@@ -165,17 +184,16 @@ app.get('/api/logout', function(req, res) {
   res.redirect('/');
 });
 
-app.post('/api/createUser', function (req, res){
+app.post('/api/users', function (req, res){
+	console.log("post /api/users");
 	var profile = JSON.parse(req.body.json);
-	console.log("[info]\t[server.js]\treceiving profile:" + JSON.stringify(profile));
+	debug("receiving profile: "+profile.email);
 
-	// TODO: add user into database!
 	acManager.createUser(profile, function(success,msg){
 		if(success){
 			res.send('OK');
 			return;
 		} else {
-			console.log("[Alert]\t[AccountManager.js]\tCannot create user: "+msg);
 			res.writeHead(400,msg);
 			res.end(msg);
 			return;
@@ -184,18 +202,16 @@ app.post('/api/createUser', function (req, res){
 
 });
 
-app.post('/api/updateProfile', function (req, res){
+app.patch('/api/users/:id', function (req, res){
 	var profile = JSON.parse(req.body.json);
-
+	profile['_id'] = req.params.id;
 	var user = req.session;
-	console.log("submitted by user#"+user.id);
 
 	acManager.updateProfile(user, profile, function(success, msg){
 		if(success){
 			res.send('OK');
 			return;
 		} else {
-			console.log("[Alert]\t[AccountManager.js]\tCannot update user profile: "+msg);
 			res.writeHead(400,msg);
 			res.end(msg);
 			return;
@@ -203,7 +219,7 @@ app.post('/api/updateProfile', function (req, res){
 	})
 });
 
-app.post('/api/changePassword', function (req, res){
+app.put('/api/changePassword', function (req, res){
 	var profile = JSON.parse(req.body.json);
 	var user = req.session;
 
@@ -213,7 +229,7 @@ app.post('/api/changePassword', function (req, res){
 	}
 	delete profile.oldPassword;
 
-	if(user.id!=profile.id){
+	if(user._id!=profile._id){
 		res.writeHead(400,"You have no right to change other user's password!");
 		res.end(msg);
 	}
@@ -236,38 +252,127 @@ app.post('/api/changePassword', function (req, res){
 })
 
 
-app.get('/api/userList', function(req, res){
+app.get('/api/users', function(req, res){
 	acManager.getUserList(function(users){
 		res.send(users);
 	});
 });
 
-app.get('/api/user', function(req,res){
-	acManager.getUser(req.session.id, function(success, user){
+app.get('/api/users/current', function(req,res){
+	acManager.getUser(req.session._id, function(success, user){
 		res.send(user);
 	});
 });
 
 
-app.get('/api/user/:id', function(req, res){
+app.get('/api/users/:id', function(req, res){
 	acManager.getUser(req.params.id, function(success, user){
 		res.send(user);
 	});
 });
 
-app.get('/api/profilePic', function(req, res){
-	acManager.getUserPic(req.session.id, function(pic){
+app.get('/api/users/current/profilePic', function(req, res){
+	acManager.getUserPic(req.session._id, function(pic){
 		res.send(pic);
 	})
 });
 
-app.get('/api/profilePic/:id', function(req, res){
+app.get('/api/users/:id/profilePic', function(req, res){
 	acManager.getUserPic(req.params.id, function(pic){
 		res.contentType('image/png');
 		res.send(pic);
 	})
 });
+/********************** User Account *************************/
 
+/********************** Feedback **********************/
+app.post('/api/users/:id/feedbacks', function(req, res){
+	var feedback = JSON.parse(req.body.json);
+	feedback['sender'] = req.session._id;
+	feedback['receiver'] = req.params.id;
+	feedbackManager.createFeedback(feedback, function(success,msg){
+		if(success){
+			res.send(msg);
+		} else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
+	});
+});
+
+app.get('/api/users/:id/feedbacks', function(req, res){
+	feedbackManager.getFeedbackByUser(req.params.id, function(success,feedbacks){
+		if(success){
+			res.send(feedbacks);
+		} else {
+			res.writeHead(400,feedbacks);
+			res.end(feedbacks);
+		}
+	})
+});
+
+app.get('/api/feedbacks', function(req, res){
+	feedbackManager.getAllFeedback(function(success,feedbacks){
+		if(success){
+			res.send(JSON.stringify(feedbacks));
+		} else {
+			res.writeHead(400,feedbacks);
+			res.end(feedbacks);
+		}
+	})
+});
+
+app.get('/api/feedbacks/:id', function(req, res){
+	feedbackManager.getFeedbackById(req.params.id, function(success,feedbacks){
+		if(success){
+			res.send(JSON.stringify(feedbacks));
+		} else {
+			res.writeHead(400,feedbacks);
+			res.end(feedbacks);
+		}
+	})
+});
+
+app.delete('/api/feedbacks/:id', function(req, res){
+	feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
+		if(success){
+			res.send(JSON.stringify(feedbacks));
+		} else {
+			res.writeHead(400,feedbacks);
+			res.end(feedbacks);
+		}
+	})
+});
+/********************** Feedback **********************/
+
+/********************** Message **********************/
+app.post('/api/users/:id/messages', function(req, res){
+	var message = JSON.parse(req.body.json);
+	message['sender'] = req.session._id;
+	message['receiver'] = req.params.id;
+	msgManager.sendMessage(message, function(success,msg){
+		if(success){
+			res.send(msg);
+		} else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
+	});
+});
+
+app.get('/api/users/:id/messages', function(req, res){
+	msgManager.getConversation(req.params.id, req.session._id, function(success,msg){
+		if(success){
+			res.send(msg);
+		} else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
+	});
+});
+/********************** Message **********************/
+
+/*
 app.post('/api/log', function(req, res){
 	var b = JSON.parse(req.body.json);
 
@@ -293,10 +398,10 @@ app.post('/api/log', function(req, res){
 		}
 	})
 });
-
+*/
 var server = app.listen(process.env.PORT || 3000, function () {
   var host = server.address().address;
   var port = server.address().port;
 
-  console.log('[info]\t[server.js]\tServer is now running port %s', port);
+  debug('Server is now running at port '+port);
 });

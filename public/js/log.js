@@ -1,3 +1,10 @@
+		/**
+		 * JavaScript Client Detection
+		 * (C) viazenetti GmbH (Christian Ludwig)
+		 * http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
+		 */
+
+/*
 function getLocation(callback) {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position){
@@ -11,11 +18,6 @@ function getLocation(callback) {
 $(document).ready(function(){
 	getLocation(function(position){
 
-		/**
-		 * JavaScript Client Detection
-		 * (C) viazenetti GmbH (Christian Ludwig)
-		 * http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
-		 */
 		(function (window) {
 		    {
 		        var unknown = '-';
@@ -168,7 +170,7 @@ $(document).ready(function(){
 		        }
 
 		        // flash (you'll need to include swfobject)
-		        /* script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js" */
+		        // script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"
 		        var flashVersion = 'no check';
 		        if (typeof swfobject != 'undefined') {
 		            var fv = swfobject.getFlashPlayerVersion();
@@ -235,3 +237,4 @@ $(document).ready(function(){
 
 	});
 });
+*/
