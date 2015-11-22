@@ -70,7 +70,7 @@ function isValidProfile(profile){
 $('#login').click(function(){
 	var profile = {
 		email: $('#login-email').val(),
-		password: $('#login-password').val()
+		password:{plain: $('#login-password').val()}
 	}
 	$.ajax({
 		type: "POST",
