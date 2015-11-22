@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
 var path = require('path');
 var bcrypt = require('bcrypt');
-var salt = bcrypt.genSaltSync(10);
+var https = require('https');
 
 var UserSchema, User;
 
@@ -29,7 +29,7 @@ AccountManager.prototype.login = function(profile, callback){
 	    	debug("No such email registered");
 	    	callback(false,"Invalid email or password");
 	    } else {
-	      if (bcrypt.compareSync(profile.password, user.passwordHash)) {
+	      if (bcrypt.compareSync(profile.password.plain, user.password.hash)) {
 	      	debug("Login success!")
 	        callback(true,user);
 	      } else {
@@ -38,7 +38,23 @@ AccountManager.prototype.login = function(profile, callback){
 	      }
 	    }
 	});
+}
 
+AccountManager.prototype.loginGoogle = function(profile, callback){
+
+	var options = {
+	  host: 'www.googleapis.com',
+	  path: '/oauth2/v3/tokeninfo?id_token='+profile.id_token
+	};
+
+	https.request(options, function(res){
+		console.log(res.statusCode);
+		res.setEncoding('utf8');
+		res.on('data', function(d) {
+			console.log(d);
+		});
+		callback(true,"TEST");
+	}).end();
 }
 
 AccountManager.prototype.getUserList = function(callback){
@@ -80,7 +96,7 @@ AccountManager.prototype.createUser = function(profile, callback){
 			callback(false,"Please fill in the email address!");
 			return;
 		}
-		if(profile.password == ""){
+		if(profile.password.plain == ""){
 			callback(false,"Please fill in your password!");
 			return;
 		}
@@ -106,13 +122,94 @@ AccountManager.prototype.createUser = function(profile, callback){
 					userType = 2;
 				}
 
-
-				var passwordHash = bcrypt.hashSync(profile.password, salt);
+				var salt = bcrypt.genSaltSync(10);
+				var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
 
 				var newUser = new User({
 					userType: userType,
 					email: profile.email,
-					passwordHash: passwordHash,
+					password: {hash: passwordHash, enabled: true},
+					description: profile.description,
+					displayName: profile.displayName,
+					profilePic: profilePic,
+					admin: false
+				});
+
+				newUser.save(function(error, data){
+			    	if(error){
+			    		console.log("[ERROR]\t[AccountManager.js]\tCannot save user to database: " + error);
+			        	callback(false,"Internal Server Error");
+			        	return;
+			    	} else {
+			    		debug("User #"+count+" ("+profile.email+") created");
+			    	    callback(true,"OK");
+			    	    return;
+			    	}
+				});
+			}
+		});
+	});
+}
+
+AccountManager.prototype.createUserGoogle = function(profile, callback){
+
+	var options = {
+	  host: 'www.googleapis.com',
+	  path: '/oauth2/v3/tokeninfo?id_token='+profile.id_token
+	};
+
+	https.request(options, function(res){
+		console.log(res.statusCode);
+		res.setEncoding('utf8');
+		res.on('data', function(d) {
+			var name = d.name;
+			var email = d.email;
+			var profilePicUrl = d.picture;
+
+		});
+	}).end();
+
+	debug("Creating user ("+profile.email+") using Google API");
+
+	User.count({}, function(err, count){
+
+		if(profile.email == ""){
+			callback(false,"Please fill in the email address!");
+			return;
+		}
+		if(profile.password.plain == ""){
+			callback(false,"Please fill in your password!");
+			return;
+		}
+		if(String(profile.description).length > 500){
+			callback(false,"Description must be less than 500 characters!");
+			return;
+		}
+
+		// handle profilePic
+		var profilePic = profile.profilePic
+		if(profilePic==null){
+
+		}
+
+		User.find({email: profile.email}, function(err, user){
+			if(user[0]){
+				callback(false,"Email has been used!");
+				return;
+			} else {
+				var userType = 0;
+				if(count==0){
+					User.resetCount(function(err, nextCount){});
+					userType = 2;
+				}
+
+				var salt = bcrypt.genSaltSync(10);
+				var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
+
+				var newUser = new User({
+					userType: userType,
+					email: profile.email,
+					password: {enabled:false},
 					description: profile.description,
 					displayName: profile.displayName,
 					profilePic: profilePic,
@@ -212,15 +309,16 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 
 AccountManager.prototype.changePassword = function(profile, callback){
 
-	if(profile.password==""){
+	if(profile.password.plain==""){
 		callback(false, "New Password cannot be empty!");
 		return;
 	}
 
-	var passwordHash = bcrypt.hashSync(profile.password, salt);
+	var salt = bcrypt.genSaltSync(10);
+	var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
 
 	var newProfile = profile;
-	newProfile.passwordHash = passwordHash;
+	newProfile.password.hash = passwordHash;
 	delete newProfile.password;
 
 	User.findOneAndUpdate({_id: profile._id}, profile, function(err){

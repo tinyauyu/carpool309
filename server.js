@@ -4,13 +4,15 @@ var debug_http = require('debug')('http');
 debug("Server initializing...");
 
 var mongoose = require('mongoose');
-var ROOT = { root: __dirname+'/public' };
-var express = require('express');
-var app = express();
 var bcrypt = require('bcrypt');
 var bodyParser = require('body-parser');
 var session = require('client-sessions');
 var swig  = require('swig');
+var express = require('express');
+var app = express();
+
+var ROOT = { root: __dirname+'/public' };
+
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public'));
@@ -31,7 +33,7 @@ app.use(function(req, res, next) {
 
 	debug_http(req.method + ' ' + req.url);
 
-	if(req.url=="/" || req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
+	if(req.url=="/" || req.url=="/api/login/?type=google" ||req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
 		next();
 		return;
 	} else {
@@ -57,8 +59,10 @@ var MONGODB_URL = 'mongodb://localhost/';
 /********************** Managers **********************/
 var AccountManager = require('./controller/AccountManager.js');
 var acManager = new AccountManager(MONGODB_URL);
+
 var FeedbackManager = require('./controller/FeedbackManager.js');
 var feedbackManager = new FeedbackManager(MONGODB_URL);
+
 var MessageManager = require('./controller/MessageManager.js');
 var msgManager = new MessageManager(MONGODB_URL);
 
@@ -165,18 +169,37 @@ app.delete('/api/users/:id', function(req, res){
 })
 
 app.post('/api/login', function(req, res) {
-	var profile = JSON.parse(req.body.json);
-	acManager.login(profile, function(success,user){
-		if(success){
-			req.session._id = user._id;
-			req.session.email = user.email;
-			req.session.displayName = user.displayName;
-			res.end("OK");
-		} else {
-			res.writeHead(400,user);
-			res.end(user);
-		}
-	})
+
+	if(req.query.type=="google"){
+		debug("GOOGLE LOGIN!")
+		var profile = JSON.parse(req.body.json);
+		acManager.loginGoogle(profile, function(success,user){
+			if(success){
+				req.session._id = user._id;
+				req.session.email = user.email;
+				req.session.displayName = user.displayName;
+				res.end("OK");
+			} else {
+				res.writeHead(400,user);
+				res.end(user);
+			}
+		})
+	} else {
+		var profile = JSON.parse(req.body.json);
+		acManager.login(profile, function(success,user){
+			if(success){
+				req.session._id = user._id;
+				req.session.email = user.email;
+				req.session.displayName = user.displayName;
+				res.end("OK");
+			} else {
+				res.writeHead(400,user);
+				res.end(user);
+			}
+		})
+	}
+
+
 });
 
 app.get('/api/logout', function(req, res) {

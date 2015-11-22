@@ -1,4 +1,4 @@
-#bg {
+#background {
     content : "";
     display: block;
     position: fixed;
@@ -9,44 +9,36 @@
     background-attachment: fixed;
     width: 100%;
     height: 100%;
-    opacity : 0.8;
+    opacity : 1;
     z-index: -1;
 }
 
-.input-group{
-	margin-bottom:4px;
+.modal-footer {   border-top: 0px; }
+
+.modal-content {
+    background-color: rgba(255,255,255,0.8);
 }
 
-section{
-	position:absolute;
-    top:0; right:0;
-    bottom:0; left:0;
-}
-.vcenter {
-    display: inline-block;
-    vertical-align: middle;
-    float: none;
+.center {
+     text-align:center
 }
 
-@media (min-width: 800px){
-    .vcenter {
-        min-height: 400px;
-        display:table-cell;
-        vertical-align:middle; 
-    }
-}
-
-h1{
-	font-weight: bolder;
-	color: white;
-    text-shadow: 1px 1px 2px grey;
-}
-
-p{
-    font-style: italic;
+.img_wrapper{
+    background-color: rgba(255,255,255,0.8);
+    width: 150px;
+    color: #aaa;
     font-size: 18px;
-    color: white;
-    text-shadow: 1px 1px 2px grey;
+    font-family: Arial, sans-serif;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+#profilePic_preview{
+    background: white;
+    height:150px;
+    width: 150px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    object-fit: cover;
 }
 
 .btn-file {
@@ -67,30 +59,4 @@ p{
     background: white;
     cursor: inherit;
     display: block;
-}
-.img_wrapper{
-	background-color: rgba(255,255,255,0.8);
-	width: 150px;
-	color: #aaa;
-	font-size: 18px;
-	font-family: Arial, sans-serif;
-	border-top-right-radius: 10px;
-	border-bottom-right-radius: 10px;
-}
-#profilePic_preview{
-	background: white;
-	height:150px;
-	width: 150px;
-	border-top-right-radius: 10px;
-	border-bottom-right-radius: 10px;
-    object-fit: cover;
-}
-
-#browse-wrapper{
-    padding-left: 10px;
-}
-
-#browser{
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
 }
