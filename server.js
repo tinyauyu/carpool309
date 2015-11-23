@@ -27,6 +27,13 @@ app.use(session({
   httpOnly:false
 }));
 
+var server = app.listen(process.env.PORT || 3000, function () {
+  var host = server.address().address;
+  var port = server.address().port;
+
+  debug('Server is now running at port '+port);
+});
+
 app.use(function(req, res, next) {
 
 	debug_http(req.method + ' ' + req.url);
@@ -60,7 +67,7 @@ var acManager = new AccountManager(MONGODB_URL);
 var FeedbackManager = require('./controller/FeedbackManager.js');
 var feedbackManager = new FeedbackManager(MONGODB_URL);
 var MessageManager = require('./controller/MessageManager.js');
-var msgManager = new MessageManager(MONGODB_URL);
+var msgManager = new MessageManager(MONGODB_URL, server);
 
 /********************** Managers **********************/
 
@@ -346,6 +353,12 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Feedback **********************/
 
 /********************** Message **********************/
+app.get('/api/users/:id/chat', function(req, res){
+	res.sendfile('views/chatWindow.html', {root: __dirname })
+
+});
+
+
 app.post('/api/users/:id/messages', function(req, res){
 	var message = JSON.parse(req.body.json);
 	message['sender'] = req.session._id;
@@ -399,9 +412,4 @@ app.post('/api/log', function(req, res){
 	})
 });
 */
-var server = app.listen(process.env.PORT || 3000, function () {
-  var host = server.address().address;
-  var port = server.address().port;
 
-  debug('Server is now running at port '+port);
-});
