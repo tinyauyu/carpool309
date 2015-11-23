@@ -114,6 +114,25 @@ dd{
   margin-top: 10px;
   padding: 10px;
 }
+#userComment{
+  margin-right: 5px;
+}
+#commentButton{
+  margin-left: 5px;
+}
+
+.animated {
+   -webkit-transition: height 0.2s;
+   -moz-transition: height 0.2s;
+   transition: height 0.2s;
+}
+
+.stars
+{
+   margin: 20px 0;
+   font-size: 24px;
+   color: #d17581;
+}
 
 .glyphicon { margin-right:5px;}
 .rating .glyphicon {font-size: 22px;}
@@ -122,3 +141,7 @@ dd{
 .progress-bar { text-align: left; }
 .rating-desc .col-md-3 {padding-right: 0px;}
 .sr-only { margin-left: 5px;overflow: visible;clip: auto; }
+
+.btn-primary {
+    border-color:transparent;
+}

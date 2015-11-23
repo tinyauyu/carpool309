@@ -242,14 +242,21 @@
   <!--comment area-->
 
 <div id='comments' class="jumbotron center" >
-    <div class="col-md-10 col-sm-6 text-center">
-
+    <div class="col-md-12 col-sm-6 text-center center">
       <h4>What is on your mind?</h4>
       <div class="input-group">
-        <textarea row="4" form ="xxform" id="userComment" class="form-control input-sm chat-input" placeholder="Write your message here..." ></textarea>
-  	    <span class="input-group-btn" onclick="addComment()">
+        <form accept-charset="UTF-8" action="" method="post">
+            <!--input id="ratings-hidden" name="rating" type="hidden"-->
+            <textarea class="form-control" id="cbox" rows="2" cols="150" name="comment" placeholder="Enter your review here..."></textarea>
+            <div >
+                <div class="stars starrr" data-rating="0"></div>
+                <button class="btn btn-primary btn-md" type="submit"><span class="glyphicon glyphicon-comment"></span>Save</button>
+            </div>
+        </form>
+        <!--textarea row="4" form ="xxformneed to be filled" id="userComment" class="form-control input-sm chat-input" placeholder="Write your message here..." ></textarea>
+  	    <span class="input-group-btn" onclick="addComment()" id='commentButton'>
             <a href="#" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-comment"></span> Add Comment</a>
-        </span>
+        </span-->
       </div>
       <hr data-brackets-id="12673">
       <ul data-brackets-id="12674" id="sortable" class="list-unstyled ui-sortable">
