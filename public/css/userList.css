@@ -48,3 +48,9 @@ dd{
 #nav-profilePic{
     object-fit: cover;
 }
+
+#recommendation{
+    position: fixed; 
+    top: 35%; 
+    right: 2%;
+}
