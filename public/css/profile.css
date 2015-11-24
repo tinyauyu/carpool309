@@ -134,7 +134,7 @@ dd{
    color: #d17581;
 }
 
-.glyphicon { margin-right:5px;}
+.glyphicon { margin-top:2px;}
 .rating .glyphicon {font-size: 22px;}
 .rating-num { margin-top:0px;font-size: 54px; }
 .progress { margin-bottom: 5px;}
@@ -144,4 +144,14 @@ dd{
 
 .btn-primary {
     border-color:transparent;
+}
+
+#resultPanel {
+    position: absolute;
+    right: 0px;
+    width:300px;
+    z-index: 1;
+}
+#chat {
+    margin-top: 10px;
 }

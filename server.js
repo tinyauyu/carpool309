@@ -355,7 +355,6 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Message **********************/
 app.get('/api/users/:id/chat', function(req, res){
 	res.sendfile('views/chatWindow.html', {root: __dirname })
-
 });
 
 

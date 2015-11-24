@@ -33,7 +33,8 @@
 
 .panel .panel-heading {
     clear: both;
-    color: #7b7b7b;
+    background-color: #76a3a3;
+    color: black;
     display: inline-table;
     font-size: 21px;
     padding: 7px 10px;
@@ -42,8 +43,6 @@
 }
 
 .panel-body{
-    border-left: 1px solid #337ab7;
-    border-right: 1px solid #337ab7;
     overflow-y: scroll;
     height: 300px;
 }
@@ -51,7 +50,6 @@
     width: 100%;
 }
 .panel-footer{
-    border-left: 1px solid #337ab7;
-    border-right: 1px solid #337ab7;
-    border-bottom: 1px solid #337ab7;
+    background-color: #76a3a3;
+    height:120px;
 }

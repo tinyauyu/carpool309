@@ -8,19 +8,11 @@
     <title>FriendZone</title>
 
     <!-- Bootstrap -->
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/bootstrap.min.css" rel="stylesheet"/>
 	<!-- Font Awesome -->
-	<link rel="stylesheet" href="../css/font-awesome.min.css">
-  <link href="../css/profile.css" rel="stylesheet">
+	<link rel="stylesheet" href="../css/font-awesome.min.css"/>
+  <link href="../css/profile.css" rel="stylesheet"/>
   <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
-  <style>
-    #resultPanel {
-        position: absolute;
-        right: 0px;
-        width:300px;
-        z-index: 1;
-    }
-  </style>
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -75,6 +67,8 @@
 
       <img id="profilePic_preview" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
       <img id="profilePic_buffer" class="hidden" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
+      <div> <button id="chat" sender="{{ profile.email }}" receiver="{{ user.email }}">Send Message</button></div>
+
 
       <p class="edit-menu hidden">
         <span class="btn btn-info btn-file">
@@ -88,7 +82,7 @@
       <form id="profile" data-value="{{user.id}}">
         <dl class="dl-horizontal">
           <dt>Email:</dt>
-          <dd>{{user.email}}</dd>
+          <dd id="userEmail">{{user.email}}</dd>
           <dt>Display Name:</dt>
           <dd><a href="#" id="displayName" class="editable" data-value="{{user.displayName || user.email}}"></a></dd>
           <dt>Description:</dt>
