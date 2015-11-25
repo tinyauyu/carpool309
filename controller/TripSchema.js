@@ -5,6 +5,8 @@ TripSchema = mongoose.Schema({
 	user: {type: Number, ref: 'User'},
 	startPoint: {latitude: Number, longitude: Number},
 	endPoint:{latitude: Number, longitude: Number}
+	date: Date,
+	price: Number,
 });
 
 TripSchema.plugin(autoIncrement.plugin, 'Trip');
