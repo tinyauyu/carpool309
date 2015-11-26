@@ -118,9 +118,9 @@ app.get('/users/:id', function(req, res){
 			*/
 			res.render('profile.html', {
    				profile: profile, user: user, mostVisitedPage: "***disabled***"
-			});	
+			});
 
-			
+
 		})
 	});
 });
@@ -130,7 +130,7 @@ app.get('/users', function(req, res){
 		acManager.getUserList(function(users){
 			res.render('userList.html', {
    				profile: profile, users: users
-			});	
+			});
 		})
 	});
 	var user = {
@@ -138,7 +138,7 @@ app.get('/users', function(req, res){
 	}
 	var page = "/users";
 	//acManager.logPage(user,page);
-	
+
 });
 /********************** View *************************/
 
@@ -155,7 +155,7 @@ app.delete('/api/users/:id', function(req, res){
 					res.writeHead(400,msg);
 					res.end(msg);
 				}
-				
+
 			});
 		} else {
 			res.writeHead(400,msg);
@@ -287,6 +287,7 @@ app.get('/api/users/:id/profilePic', function(req, res){
 
 /********************** Feedback **********************/
 app.post('/api/users/:id/feedbacks', function(req, res){
+  console.log("posting feedback");
 	var feedback = JSON.parse(req.body.json);
 	feedback['sender'] = req.session._id;
 	feedback['receiver'] = req.params.id;
@@ -384,7 +385,7 @@ app.post('/api/log', function(req, res){
 		screenSize: b.screenSize,
 		location: b.location
 	}
-	
+
 	var user = {
 		id: req.session.id,
 		behavior: behavior

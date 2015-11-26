@@ -239,20 +239,19 @@
       </div>
   </div>
 
-  <!--comment area-->
-
+  <!--user comment-->
 <div id='comments' class="jumbotron center" >
     <div class="col-md-12 col-sm-6 text-center center">
       <h4>What is on your mind?</h4>
       <div class="input-group">
-        <form accept-charset="UTF-8" action="" method="post">
-            <!--input id="ratings-hidden" name="rating" type="hidden"-->
+        <!--form accept-charset="UTF-8" action="" method="post"-->
+            <input id="ratings-hidden" name="rating" type="hidden">
             <textarea class="form-control" id="cbox" rows="2" cols="150" name="comment" placeholder="Enter your review here..."></textarea>
-            <div >
-                <div class="stars starrr" data-rating="0"></div>
-                <button class="btn btn-primary btn-md" type="submit"><span class="glyphicon glyphicon-comment"></span>Save</button>
-            </div>
-        </form>
+
+            <div class="stars starrr" data-rating="0"></div>
+            <button id='save' class="btn btn-primary btn-md"><span class="glyphicon glyphicon-comment"></span>Save</button>
+
+        <!--/form-->
         <!--textarea row="4" form ="xxformneed to be filled" id="userComment" class="form-control input-sm chat-input" placeholder="Write your message here..." ></textarea>
   	    <span class="input-group-btn" onclick="addComment()" id='commentButton'>
             <a href="#" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-comment"></span> Add Comment</a>

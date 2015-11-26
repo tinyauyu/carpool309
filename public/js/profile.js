@@ -212,6 +212,40 @@ $( document ).ready( function(){
     });
   });
 
+  //button to add comment
+
+  $(".starrr").starrr()
+
+
+  var ratingsField = $('#ratings-hidden');
+  $('.starrr').on('starrr:change', function(e, value){
+    ratingsField.val(value);
+  });
+
+  $('#save').click(function(){
+    var comment =  $("textarea[name='comment']").val();
+    var star = ratingsField.val();
+    var feedback = {'comment': comment, 'rating': star, 'sender':'',
+    'receiver': ''};
+    var profile_id = $('#profile').data('value');
+    //alert(comment +'  s: ' +star);
+    $.ajax({
+      type: 'POST',
+      url: "/api/users/" + profile_id + "/feedbacks",
+      data: {json: JSON.stringify(feedback)},
+      success: function(data){
+        //$(".editableform-loading").addClass('hidden');
+        alert(data);
+        window.location.reload();
+      },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+        //$(".editableform-loading").addClass('hidden');
+      }
+    });
+  });
+
+
 });
 
 $.fn.editable.defaults.mode = 'inline';
@@ -302,6 +336,3 @@ var __slice = [].slice;
         }
     })
 })(window.jQuery, window);
-$(function() {
-    return $(".starrr").starrr()
-})
