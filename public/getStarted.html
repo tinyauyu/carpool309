@@ -13,6 +13,7 @@
 		<![endif]-->
     <link rel="stylesheet" href="./css/font-awesome.min.css">
 		<link href="css/getStarted.css" rel="stylesheet">    
+
 	</head>
 	<body>
     <div id="background"></div>
@@ -27,19 +28,21 @@
           <div class="modal-body">
               <form class="form col-md-12 center-block">
                 <div class="form-group">
-                  <input type="text" class="form-control input-lg" placeholder="Email">
+                  <input id="login-email" type="text" class="form-control input-lg" placeholder="Email">
                 </div>
                 <div class="form-group">
-                  <input type="password" class="form-control input-lg" placeholder="Password">
+                  <input id="login-password" type="password" class="form-control input-lg" placeholder="Password">
                 </div>
                 <div class="form-group">
-                  <button class="btn btn-primary btn-lg btn-block">Sign In</button>
+                  <button id="login" class="btn btn-primary btn-lg btn-block">Sign In</button>
                   <span class="pull-right"><a id="register" href="#">Register</a></span>
                 </div>
               </form>
           </div>
           <div class="modal-footer">
-            <div class="g-signin2 center" data-onsuccess="onSignIn" data-width="200" data-longtitle="true"></div>
+            <div class="col-md-12">
+              <div id="my-signin2"></div>
+            </div>
           </div>
       </div>
       </div>
@@ -51,64 +54,64 @@
       <div class="modal-content">
           <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-              <h1 class="text-center">Register</h1>
+              <h3 class="text-center">Register</h3>
           </div>
           <div class="modal-body">
-              <div class="input-group input-group-lg">
-                <span class="input-group-addon" id="sizing-addon1">
-                  <i class="fa fa-envelope"></i>
-                </span>
-                <input id="email" type="text" class="form-control" placeholder="email" aria-describedby="sizing-addon1">
-              </div>
-
-              <div class="input-group input-group-lg">
-                <span class="input-group-addon" id="sizing-addon1">
-                  <i class="fa fa-key"></i>
-                </span>
-                <input id="password" type="password" class="form-control" placeholder="password" aria-describedby="sizing-addon1">
-                <input id="confirm_password" type="password" class="form-control" placeholder="confirm password" aria-describedby="sizing-addon1">
-              </div>
-
-              <div class="input-group input-group-lg">
-                <span class="input-group-addon" id="sizing-addon1">
-                  <i class="fa fa-commenting"></i>
-                </span>
-                <textarea id="description" class="form-control" rows="3" placeholder="description" required style="height:100px;"></textarea>
-              </div>
-
-              <div class="input-group input-group-lg">
-                <span class="input-group-addon" id="sizing-addon1">
-                  <i class="fa fa-tag"></i>
-                </span>
-                <input id="displayName" type="text" class="form-control" placeholder="display name" aria-describedby="sizing-addon1">
-              </div>
-
-              <div class="input-group input-group-lg">
-                <span class="input-group-addon" id="sizing-addon1">
-                  <i class="fa fa-picture-o"></i>
-                </span>
-                  <div class="img_wrapper">
-                    <img id="profilePic_preview" alt="profile picture" src="./img/default_profilePic.png"/>
-                    <img id="profilePic_buffer" class="hidden" alt="profile picture" src="./img/default_profilePic.png"/>
-                  </div>
-
-                <span class="input-group-btn" id="browse-wrapper">
-                  <span class="btn btn-info btn-file" id="browser">
-                    Browse…
-                    <input type="file" id="profilePic" accept=".jpg,.png,.gif">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-addon" id="sizing-addon1">
+                    <i class="fa fa-envelope"></i>
                   </span>
-                </span>
+                  <input id="email" type="text" class="form-control" placeholder="email" aria-describedby="sizing-addon1">
+                </div>
+
+                <div class="input-group">
+                  <span class="input-group-addon" id="sizing-addon1">
+                    <i class="fa fa-key"></i>
+                  </span>
+                  <input id="password" type="password" class="form-control" placeholder="password" aria-describedby="sizing-addon1">
+                  <input id="confirm_password" type="password" class="form-control" placeholder="confirm password" aria-describedby="sizing-addon1">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-addon" id="sizing-addon1">
+                    <i class="fa fa-commenting"></i>
+                  </span>
+                  <textarea id="description" class="form-control" rows="3" placeholder="description" required style="height:100px;"></textarea>
+                </div>
+
+                <div class="input-group">
+                  <span class="input-group-addon" id="sizing-addon1">
+                    <i class="fa fa-tag"></i>
+                  </span>
+                  <input id="displayName" type="text" class="form-control" placeholder="display name" aria-describedby="sizing-addon1">
+                </div>
+
+                <div class="input-group">
+                  <span class="input-group-addon" id="sizing-addon1">
+                    <i class="fa fa-picture-o"></i>
+                  </span>
+                    <div class="img_wrapper">
+                      <img id="profilePic_preview" alt="profile picture" src="./img/default_profilePic.png"/>
+                      <img id="profilePic_buffer" class="hidden" alt="profile picture" src="./img/default_profilePic.png"/>
+                    </div>
+
+                  <span class="input-group-btn" id="browse-wrapper">
+                    <span class="btn btn-info btn-file" id="browser">
+                      Browse…
+                      <input type="file" id="profilePic" accept=".jpg,.png,.gif">
+                    </span>
+                  </span>
+                </div>
               </div>
 
-              <button id="submit" type="button" class="btn btn-success btn-lg">
+              <button id="submit" type="button" class="btn btn-success">
                 Register
               </button>
           </div>
           <div class="modal-footer">
-              <div class="col-md-12">
-              <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-              <div class="g-signin2 center" data-onsuccess="onSignIn" data-width="200" data-longtitle="true"></div>
-          </div>  
+              <!--<div class="g-signin2 center" data-onsuccess="onSignUp" data-width="200" data-longtitle="true"></div>-->
           </div>
       </div>
       </div>
@@ -117,33 +120,9 @@
 	  <!-- script references -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="js/getStarted.js"></script>
-    <script>
-    function onSignIn(googleUser){
-      var profile = googleUser.getBasicProfile();
-      var id_token = googleUser.getAuthResponse().id_token;
-      var user = {
-        email: profile.getEmail(),
-        id_token: googleUser.getAuthResponse().id_token,
-      }
-
-      $.ajax({
-        type: "POST",
-        url: "/api/login/?type=google",
-        data: {json: JSON.stringify(user)},
-        success: function(data){
-          alert("OK");
-        },
-        error: function(jqxhr, textStatus, errorThrown){
-          alert(errorThrown);
-        }
-      });
-      $('#register').click(function(){
-        $('#loginModal').removeClass('show');
-        $('#registerModal').addClass('show');
-      });
-    } 
-    </script>
+    <script src="js/googleLogin.js"></script>
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+    <canvas id="canvas" class="hidden"></canvas>
 	</body>
 </html>

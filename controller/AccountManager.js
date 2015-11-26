@@ -29,6 +29,10 @@ AccountManager.prototype.login = function(profile, callback){
 	    	debug("No such email registered");
 	    	callback(false,"Invalid email or password");
 	    } else {
+	      if(!user.password.enabled){
+	      	callback(false,"You haven't set a password! Use Google Login!")
+	      	return;
+	      }
 	      if (bcrypt.compareSync(profile.password.plain, user.password.hash)) {
 	      	debug("Login success!")
 	        callback(true,user);
@@ -51,9 +55,20 @@ AccountManager.prototype.loginGoogle = function(profile, callback){
 		console.log(res.statusCode);
 		res.setEncoding('utf8');
 		res.on('data', function(d) {
-			console.log(d);
+			var googleProfile = JSON.parse(d);
+			debug("Login in attempt using Google API by: "+googleProfile.email);
+			User.findOne({email: googleProfile.email},function(err,user){
+				if(err){
+					callback(false,"Internal Server Error");
+					return;
+				} else {
+					callback(true,user);
+					return;
+				}
+			})
+
 		});
-		callback(true,"TEST");
+		//callback(true,"TEST");
 	}).end();
 }
 
@@ -81,7 +96,11 @@ AccountManager.prototype.getUser = function(id,callback){
 AccountManager.prototype.getUserPic = function(id,callback){
 	User.findOne({_id: id},'profilePic', function(err, user){
 		if (err) {throw err;}
-		if(!user){callback(null)} else {
+		if(!user){
+			callback(null)
+		} else if (typeof user.profilePic == "undefined"){
+			callback("/img/default_profilePic.png")
+		} else {
 			callback(user.profilePic);
 		}
 	})
@@ -151,6 +170,7 @@ AccountManager.prototype.createUser = function(profile, callback){
 	});
 }
 
+
 AccountManager.prototype.createUserGoogle = function(profile, callback){
 
 	var options = {
@@ -162,74 +182,69 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 		console.log(res.statusCode);
 		res.setEncoding('utf8');
 		res.on('data', function(d) {
-			var name = d.name;
-			var email = d.email;
-			var profilePicUrl = d.picture;
+			debug(d);
+			var data = JSON.parse(d)
+			var displayName = data.name;
+			var email = data.email;
+			var profilePic = data.picture;
+
+			debug("email: "+email)
+			debug("profilePic: "+profilePic)
+
+			debug("Creating user ("+profile.email+") using Google API");
+
+			User.count({}, function(err, count){
+
+				if(profile.email == ""){
+					callback(false,"Please fill in the email address!");
+					return;
+				}
+				
+				if(String(profile.description).length > 500){
+					callback(false,"Description must be less than 500 characters!");
+					return;
+				}
+
+				User.find({email: email}, function(err, user){
+					if(user[0]){
+						callback(false,"Email has been used!");
+						return;
+					} else {
+						var userType = 0;
+						if(count==0){
+							User.resetCount(function(err, nextCount){});
+							userType = 2;
+						}
+
+						var newUser = new User({
+							userType: userType,
+							email: email,
+							password: {enabled:false},
+							//description: profile.description,
+							displayName: displayName,
+							profilePic: profilePic,
+							admin: false
+						});
+
+						newUser.save(function(error, data){
+					    	if(error){
+					    		console.log("[ERROR]\t[AccountManager.js]\tCannot save user to database: " + error);
+					        	callback(false,"Internal Server Error");
+					        	return;
+					    	} else {
+					    		debug("User #"+count+" ("+profile.email+") created");
+					    	    callback(true,data);
+					    	    return;
+					    	}
+						});
+					}
+				});
+			});
+
 
 		});
 	}).end();
 
-	debug("Creating user ("+profile.email+") using Google API");
-
-	User.count({}, function(err, count){
-
-		if(profile.email == ""){
-			callback(false,"Please fill in the email address!");
-			return;
-		}
-		if(profile.password.plain == ""){
-			callback(false,"Please fill in your password!");
-			return;
-		}
-		if(String(profile.description).length > 500){
-			callback(false,"Description must be less than 500 characters!");
-			return;
-		}
-
-		// handle profilePic
-		var profilePic = profile.profilePic
-		if(profilePic==null){
-
-		}
-
-		User.find({email: profile.email}, function(err, user){
-			if(user[0]){
-				callback(false,"Email has been used!");
-				return;
-			} else {
-				var userType = 0;
-				if(count==0){
-					User.resetCount(function(err, nextCount){});
-					userType = 2;
-				}
-
-				var salt = bcrypt.genSaltSync(10);
-				var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
-
-				var newUser = new User({
-					userType: userType,
-					email: profile.email,
-					password: {enabled:false},
-					description: profile.description,
-					displayName: profile.displayName,
-					profilePic: profilePic,
-					admin: false
-				});
-
-				newUser.save(function(error, data){
-			    	if(error){
-			    		console.log("[ERROR]\t[AccountManager.js]\tCannot save user to database: " + error);
-			        	callback(false,"Internal Server Error");
-			        	return;
-			    	} else {
-			    		debug("User #"+count+" ("+profile.email+") created");
-			    	    callback(true,"OK");
-			    	    return;
-			    	}
-				});
-			}
-		});
-	});
 }
 
 AccountManager.prototype.deleteUser = function(user, profile, callback){

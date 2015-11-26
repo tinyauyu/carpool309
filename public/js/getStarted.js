@@ -47,12 +47,12 @@ function isValidProfile(profile){
 	}
 
 	// password
-	if(profile.password==""){
+	if(profile.password.plain==""){
 		showAlert("Please fill in your password!");
 		return false;
 	}
 	var confirmPassword = $("#confirm_password").val();
-	if(confirmPassword!=profile.password){
+	if(confirmPassword!=profile.password.plain){
 		showAlert("Password does not match!");
 		return false;
 	}
@@ -120,7 +120,7 @@ $('#submit').click(function(){
 
 	var profile = {
 		email: $('#email').val(),
-		password: $('#password').val(),
+		password:{plain: $('#password').val()},
 		description: $('#description').val(),
 		displayName: $('#displayName').val(),
 		profilePic: profilePicBuffer
@@ -151,4 +151,8 @@ $('#submit').click(function(){
 $( document ).ready( function(){
 	$('input').css('background-color', 'rgba(255,255,255,0.8)');
 	$('textarea').css('background-color', 'rgba(255,255,255,0.8)');
+	$('#register').click(function(){
+        $('#loginModal').removeClass('show');
+        $('#registerModal').addClass('show');
+      });
 });

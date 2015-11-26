@@ -174,11 +174,22 @@ app.post('/api/login', function(req, res) {
 		debug("GOOGLE LOGIN!")
 		var profile = JSON.parse(req.body.json);
 		acManager.loginGoogle(profile, function(success,user){
-			if(success){
+			if(success && user){
+				debug("User found and login")
 				req.session._id = user._id;
 				req.session.email = user.email;
 				req.session.displayName = user.displayName;
-				res.end("OK");
+				res.end(JSON.stringify({isLogin: true}));
+			} else if(success && !user){
+				debug("User NOT found, create user")
+				acManager.createUserGoogle(profile, function(success,user){
+					if(success && user){
+						req.session._id = user._id;
+						req.session.email = user.email;
+						req.session.displayName = user.displayName;
+						res.end(JSON.stringify({isLogin: true}));
+					}
+				})
 			} else {
 				res.writeHead(400,user);
 				res.end(user);
@@ -192,6 +203,7 @@ app.post('/api/login', function(req, res) {
 				req.session.email = user.email;
 				req.session.displayName = user.displayName;
 				res.end("OK");
+				debug("Login success!")
 			} else {
 				res.writeHead(400,user);
 				res.end(user);
@@ -208,20 +220,35 @@ app.get('/api/logout', function(req, res) {
 });
 
 app.post('/api/users', function (req, res){
-	console.log("post /api/users");
 	var profile = JSON.parse(req.body.json);
-	debug("receiving profile: "+profile.email);
+	if(req.query.type=="google"){
+		debug("Create user by Google");
 
-	acManager.createUser(profile, function(success,msg){
-		if(success){
-			res.send('OK');
-			return;
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-			return;
-		}
-	});
+		acManager.createUserGoogle(profile, function(success,msg){
+			if(success){
+				res.send('OK');
+				return;
+			} else {
+				res.writeHead(400,msg);
+				res.end(msg);
+				return;
+			}
+		})
+
+	} else {
+		debug("receiving profile: "+profile.email);
+
+		acManager.createUser(profile, function(success,msg){
+			if(success){
+				res.send('OK');
+				return;
+			} else {
+				res.writeHead(400,msg);
+				res.end(msg);
+				return;
+			}
+		});
+	}
 
 });
 
@@ -302,7 +329,7 @@ app.get('/api/users/current/profilePic', function(req, res){
 
 app.get('/api/users/:id/profilePic', function(req, res){
 	acManager.getUserPic(req.params.id, function(pic){
-		res.contentType('image/png');
+		//res.contentType('image/png');
 		res.send(pic);
 	})
 });
