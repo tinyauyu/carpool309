@@ -17,11 +17,16 @@
 }
 
 section{
-	position:absolute;
+    position:absolute;
     top:0; right:0;
     bottom:0; left:0;
     font-size: 16px;
 }
+
+#content {
+    float: none;
+}
+
 .vcenter-wrapper { display:table; }
 .vcenter { display:table-cell; vertical-align:middle; }
 
@@ -147,11 +152,22 @@ dd{
 }
 
 #resultPanel {
+    float: right;
     position: absolute;
     right: 0px;
     width:300px;
-    z-index: 1;
+    z-index: 100;
 }
 #chat {
     margin-top: 10px;
+}
+.glyphicon-envelope{
+    font-size: 25px;
+}
+.W_new_count {
+    position: absolute;
+    right: -4px;
+    top: 2px;
+    font-size: 13px;
+    color: red;
 }

@@ -4,9 +4,9 @@ function updateResultPanel(data) {
     $("#resultPanel").html(data);
 }
 $(document).ready(function() {
-    $("#resultPanel").hide();
     $("#chat").click(function() {
-      $("#resultPanel").show();
+      $("#chat").attr("disabled", true);
+      $("#resultPanel").removeClass("hidden");
         $.ajax({
             type: "GET",
             datatype: "html",

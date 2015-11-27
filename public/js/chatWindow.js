@@ -8,6 +8,14 @@ $(document).ready(function () {
     });
 });
 
+$(document).ready(function() {
+    $('#removeBox').click(function () {
+        $("#resultPanel").addClass("hidden");
+        location.reload();
+    });
+});
+
+
 $(document).ready( function(){
     $.ajax({
         type: "GET",
@@ -21,7 +29,7 @@ $(document).ready( function(){
     });
 });
 
-var socket = io();
+// var socket = io();
 var sender = $('button#chat').attr("sender");
 socket.emit('register', {sender: sender});
 
