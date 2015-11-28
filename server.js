@@ -282,30 +282,50 @@ app.put('/api/changePassword', function (req, res){
 
 	var loginProfile = {
 		email: user.email,
-		password: profile.oldPassword
+		password: {plain: profile.password.old}
 	}
-	delete profile.oldPassword;
+	delete profile.password.old;
 
 	if(user._id!=profile._id){
 		res.writeHead(400,"You have no right to change other user's password!");
-		res.end(msg);
+		res.end("You have no right to change other user's password!");
 	}
 
-	acManager.login(loginProfile, function(success,msg){
-		if(!success){
-			res.writeHead(400,"Original password invalid");
-			res.end("Original password invalid");
-		} else {
-			acManager.changePassword(profile, function(success, msg){
-				if(!success){
-					res.writeHead(400,msg);
-					res.end(msg);
-				} else {
-					res.send('OK');
-				}
-			})
-		}
-	})
+	if(profile.password.enabled){
+		acManager.login(loginProfile, function(success,msg){
+			if(!success){
+				res.writeHead(400,"Original password invalid");
+				res.end("Original password invalid");
+			} else {
+				acManager.changePassword(profile, function(success, msg){
+					if(!success){
+						res.writeHead(400,msg);
+						res.end(msg);
+					} else {
+						res.send('OK');
+					}
+				})
+			}
+		})
+	} else {
+		acManager.getUser(profile._id, function(success, p){
+			if(!p.password.enabled){
+				acManager.changePassword(profile, function(success, msg){
+					if(!success){
+						res.writeHead(400,msg);
+						res.end(msg);
+					} else {
+						res.send('OK');
+					}
+				})
+			} else {
+				res.writeHead(400,"The user has enabled password!")
+				res.send('The user has enabled password!')
+			}
+		})
+	}
+	
+
 })
 
 
@@ -434,7 +454,6 @@ app.get('/api/users/:id/messages', function(req, res){
 });
 /********************** Message **********************/
 
-/*
 app.post('/api/log', function(req, res){
 	var b = JSON.parse(req.body.json);
 
@@ -460,5 +479,4 @@ app.post('/api/log', function(req, res){
 		}
 	})
 });
-*/
 

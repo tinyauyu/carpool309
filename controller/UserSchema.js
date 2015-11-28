@@ -9,13 +9,18 @@ UserSchema = mongoose.Schema({
 	description: String,
 	profilePic: Buffer,
 	displayName: String,
+	lastLocation: {latitude: Number, longitude: Number},
+	behavior: {
+		browser: String,
+		os: String,
+		screenSize: String,
+		mobile: String,
+		location: {
+			latitude: Number,
+			longitude: Number
+		}
+	}
 });
-/*** Things to add: ***
-1. rating
-
-
-
- *********************/
 
 UserSchema.plugin(autoIncrement.plugin, 'User');
 
