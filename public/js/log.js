@@ -4,7 +4,7 @@
 		 * http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 		 */
 
-/*
+
 function getLocation(callback) {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position){
@@ -237,4 +237,3 @@ $(document).ready(function(){
 
 	});
 });
-*/

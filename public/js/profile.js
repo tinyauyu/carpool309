@@ -213,8 +213,10 @@ $( document ).ready( function(){
     }
 
     if($('#oldPassword').val()==""){
-      showPasswordInfo("danger","Please enter the original password!");
-      return;
+      if(!$('#oldPassword').prop('disabled')){
+        showPasswordInfo("danger","Please enter the original password!");
+        return;
+      }
     }
 
     if($('#newPassword').val()==""){
@@ -223,9 +225,12 @@ $( document ).ready( function(){
     }
 
     var profile = {
-      id: $('#profile').data('value'),
-      password: $('#newPassword').val(),
-      oldPassword: $('#oldPassword').val()
+      _id: $('#profile').data('value'),
+      password:{
+        plain: $('#newPassword').val(),
+        old: $('#oldPassword').val(),
+        enabled: !$('#oldPassword').prop('disabled')
+      }
     }
 
     $.ajax({

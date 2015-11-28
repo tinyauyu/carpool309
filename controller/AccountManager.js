@@ -345,7 +345,8 @@ AccountManager.prototype.changePassword = function(profile, callback){
 
 	var newProfile = profile;
 	newProfile.password.hash = passwordHash;
-	delete newProfile.password;
+	newProfile.password.enabled = true;
+	delete newProfile.password.plain;
 
 	User.findOneAndUpdate({_id: profile._id}, profile, function(err){
 		if(err){
@@ -356,6 +357,18 @@ AccountManager.prototype.changePassword = function(profile, callback){
 			return;
 		}
 	});
+}
+
+AccountManager.prototype.log = function(user, callback){
+	User.findOneAndUpdate({id: user.id}, user, function(err){
+		if(err){
+			callback(false, err);
+			return;
+		} else {
+			callback(true,"OK");
+			return;
+		}
+	})
 }
 
 module.exports = AccountManager;
