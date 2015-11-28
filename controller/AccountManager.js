@@ -83,6 +83,7 @@ AccountManager.prototype.getUserList = function(callback){
 }
 
 AccountManager.prototype.getUser = function(id,callback){
+	console.log(id);
 	User.findOne({_id: id}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
@@ -92,7 +93,17 @@ AccountManager.prototype.getUser = function(id,callback){
 		}
 	})
 }
-
+AccountManager.prototype.getUserByEmail = function(email, callback){
+	console.log(email);
+	User.findOne({email: email}, function(err, user){
+		if(err) {throw err;}
+		if(!user){
+			callback(false,null)
+		} else {
+			callback(true,user);
+		}
+	})
+}
 AccountManager.prototype.getUserPic = function(id,callback){
 	User.findOne({_id: id},'profilePic', function(err, user){
 		if (err) {throw err;}

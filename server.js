@@ -340,6 +340,7 @@ app.get('/api/users/:id/profilePic', function(req, res){
 		res.send(pic);
 	})
 });
+
 /********************** User Account *************************/
 
 /********************** Feedback **********************/
@@ -403,35 +404,82 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Feedback **********************/
 
 /********************** Message **********************/
-app.get('/api/users/:id/chat', function(req, res){
-	res.sendfile('views/chatWindow.html', {root: __dirname })
-});
+// app.get('/api/users/chat', function(req, res){
+// 	res.sendfile('views/chatWindow.html', {root: __dirname })
+// });
 
 
-app.post('/api/users/:id/messages', function(req, res){
-	var message = JSON.parse(req.body.json);
-	message['sender'] = req.session._id;
-	message['receiver'] = req.params.id;
-	msgManager.sendMessage(message, function(success,msg){
-		if(success){
-			res.send(msg);
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-		}
+app.get('/api/users/:email/chatWindow/', function(req, res){
+	var fs = require('fs');
+	fs.readFile(__dirname + '/views/chatWindow.html', 'utf8', function(err, data){
+		if (err)
+			{throw err;}
+		else {
+			acManager.getUserByEmail(req.params.email, function(success, user){
+				if(success){
+					var profilePic = user.profilePic;
+					console.log(profilePic);
+					var chatWindow = {user: user, window: data, profilePic: profilePic};
+					res.send(chatWindow);
+				} else {
+					res.status(404);
+					res.end();
+				};
+			});
+		};
 	});
 });
 
-app.get('/api/users/:id/messages', function(req, res){
-	msgManager.getConversation(req.params.id, req.session._id, function(success,msg){
-		if(success){
-			res.send(msg);
+// app.get('/api/users/:email/senderProfilePic', function(req, res){
+// 	acManager.getUserPicByEmail(req.params.email, function(pic){
+// 		//res.contentType('image/png');
+// 		res.send(pic);
+// 	})
+// });
+
+app.get('/api/unreadmessage/:email/', function(req, res) {
+	var email = req.params.email;
+	msgManager.getUnreadMsgsForUser(email, function(success, feedbacks) {
+		if (success) {
+			res.send(JSON.stringify(feedbacks))
 		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
+			res.writeHead(404,feedbacks);
+			res.end(feedbacks);
 		}
-	});
-});
+	})
+})
+
+app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
+	var sender = req.params.sender;
+	var receiver = req.params.receiver;
+	msgManager.markMsgRead(sender, receiver);
+	res.end();
+})
+
+// app.post('/api/users/:id/messages', function(req, res){
+// 	var message = JSON.parse(req.body.json);
+// 	message['sender'] = req.session._id;
+// 	message['receiver'] = req.params.id;
+// 	msgManager.sendMessage(message, function(success,msg){
+// 		if(success){
+// 			res.send(msg);
+// 		} else {
+// 			res.writeHead(400,msg);
+// 			res.end(msg);
+// 		}
+// 	});
+// });
+
+// app.get('/api/users/:id/messages', function(req, res){
+// 	msgManager.getConversation(req.params.id, req.session._id, function(success,msg){
+// 		if(success){
+// 			res.send(msg);
+// 		} else {
+// 			res.writeHead(400,msg);
+// 			res.end(msg);
+// 		}
+// 	});
+// });
 /********************** Message **********************/
 
 /*

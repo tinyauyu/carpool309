@@ -40,7 +40,7 @@ function MessageManager(url, server){
             console.log('user disconnected');
         });
     });
-}
+};
 
 MessageManager.prototype.sendMessage = function(message,callback){
     Message.count({}, function(err, count){
@@ -89,6 +89,25 @@ MessageManager.prototype.getConversation = function(user1,user2,callback){
             callback(true,messages);
             return;
         }
+    });
+}
+
+MessageManager.prototype.getUnreadMsgsForUser = function(email, callback) {
+    Message.find({receiver: email, alreadyRead: false}, function(err, msgs) {
+        if (err) {
+            console.log("[ERROR]\t[MessageManager.js]\tCannot find unread messages for user with email: " + email)
+            callback(false, "Internal Server Error");
+            return;
+        } else {
+            callback(true, msgs);
+            return;
+        }
+    })
+}
+
+MessageManager.prototype.markMsgRead = function(sender, receiver) {
+    Message.update({sender: sender, receiver: receiver}, {$set: {alreadyRead: true}}, {multi: true}, function(err, docs) {
+        return;
     });
 }
 

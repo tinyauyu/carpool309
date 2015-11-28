@@ -5,7 +5,8 @@ MessageSchema = mongoose.Schema({
 	sender: {type: String, ref: 'User.email'},
 	receiver: {type: String, ref: 'User.email'},
 	content: String,
-	date: {type: Date, default: Date.now}
+	date: {type: Date, default: Date.now},
+    alreadyRead: {type: Boolean, default: false}
 });
 
 MessageSchema.plugin(autoIncrement.plugin, 'Message');

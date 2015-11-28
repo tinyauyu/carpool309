@@ -1,16 +1,34 @@
 var profilePicBuffer = undefined;
 
+// function updateResultPanel(data) {
+//     $("#resultPanel").html(data);
+// }
+// $(document).ready(function() {
+//     $("#chat").click(function() {
+//       $("#chat").attr("disabled", true);
+//       $("#resultPanel").removeClass("hidden");
+//         $.ajax({
+//             type: "GET",
+//             datatype: "html",
+//             url: "/api/users/chat",
+//             success: updateResultPanel
+//         });
+//     });
+// })
 function updateResultPanel(data) {
-    $("#resultPanel").html(data);
+    $("#resultPanel").html(data.window);
+    $("#resultPanel").attr('sendto', data.user.email);
+    //$("#receiverImg").attr("src", data.user.profilePic);
 }
 $(document).ready(function() {
     $("#chat").click(function() {
       $("#chat").attr("disabled", true);
       $("#resultPanel").removeClass("hidden");
+      var email = $("#chat").attr("receiver");
         $.ajax({
             type: "GET",
             datatype: "html",
-            url: "/api/users/:id/chat",
+            url: "/api/users/" + email + "/chatWindow",
             success: updateResultPanel
         });
     });
