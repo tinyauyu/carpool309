@@ -225,8 +225,11 @@ $( document ).ready( function(){
   $('#save').click(function(){
     var comment =  $("textarea[name='comment']").val();
     var star = ratingsField.val();
+    var date = new Date();
+    date = date.toString();
+    //console.log(date.toString());
     var feedback = {'comment': comment, 'rating': star, 'sender':'',
-    'receiver': ''};
+    'receiver': '', 'date': date};
     var profile_id = $('#profile').data('value');
     //alert(comment +'  s: ' +star);
     $.ajax({
@@ -235,8 +238,13 @@ $( document ).ready( function(){
       data: {json: JSON.stringify(feedback)},
       success: function(data){
         //$(".editableform-loading").addClass('hidden');
-        alert(data);
-        window.location.reload();
+        //alert(data);
+        //window.location.reload();
+        var curPage = $('#curPage').html();
+        if(!curPage){
+          curPage = 1;
+        }
+        displayComments($('#profile').data('value'),curPage);
       },
       error: function(jqxhr, textStatus, errorThrown){
         alert(errorThrown);
@@ -244,11 +252,80 @@ $( document ).ready( function(){
       }
     });
   });
-
+  //control the page number buttons
+  $('#pageNumbers').on('click','button',function(event){
+    //var page = event.target;
+    var page = event.target.innerHTML;
+    displayComments($('#profile').data('value'), page);
+  });
+  displayComments($('#profile').data('value'),1);
 
 });
 
 $.fn.editable.defaults.mode = 'inline';
+
+var commentsPerPage = 3;
+function displayComments(profile_id, pageNumber){
+  //console.log($('#sortable').html());
+
+  $.ajax({
+    type: 'GET',
+    url: "/api/users/" + profile_id + "/feedbacks",
+    success: function(data){
+      var list = "";
+      var pages = Math.ceil(data.length/commentsPerPage);
+      var buttons = "";
+      for (i =1; i <= pages; i++){
+        if(i == pageNumber){
+          buttons+="<label id='curPage' class='btn btn-primary btn-default'>"+i.toString() +"</label>"
+        }
+        else{
+          buttons += "<button class ='btn'>"+i.toString()+"</button>"
+        }
+      }
+      $('#pageNumbers').html(buttons);
+      for(i = commentsPerPage*(pageNumber-1); i < Math.min(data.length,commentsPerPage*pageNumber); i++){
+        var info = data[i];
+        var senderId = info.sender;
+        var comment = info.comment;
+        var request = $.ajax({
+          type: 'GET',
+          url: '/api/users/' + senderId,
+          async: false,
+          success: function(user){
+            list+='<p class="pull-left primary-font margin-left">' + user.displayName + '</p><br>';
+            list+='<small class="pull-right text-muted">' +
+              '<small>rating: ' + info.rating + '/5 </small><br>'+
+              '<span class="glyphicon glyphicon-time"></span>'
+              +info.date + '</small>';
+            list += '<br><br>';
+            //list += '<small>rating: ' + info.rating + '/5 </small><br>'
+            list += '<li class="ui-state-default">' + comment + '</li>';
+            list +='<br>';
+
+          },
+          error: function(jqxhr, textStatus, errorThrown){
+            alert(errorThrown);
+          }
+        });
+      }
+      $('#sortable').html(list);
+    },
+    error: function(jqxhr, textStatus, errorThrown){
+      alert(errorThrown);
+    }
+  });
+    /*<strong class="pull-left primary-font">James</strong>
+    <small class="pull-right text-muted">
+       <span class="glyphicon glyphicon-time"></span>7 mins ago</small>
+    </br>
+    <li class="ui-state-default">Lorem ipsum dolor </li>
+    </br>
+
+    var list = "<strong>" + $( "p" ).length + " paragraphs!</em>";
+    return "<p>All new content for " + emphasis + "</p>";*/
+
+}
 
 //for the star rating user click
 var __slice = [].slice;

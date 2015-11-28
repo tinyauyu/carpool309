@@ -287,7 +287,7 @@ app.get('/api/users/:id/profilePic', function(req, res){
 
 /********************** Feedback **********************/
 app.post('/api/users/:id/feedbacks', function(req, res){
-  console.log("posting feedback");
+  //console.log("posting feedback");
 	var feedback = JSON.parse(req.body.json);
 	feedback['sender'] = req.session._id;
 	feedback['receiver'] = req.params.id;
