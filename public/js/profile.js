@@ -1,5 +1,22 @@
 var profilePicBuffer = undefined;
 
+function updateResultPanel(data) {
+    $("#resultPanel").html(data);
+}
+$(document).ready(function() {
+    $("#chat").click(function() {
+      $("#chat").attr("disabled", true);
+      $("#resultPanel").removeClass("hidden");
+        $.ajax({
+            type: "GET",
+            datatype: "html",
+            url: "/api/users/:id/chat",
+            success: updateResultPanel
+        });
+    });
+})
+
+
 function showPasswordInfo(type, msg){
   var head = "";
   if(type=="success"){

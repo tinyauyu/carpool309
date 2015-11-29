@@ -4,13 +4,15 @@ var debug_http = require('debug')('http');
 debug("Server initializing...");
 
 var mongoose = require('mongoose');
-var ROOT = { root: __dirname+'/public' };
-var express = require('express');
-var app = express();
 var bcrypt = require('bcrypt');
 var bodyParser = require('body-parser');
 var session = require('client-sessions');
 var swig  = require('swig');
+var express = require('express');
+var app = express();
+
+var ROOT = { root: __dirname+'/public' };
+
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public'));
@@ -27,11 +29,18 @@ app.use(session({
   httpOnly:false
 }));
 
+var server = app.listen(process.env.PORT || 3000, function () {
+  var host = server.address().address;
+  var port = server.address().port;
+
+  debug('Server is now running at port '+port);
+});
+
 app.use(function(req, res, next) {
 
 	debug_http(req.method + ' ' + req.url);
 
-	if(req.url=="/" || req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
+	if(req.url=="/" || req.url=="/api/login/?type=google" ||req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
 		next();
 		return;
 	} else {
@@ -57,10 +66,12 @@ var MONGODB_URL = 'mongodb://localhost/';
 /********************** Managers **********************/
 var AccountManager = require('./controller/AccountManager.js');
 var acManager = new AccountManager(MONGODB_URL);
+
 var FeedbackManager = require('./controller/FeedbackManager.js');
 var feedbackManager = new FeedbackManager(MONGODB_URL);
+
 var MessageManager = require('./controller/MessageManager.js');
-var msgManager = new MessageManager(MONGODB_URL);
+var msgManager = new MessageManager(MONGODB_URL, server);
 
 /********************** Managers **********************/
 
@@ -165,18 +176,49 @@ app.delete('/api/users/:id', function(req, res){
 })
 
 app.post('/api/login', function(req, res) {
-	var profile = JSON.parse(req.body.json);
-	acManager.login(profile, function(success,user){
-		if(success){
-			req.session._id = user._id;
-			req.session.email = user.email;
-			req.session.displayName = user.displayName;
-			res.end("OK");
-		} else {
-			res.writeHead(400,user);
-			res.end(user);
-		}
-	})
+
+	if(req.query.type=="google"){
+		debug("GOOGLE LOGIN!")
+		var profile = JSON.parse(req.body.json);
+		acManager.loginGoogle(profile, function(success,user){
+			if(success && user){
+				debug("User found and login")
+				req.session._id = user._id;
+				req.session.email = user.email;
+				req.session.displayName = user.displayName;
+				res.end(JSON.stringify({isLogin: true}));
+			} else if(success && !user){
+				debug("User NOT found, create user")
+				acManager.createUserGoogle(profile, function(success,user){
+					if(success && user){
+						req.session._id = user._id;
+						req.session.email = user.email;
+						req.session.displayName = user.displayName;
+						res.end(JSON.stringify({isLogin: true}));
+					}
+				})
+			} else {
+				res.writeHead(400,user);
+				res.end(user);
+			}
+		})
+	} else {
+		var profile = JSON.parse(req.body.json);
+		acManager.login(profile, function(success,user){
+			if(success){
+				req.session._id = user._id;
+				req.session.email = user.email;
+				req.session.displayName = user.displayName;
+				res.end("OK");
+				debug("Login success!")
+			} else {
+				res.writeHead(400,user);
+				res.end(user);
+			}
+		})
+	}
+
+
 });
 
 app.get('/api/logout', function(req, res) {
@@ -185,20 +227,35 @@ app.get('/api/logout', function(req, res) {
 });
 
 app.post('/api/users', function (req, res){
-	console.log("post /api/users");
 	var profile = JSON.parse(req.body.json);
-	debug("receiving profile: "+profile.email);
+	if(req.query.type=="google"){
+		debug("Create user by Google");
 
-	acManager.createUser(profile, function(success,msg){
-		if(success){
-			res.send('OK');
-			return;
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-			return;
-		}
-	});
+		acManager.createUserGoogle(profile, function(success,msg){
+			if(success){
+				res.send('OK');
+				return;
+			} else {
+				res.writeHead(400,msg);
+				res.end(msg);
+				return;
+			}
+		})
+
+	} else {
+		debug("receiving profile: "+profile.email);
+
+		acManager.createUser(profile, function(success,msg){
+			if(success){
+				res.send('OK');
+				return;
+			} else {
+				res.writeHead(400,msg);
+				res.end(msg);
+				return;
+			}
+		});
+	}
 
 });
 
@@ -279,7 +336,7 @@ app.get('/api/users/current/profilePic', function(req, res){
 
 app.get('/api/users/:id/profilePic', function(req, res){
 	acManager.getUserPic(req.params.id, function(pic){
-		res.contentType('image/png');
+		//res.contentType('image/png');
 		res.send(pic);
 	})
 });
@@ -347,6 +404,11 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Feedback **********************/
 
 /********************** Message **********************/
+app.get('/api/users/:id/chat', function(req, res){
+	res.sendfile('views/chatWindow.html', {root: __dirname })
+});
+
+
 app.post('/api/users/:id/messages', function(req, res){
 	var message = JSON.parse(req.body.json);
 	message['sender'] = req.session._id;
@@ -400,9 +462,4 @@ app.post('/api/log', function(req, res){
 	})
 });
 */
-var server = app.listen(process.env.PORT || 3000, function () {
-  var host = server.address().address;
-  var port = server.address().port;
 
-  debug('Server is now running at port '+port);
-});

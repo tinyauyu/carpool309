@@ -9,5 +9,12 @@ FeedbackSchema = mongoose.Schema({
 	date: String
 });
 
+/*** Things to add: ***
+1. Time
+
+
+$text
+ *********************/
+
 FeedbackSchema.plugin(autoIncrement.plugin, 'Feedback');
 module.exports.FeedbackSchema = FeedbackSchema;

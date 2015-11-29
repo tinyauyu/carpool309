@@ -11,3 +11,12 @@ $( document ).ready( function(){
     }
   });
 });
+
+var socket = io();
+var sender = $('.navbar-brand').attr("loggedInUser");
+socket.emit('register', {sender: sender});
+
+socket.on('chat message', function(data) {
+  $('.W_new_count').removeClass("hidden");
+
+});
