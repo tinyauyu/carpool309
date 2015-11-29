@@ -450,13 +450,6 @@ app.get('/api/users/:email/chatWindow/', function(req, res){
 	});
 });
 
-// app.get('/api/users/:email/senderProfilePic', function(req, res){
-// 	acManager.getUserPicByEmail(req.params.email, function(pic){
-// 		//res.contentType('image/png');
-// 		res.send(pic);
-// 	})
-// });
-
 app.get('/api/unreadmessage/:email/', function(req, res) {
 	var email = req.params.email;
 	msgManager.getUnreadMsgsForUser(email, function(success, feedbacks) {

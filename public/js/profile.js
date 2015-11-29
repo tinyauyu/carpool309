@@ -18,7 +18,16 @@ var profilePicBuffer = undefined;
 function updateResultPanel(data) {
     $("#resultPanel").html(data.window);
     $("#resultPanel").attr('sendto', data.user.email);
-    //$("#receiverImg").attr("src", data.user.profilePic);
+    $.ajax({
+      type: "GET",
+      url: "/api/users/"+data.user._id+"/profilePic",
+      success: function(img){
+        $('#receiverImg').attr("src", img);
+          },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+      }
+    });
 }
 $(document).ready(function() {
     $("#chat").click(function() {

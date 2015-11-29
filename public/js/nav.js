@@ -24,7 +24,17 @@ function showChatWindow(data, msgs) {
       if (msg.sender == data.user.email) {
         $('#messages').append($('<li>').text(msg.content));
       }
-    }
+    };
+    $.ajax({
+      type: "GET",
+      url: "/api/users/"+data.user._id+"/profilePic",
+      success: function(img){
+        $('#receiverImg').attr("src", img);
+          },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+      }
+    });
 }
 
 function getLoggedInUser() {
@@ -71,6 +81,7 @@ function getUnreadMsgs() {
             datatype: "json",
             url: "/api/users/" + sender + "/chatWindow/",
             success: function(data) {
+              
               showChatWindow(data, msgsJson);
             }
           });
