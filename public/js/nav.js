@@ -22,7 +22,9 @@ function showChatWindow(data, msgs) {
     for (i = 0; i < msgs.length; i++) {
       var msg = msgs[i];
       if (msg.sender == data.user.email) {
-        $('#messages').append($('<li>').text(msg.content));
+        var ele = $('<p>');
+        $('#messages').append(ele.text(msg.content));
+        ele.attr('id', 'msgYouGet');
       }
     };
     $.ajax({

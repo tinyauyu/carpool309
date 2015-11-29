@@ -43,8 +43,9 @@ $(document).ready( function(){
         } else {
             receiver = $('#resultPanel').attr('sendto');
         };
-
-        $('#messages').append($('<li>').text(msg));
+        var ele = $('<p>');
+        $('#messages').append(ele.text(msg));
+        ele.attr('id', 'msgYouSend');
         var data = {
             sender: sender,
             receiver: receiver,
@@ -59,7 +60,9 @@ $(document).ready( function(){
 
 socket.on('chat message', function(data) {
     if ($("#resultPanel").is(':visible') && $("#resultPanel").attr('sendto') == data.sender) {
-        $('#messages').append($('<li>').text(data.msg));
+        var ele = $('<p>');
+        $('#messages').append(ele.text(data.msg));
+        ele.attr('id', 'msgYouGet');
         $.ajax({
           type: "POST",
           url: "/api/markMsgRead/" + data.sender + "/" + data.receiver + "/",
