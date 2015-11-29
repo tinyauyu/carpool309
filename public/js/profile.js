@@ -24,6 +24,42 @@ function isValidProfile(profile){
 
 }
 
+var map;
+function initMap() {
+  var myLatLng = {lat: -25.363, lng: 131.044};
+  var to = {lat: -25.363, lng: 142.044};
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 4,
+    center: myLatLng
+  });
+
+  var markerFrom = new google.maps.Marker({
+    position: myLatLng,
+    map: map,
+    title: 'From',
+  });
+
+  var markerTo = new google.maps.Marker({
+    position: to,
+    map: map,
+    title: 'To',
+  });
+
+  var lineSymbol = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+  };
+
+  // Create the polyline and add the symbol via the 'icons' property.
+  var line = new google.maps.Polyline({
+    path: [myLatLng, to],
+    icons: [{
+      icon: lineSymbol,
+      offset: '100%'
+    }],
+    map: map
+  });
+}
+
 $(document).on('change', '#profilePic', function() {
   var reader = new FileReader();
 
