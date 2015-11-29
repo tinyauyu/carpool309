@@ -61,6 +61,8 @@ var FeedbackManager = require('./controller/FeedbackManager.js');
 var feedbackManager = new FeedbackManager(MONGODB_URL);
 var MessageManager = require('./controller/MessageManager.js');
 var msgManager = new MessageManager(MONGODB_URL);
+var TripManager =  require('./controller/TripManager.js');
+var tripManager = new TripManager(MONGODB_URL);
 
 /********************** Managers **********************/
 
@@ -74,55 +76,84 @@ app.all('/', function(req, res){
 });
 
 app.get('/users/:id', function(req, res){
-	var page = "/users/" + req.params.id;
+	//var page = "/users/" + req.params.id;
 	var user = {
 		_id: req.session._id
 	}
-
-	//acManager.logPage(user,page);
-
-	acManager.getUser(req.session._id,function(success,profile){
-		if(!success){
-			res.redirect('/users');
-			return;
-		}
-		acManager.getUser(req.params.id, function(success,user){
-
+	var tripId = req.query.trip;
+	if (tripId == '' || tripId == null){
+		//acManager.logPage(user,page);
+		acManager.getUser(req.session._id,function(success,profile){
 			if(!success){
 				res.redirect('/users');
 				return;
 			}
+			acManager.getUser(req.params.id, function(success,user){
 
-			/*
-			var pageHistory = {}
-
-			for (i=0; i<user.pageHistory.length; i++){
-				var page = user.pageHistory[i];
-				if(!pageHistory[page]){
-					pageHistory[page] = 1;
-				} else {
-					pageHistory[page]++;
+				if(!success){
+					res.redirect('/users');
+					return;
 				}
-			}
 
-			var maxView = -1;
-			var mostVisitedPage = null;
-			for (page in pageHistory){
-				console.log(page+" : "+pageHistory[page]);
-				if(parseInt(pageHistory[page])>maxView){
-					mostVisitedPage = page;
-					maxView = pageHistory[page];
+				/*
+				var pageHistory = {}
+
+				for (i=0; i<user.pageHistory.length; i++){
+					var page = user.pageHistory[i];
+					if(!pageHistory[page]){
+						pageHistory[page] = 1;
+					} else {
+						pageHistory[page]++;
+					}
 				}
-			}
-			console.log("maxView: "+pageHistory[page]);
-			*/
-			res.render('profile.html', {
-   				profile: profile, user: user, mostVisitedPage: "***disabled***"
-			});	
 
-			
-		})
-	});
+				var maxView = -1;
+				var mostVisitedPage = null;
+				for (page in pageHistory){
+					console.log(page+" : "+pageHistory[page]);
+					if(parseInt(pageHistory[page])>maxView){
+						mostVisitedPage = page;
+						maxView = pageHistory[page];
+					}
+				}
+				console.log("maxView: "+pageHistory[page]);
+				*/
+
+				//TODO: if exite, if not exits, get the trip object and pass in to render
+				res.render('profile.html', {
+	   				profile: profile, user: user, mostVisitedPage: "***disabled***"
+				});	
+			})
+		});
+	}
+	else {
+		acManager.getUser(req.session._id,function(success,profile){
+			if(!success){
+				res.redirect('/users');
+				return;
+			}
+			acManager.getUser(req.params.id, function(success,user){
+				if(!success){
+					res.redirect('/users');
+					return;
+				}
+				//TODO: if exite, if not exits, get the trip object and pass in to render
+				tripManager.findOneTrip(tripId, function(success, trip){
+					if(!success){
+						alert("Faile to find the detail of the trip");
+						res.redirect('/users');
+						return;
+					}
+					else {
+						console.log(trip);
+						res.render('profile.html', {
+			   				profile: profile, user: user, mostVisitedPage: "***disabled***", trip: trip
+						});
+					}
+				})
+			})
+		});		
+	}
 });
 
 app.get('/users', function(req, res){
@@ -371,6 +402,46 @@ app.get('/api/users/:id/messages', function(req, res){
 	});
 });
 /********************** Message **********************/
+
+/***********************Search&Trip*******************/
+/*---------------------------------------------------------
+Update trip to Trip db function by Steve
+----------------------------------------------------------*/
+app.post('/api/updateTrip', function(req,res){
+	var trip = req.body;
+	trip.user = req.session._id;
+	tripManager.updateTrip(trip, function(success,msg){
+		if (success){
+			res.send(msg);
+		}
+		else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
+	});
+});
+
+app.get('/searchTrip/:id', function(req,res){
+	var tripId = req.params.id;
+	req.session.tripId = tripId;
+	tripManager.searchTrip(tripId, function(success,trips){
+		if (success){
+			console.log(trips);
+			res.render('trips.html', {
+   				trips: trips
+			});
+			//res.send(trips);	
+		}
+		else {
+			res.writeHead(400,trips);
+			res.end(trips);
+		}
+	});
+});
+
+/***********************Search&Trip*******************/
+
+
 
 /*
 app.post('/api/log', function(req, res){
