@@ -83,6 +83,7 @@ AccountManager.prototype.getUserList = function(callback){
 }
 
 AccountManager.prototype.getUser = function(id,callback){
+	console.log(id);
 	User.findOne({_id: id}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
@@ -92,7 +93,17 @@ AccountManager.prototype.getUser = function(id,callback){
 		}
 	})
 }
-
+AccountManager.prototype.getUserByEmail = function(email, callback){
+	console.log(email);
+	User.findOne({email: email}, function(err, user){
+		if(err) {throw err;}
+		if(!user){
+			callback(false,null)
+		} else {
+			callback(true,user);
+		}
+	})
+}
 AccountManager.prototype.getUserPic = function(id,callback){
 	User.findOne({_id: id},'profilePic', function(err, user){
 		if (err) {throw err;}
@@ -334,7 +345,8 @@ AccountManager.prototype.changePassword = function(profile, callback){
 
 	var newProfile = profile;
 	newProfile.password.hash = passwordHash;
-	delete newProfile.password;
+	newProfile.password.enabled = true;
+	delete newProfile.password.plain;
 
 	User.findOneAndUpdate({_id: profile._id}, profile, function(err){
 		if(err){
@@ -345,6 +357,18 @@ AccountManager.prototype.changePassword = function(profile, callback){
 			return;
 		}
 	});
+}
+
+AccountManager.prototype.log = function(user, callback){
+	User.findOneAndUpdate({id: user.id}, user, function(err){
+		if(err){
+			callback(false, err);
+			return;
+		} else {
+			callback(true,"OK");
+			return;
+		}
+	})
 }
 
 module.exports = AccountManager;

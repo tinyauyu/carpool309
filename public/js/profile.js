@@ -1,17 +1,29 @@
 var profilePicBuffer = undefined;
 
 function updateResultPanel(data) {
-    $("#resultPanel").html(data);
+    $("#resultPanel").html(data.window);
+    $("#resultPanel").attr('sendto', data.user.email);
+    $.ajax({
+      type: "GET",
+      url: "/api/users/"+data.user._id+"/profilePic",
+      success: function(img){
+        $('#receiverImg').attr("src", img);
+          },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+      }
+    });
 }
 $(document).ready(function() {
     $("#chat").click(function() {
       $("#chat").attr("disabled", true);
       $("#resultPanel").removeClass("hidden");
+      var email = $("#chat").attr("receiver");
         $.ajax({
             type: "GET",
             datatype: "html",
-            url: "/api/users/:id/chat",
-            success: updateResultPanel
+            url: "/api/users/" + email + "/chatWindow",
+            success: showChatWindow
         });
     });
 })
@@ -195,8 +207,10 @@ $( document ).ready( function(){
     }
 
     if($('#oldPassword').val()==""){
-      showPasswordInfo("danger","Please enter the original password!");
-      return;
+      if(!$('#oldPassword').prop('disabled')){
+        showPasswordInfo("danger","Please enter the original password!");
+        return;
+      }
     }
 
     if($('#newPassword').val()==""){
@@ -205,9 +219,12 @@ $( document ).ready( function(){
     }
 
     var profile = {
-      id: $('#profile').data('value'),
-      password: $('#newPassword').val(),
-      oldPassword: $('#oldPassword').val()
+      _id: $('#profile').data('value'),
+      password:{
+        plain: $('#newPassword').val(),
+        old: $('#oldPassword').val(),
+        enabled: !$('#oldPassword').prop('disabled')
+      }
     }
 
     $.ajax({
