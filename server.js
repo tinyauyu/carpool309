@@ -424,12 +424,8 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Feedback **********************/
 
 /********************** Message **********************/
-// app.get('/api/users/chat', function(req, res){
-// 	res.sendfile('views/chatWindow.html', {root: __dirname })
-// });
 
-
-app.get('/api/users/:email/chatWindow/', function(req, res){
+app.get('/api/users/:email/chatWindow/', function(req, res) {
 	var fs = require('fs');
 	fs.readFile(__dirname + '/views/chatWindow.html', 'utf8', function(err, data){
 		if (err)
@@ -459,15 +455,30 @@ app.get('/api/unreadmessage/:email/', function(req, res) {
 			res.writeHead(404,feedbacks);
 			res.end(feedbacks);
 		}
-	})
-})
+	});
+});
 
 app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 	var sender = req.params.sender;
 	var receiver = req.params.receiver;
 	msgManager.markMsgRead(sender, receiver);
 	res.end();
-})
+});
+
+app.get('/api/getConversation/:user1/:user2/', function(req, res) {
+	var user1 = req.params.user1;
+	var user2 = req.params.user2;
+	console.log(user1);
+	console.log(user2);
+	msgManager.getConversation(user1, user2, function(success, messages) {
+		if (success) {
+			res.send(JSON.stringify(messages));
+		} else {
+			res.writeHead(404, messages);
+			res.end(messages);
+		}
+	});
+});
 
 // app.post('/api/users/:id/messages', function(req, res){
 // 	var message = JSON.parse(req.body.json);

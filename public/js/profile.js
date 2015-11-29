@@ -23,7 +23,7 @@ $(document).ready(function() {
             type: "GET",
             datatype: "html",
             url: "/api/users/" + email + "/chatWindow",
-            success: updateResultPanel
+            success: showChatWindow
         });
     });
 })

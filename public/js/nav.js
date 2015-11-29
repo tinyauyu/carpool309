@@ -16,14 +16,23 @@ var socket = io();
 var sender = $('.navbar-brand').attr("loggedInUser");
 socket.emit('register', {sender: sender});
 
-function showChatWindow(data, msgs) {
+function showChatWindow(data) {
+  $("#resultPanel").removeClass("hidden");
+
+  var sender = data.user.email;
+  var receiver = getLoggedInUser();
+  var show = function(msgs) {
+    msgs = JSON.parse(msgs);
+    console.log(data.html);
     $("#resultPanel").html(data.window);
-    $("#resultPanel").attr('sendto', data.user.email);
+    $("#resultPanel").attr('sendto', sender);
     for (i = 0; i < msgs.length; i++) {
       var msg = msgs[i];
-      if (msg.sender == data.user.email) {
-        var ele = $('<p>');
-        $('#messages').append(ele.text(msg.content));
+      var ele = $('<p>');
+      $('#messages').append(ele.text(msg.content));
+      if (msg.sender == receiver) {
+        ele.attr('id', 'msgYouSend');
+      } else {
         ele.attr('id', 'msgYouGet');
       }
     };
@@ -33,10 +42,17 @@ function showChatWindow(data, msgs) {
       success: function(img){
         $('#receiverImg').attr("src", img);
           },
-      error: function(jqxhr, textStatus, errorThrown){
+      error: function(jqxhr, textStatus, errorThrown) {
         alert(errorThrown);
       }
     });
+  };
+
+  $.ajax({
+    type: "GET",
+    url: "/api/getConversation/" + sender + "/" + receiver + "/",
+    success: show
+  });
 }
 
 function getLoggedInUser() {
@@ -70,7 +86,6 @@ function getUnreadMsgs() {
         ele.text(sender);
         $('#newMsgList').append(ele);
         ele.click(function() {
-          $("#resultPanel").removeClass("hidden");
           ele.remove();
           var sender = ele.text();
           $.ajax({
@@ -82,14 +97,11 @@ function getUnreadMsgs() {
             type: "GET",
             datatype: "json",
             url: "/api/users/" + sender + "/chatWindow/",
-            success: function(data) {
-              
-              showChatWindow(data, msgsJson);
-            }
+            success: showChatWindow
           });
         });
       }
-    }
+    };
 
     $.ajax({
       type: "GET",

@@ -77,20 +77,17 @@ function MessageManager(url, server){
 //     });
 // }
 
-// MessageManager.prototype.getConversation = function(user1,user2,callback){
-//     debug("Get conversation between user#"+user1+" and user#"+user2);
-//     Message.find({$or:[{sender: user1, receiver:user2},{sender: user2, receiver: user1}]}, function(err, messages) {
-//         if(err){
-//             console.log("[ERROR]\t[MessageManager.js]\tCannot get messages from database: " + error);
-//             callback(false, "Internal Server Error");
-//             return;
-//         } else {
-//             debug("Returning messages:\n"+JSON.stringify(messages));
-//             callback(true,messages);
-//             return;
-//         }
-//     });
-// }
+MessageManager.prototype.getConversation = function(user1, user2, callback) {
+    Message.find({$or:[{sender: user1, receiver: user2}, {sender: user2, receiver: user1}]}, null, {sort: {date: "ascending"}}, function(err, messages) {
+        if(err){
+            callback(false, "Internal Server Error");
+            return;
+        } else {
+            callback(true, messages);
+            return;
+        }
+    });
+}
 
 MessageManager.prototype.getUnreadMsgsForUser = function(email, callback) {
     Message.find({receiver: email, alreadyRead: false}, function(err, msgs) {
