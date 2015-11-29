@@ -49,7 +49,7 @@
             <em class="W_new_count hidden">New</em>
           </a>
           <ul id="newMsgList" class="dropdown-menu hidden">
-            
+
           </ul>
         </li>
         <li class="dropdown">
@@ -173,15 +173,15 @@
               <div class ="noclass"> <!--this div is not in use for now-->
                   <div class="row">
                       <div class="col-xs-12 col-md-6 text-center">
-                          <h1 class="rating-num">
-                              4.0</h1>
-                          <div class="rating">
+                          <h1 id="averageRating" class="rating-num">0.0</h1>
+                          <div id="averageStars" class="rating">
                               <span class="glyphicon glyphicon-star"></span><span class="glyphicon glyphicon-star">
                               </span><span class="glyphicon glyphicon-star"></span><span class="glyphicon glyphicon-star">
                               </span><span class="glyphicon glyphicon-star-empty"></span>
                           </div>
                           <div>
-                              <span class="glyphicon glyphicon-user"></span>1,050,008 total
+                              <span class="glyphicon glyphicon-user"></span>
+                              <label id="numberOfRating">0 </label> total
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-6">
@@ -191,9 +191,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress progress-striped">
-                                      <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 80%">
-                                          <span class="sr-only">80%</span>
+                                      <div id ='fiveStars' class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id ='fiveStarsTxt'class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -203,9 +203,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 60%">
-                                          <span class="sr-only">60%</span>
+                                      <div id ='fourStars' class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id='fourStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -215,9 +215,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 40%">
-                                          <span class="sr-only">40%</span>
+                                      <div id ='threeStars' class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id = 'threeStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -227,9 +227,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 20%">
-                                          <span class="sr-only">20%</span>
+                                      <div id = 'twoStars' class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id = 'twoStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -239,9 +239,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 15%">
-                                          <span class="sr-only">15%</span>
+                                      <div id ='oneStars' class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id = 'oneStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -275,17 +275,6 @@
       </div>
       <hr data-brackets-id="12673">
       <ul data-brackets-id="12674" id="sortable" class="list-unstyled ui-sortable">
-          <strong class="pull-left primary-font">James</strong>
-          <small class="pull-right text-muted">
-             <span class="glyphicon glyphicon-time"></span>7 mins ago</small>
-          </br>
-          <li class="ui-state-default">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </li>
-          </br>
-           <strong class="pull-left primary-font">Taylor</strong>
-          <small class="pull-right text-muted">
-             <span class="glyphicon glyphicon-time"></span>14 mins ago</small>
-          </br>
-          <li class="ui-state-default">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li>
       </ul>
       <div id = 'pageNumbers'></div>
     </div>

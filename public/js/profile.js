@@ -262,6 +262,11 @@ $( document ).ready( function(){
     var date = new Date();
     date = date.toString();
     //console.log(date.toString());
+    //console.log(" star: "+star);
+    if(!star){
+      star = 0;
+      //alert(star);
+    }
     var feedback = {'comment': comment, 'rating': star, 'sender':'',
     'receiver': '', 'date': date};
     var profile_id = $('#profile').data('value');
@@ -271,9 +276,6 @@ $( document ).ready( function(){
       url: "/api/users/" + profile_id + "/feedbacks",
       data: {json: JSON.stringify(feedback)},
       success: function(data){
-        //$(".editableform-loading").addClass('hidden');
-        //alert(data);
-        //window.location.reload();
         var curPage = $('#curPage').html();
         if(!curPage){
           curPage = 1;
@@ -288,7 +290,6 @@ $( document ).ready( function(){
   });
   //control the page number buttons
   $('#pageNumbers').on('click','button',function(event){
-    //var page = event.target;
     var page = event.target.innerHTML;
     displayComments($('#profile').data('value'), page);
   });
@@ -299,9 +300,48 @@ $( document ).ready( function(){
 $.fn.editable.defaults.mode = 'inline';
 
 var commentsPerPage = 3;
+//display comments and rating
 function displayComments(profile_id, pageNumber){
   //console.log($('#sortable').html());
-
+  //display average rating
+  var request = $.ajax({
+    type: 'GET',
+    url: '/api/users/' + profile_id,
+    async: true,
+    success: function(user){
+      $('#averageRating').html(user.averageRating.toFixed(2));
+      $('#numberOfRating').html(user.numberOfRating);
+      var stars = "";
+      var intRating = Math.round( user.averageRating );
+      for(var i = 0; i < intRating; i++){
+        stars += '<span class="glyphicon glyphicon-star"></span>';
+      }
+      var emptystar = 5 - intRating;
+      for(var i = 0; i < emptystar; i++){
+        stars +='<span class="glyphicon glyphicon-star-empty"></span>';
+      }
+      $('#averageStars').html(stars);
+      //console.log("fivestars: " + user.fiveStars +" asd "+ user.fiveStars / user.numberOfRating);
+      var fiveStars = (user.fiveStars/user.numberOfRating * 100).toFixed(1);
+      var fourStars = (user.fourStars/user.numberOfRating * 100).toFixed(1);
+      var threeStars = (user.threeStars/user.numberOfRating * 100).toFixed(1);
+      var twoStars = (user.twoStars/user.numberOfRating * 100).toFixed(1);
+      var oneStars = (user.oneStars/user.numberOfRating * 100).toFixed(1);
+      $('#fiveStars').attr( "style", "width:"+fiveStars+"%");
+      $('#fourStars').attr( "style", "width:"+fourStars+"%");
+      $('#threeStars').attr( "style", "width:"+threeStars+"%");
+      $('#twoStars').attr( "style", "width:"+twoStars+"%");
+      $('#oneStars').attr( "style", "width:"+oneStars+"%");
+      $('#fiveStarsTxt').html(fiveStars+"%");
+      $('#fourStarsTxt').html(fourStars+"%");
+      $('#threeStarsTxt').html(threeStars+"%");
+      $('#twoStarsTxt').html(twoStars+"%");
+      $('#oneStarsTxt').html(oneStars+"%");
+    },
+    error: function(jqxhr, textStatus, errorThrown){
+      alert(errorThrown);
+    }
+  });
   $.ajax({
     type: 'GET',
     url: "/api/users/" + profile_id + "/feedbacks",
@@ -327,6 +367,10 @@ function displayComments(profile_id, pageNumber){
           url: '/api/users/' + senderId,
           async: false,
           success: function(user){
+            console.log(user.displayName);
+            if(user.displayName == ""){
+              user.displayName = user.email;
+            }
             list+='<p class="pull-left primary-font margin-left">' + user.displayName + '</p><br>';
             list+='<small class="pull-right text-muted">' +
               '<small>rating: ' + info.rating + '/5 </small><br>'+
@@ -349,16 +393,6 @@ function displayComments(profile_id, pageNumber){
       alert(errorThrown);
     }
   });
-    /*<strong class="pull-left primary-font">James</strong>
-    <small class="pull-right text-muted">
-       <span class="glyphicon glyphicon-time"></span>7 mins ago</small>
-    </br>
-    <li class="ui-state-default">Lorem ipsum dolor </li>
-    </br>
-
-    var list = "<strong>" + $( "p" ).length + " paragraphs!</em>";
-    return "<p>All new content for " + emphasis + "</p>";*/
-
 }
 
 //for the star rating user click

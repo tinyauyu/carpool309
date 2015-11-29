@@ -324,7 +324,7 @@ app.put('/api/changePassword', function (req, res){
 			}
 		})
 	}
-	
+
 
 })
 
@@ -369,14 +369,24 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 	var feedback = JSON.parse(req.body.json);
 	feedback['sender'] = req.session._id;
 	feedback['receiver'] = req.params.id;
+  //update comment for the user
 	feedbackManager.createFeedback(feedback, function(success,msg){
 		if(success){
-			res.send(msg);
+      //update rating for the user
+      acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
+    		if(success){
+    			res.send(msg);
+    		} else {
+    			res.writeHead(400,msg);
+    			res.end(msg);
+    		}
+      });
 		} else {
 			res.writeHead(400,msg);
 			res.end(msg);
 		}
 	});
+
 });
 
 app.get('/api/users/:id/feedbacks', function(req, res){
@@ -532,4 +542,3 @@ app.post('/api/log', function(req, res){
 		}
 	})
 });
-

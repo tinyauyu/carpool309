@@ -162,7 +162,15 @@ AccountManager.prototype.createUser = function(profile, callback){
 					description: profile.description,
 					displayName: profile.displayName,
 					profilePic: profilePic,
-					admin: false
+					admin: false,
+					totalRating: 0,
+					numberOfRating: 0,
+					averageRating: 0,
+					fiveStars: 0,
+					fourStars: 0,
+					threeStars: 0,
+					twoStars: 0,
+					oneStars: 0
 				});
 
 				newUser.save(function(error, data){
@@ -210,7 +218,7 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 					callback(false,"Please fill in the email address!");
 					return;
 				}
-				
+
 				if(String(profile.description).length > 500){
 					callback(false,"Description must be less than 500 characters!");
 					return;
@@ -234,7 +242,15 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							//description: profile.description,
 							displayName: displayName,
 							profilePic: profilePic,
-							admin: false
+							admin: false,
+							ttotalRating: 0,
+							numberOfRating: 0,
+							averageRating: 0,
+							fiveStars: 0,
+							fourStars: 0,
+							threeStars: 0,
+							twoStars: 0,
+							oneStars: 0
 						});
 
 						newUser.save(function(error, data){
@@ -331,6 +347,63 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 		}
 
 	})
+}
+
+
+
+AccountManager.prototype.getUser = function(id,callback){
+	console.log(id);
+	User.findOne({_id: id}, function(err, user){
+		if(err) {throw err;}
+		if(!user){
+			callback(false,null)
+		} else {
+			callback(true,user);
+		}
+	})
+}
+AccountManager.prototype.updateRating =  function(rating, receiver, callback){
+	var conditions = { _id: receiver }, options = {}, update ={};
+	this.getUser(receiver, function(err, user){
+		if(!err){
+			callback(false, 'Error finding user');
+		}
+		else{
+			rating = parseInt(rating);
+			user.totalRating += rating;
+			//console.log("updating total rating: "+ user.totalRating);
+			user.numberOfRating += 1;
+			switch(rating) {
+				case 1:
+					user.oneStars+=1;
+					break;
+				case 2:
+					user.twoStars+=1;
+					break;
+				case 3:
+					user.threeStars+=1;
+					break;
+				case 4:
+					user.fourStars+=1;
+					break;
+				case 5:
+					user.fiveStars+=1;
+					break;
+				default:
+					break;
+			}
+			user.averageRating = user.totalRating/ user.numberOfRating;
+			User.findOneAndUpdate(conditions, user, options, function(err){
+				if(err){
+					callback(false,err);
+					return;
+				} else {
+					callback(true,"OK");
+					return;
+				}
+			});
+		}
+	});
 }
 
 AccountManager.prototype.changePassword = function(profile, callback){
