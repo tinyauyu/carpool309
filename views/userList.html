@@ -68,7 +68,8 @@
 </nav>
 <div id="resultPanel"></div>
 
-<div id="content" class="col-xs-5 col-md-5 col-md-offset-0" ng-app="userList" ng-controller="userListCtrl">
+
+<div id="content" class="col-xs-5 col-md-5 col-md-offset-1" ng-app="userList" ng-controller="userListCtrl">
   <h1>Hi! <span id="displayName">{{ profile.displayName || profile.email }}</span></h1>
   <div class="table-responsive">
   <table class="table table-hover">
@@ -91,37 +92,24 @@
 </div>
 
 <hr><hr><hr>
-<div class="container col-xs-5 col-md-4 col-md-offset-0.5">
-  <form class="form">
+<div class="container col-xs-5 col-md-5 col-md-offset-0.5">
+  <form class="form" id="tripForm">
       <label for="fromWhere" class = "control-label">From: </label>
-      <input id="fromWhere" class="form-control" placeholder="From: eg.L4C 2C7" required autofocus>
+      <input id="fromWhere" class="form-control" placeholder="From: eg.L4C 2C7 OR 123 Main Ave, Toronto, ON, CA" required autofocus>
       <label for="toWhere" class="control-label">To:</label>
-      <input id="toWhere" class="form-control" placeholder="To: eg.L5C 7C8" required>
+      <input id="toWhere" class="form-control" placeholder="To: eg.L5C 7C8 OR Street# Stree, City, Country" required>
       <label for="expectedPrice" class="control-label">Expected Price:</label>
-      <input id="expectedPrice" class="form-control" placeholder="$60" required>
+      <input id="expectedPrice" class="form-control" placeholder="$60, Default is All Price Range" required>
       <label for="expectedDate" class="control-label">Expected Date (Minimum is Today):</label>
       <input type="datetime-local" id="expectedDate" class="form-control" min="2015-11-21" required>
-      <input type="submit" value="Find Your Trip" id = "findTrip" class="btn-primary">
+      <hr>
+      <label for="tripProvider" class="control-label">Trip Provider? Or Trip Wanted:</label><br>
+      <input type="radio" name="type" value="true"/> TripProvider
+      <input type="radio" name="type" value="false"/> TripWanted
+      <hr>
+      <input type="button" value="Let us Search the Trips for You" id = "findTrip" class="btn-primary">
   </form>
   <hr>
-  <form class="form-group">
-      <label for="searchFor" class="control-label">Search:</label>
-      <input id="searchFor" class="form-control" placeholder="Any keywords for search" required>
-      <button> <i id="clickSearch" class="glyphicon glyphicon-search"></i> </button>
-  </form>
-</div>
-
-<div class="col-xs-2 col-md-2" id="recommendation">
-  <div class="panel-head">
-    <span class="glyphicon glyphicon-list"></span> People Closest to You:
-  </div>
-  <div class="panel-body">
-      <ul class = "list-group">
-        <li class="list-group-item" id="1" onclick="console.log(1)">Email Address 1</li>
-        <li class="list-group-item" id="2" onclick="console.log(2)">Email Address 2</li>
-        <li class="list-group-item" id="3" onclick="console.log(3)">Email Address 3</li>
-      </ul>
-  </div>
 </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

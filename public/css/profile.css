@@ -104,6 +104,12 @@ dd{
     border-radius: 10px;
 }
 
+.jumbotron3{
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: lightgrey ;
+}
+
 #nav-profilePic{
     object-fit: cover;
 }
@@ -139,7 +145,26 @@ dd{
    color: #d17581;
 }
 
-.glyphicon { margin-top:2px;}
+#map {
+    height: 400px;
+    width: 30%;
+    z-index: 9999;
+    float: left;
+}
+
+#map2 {
+    height: 400px;
+    width: 30%;
+    z-index: 9999;
+    float: right;
+}
+
+#tripDescription {
+    float: center;
+}
+
+.glyphicon { margin-right:5px;}
+
 .rating .glyphicon {font-size: 22px;}
 .rating-num { margin-top:0px;font-size: 54px; }
 .progress { margin-bottom: 5px;}

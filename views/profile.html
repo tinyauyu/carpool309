@@ -8,12 +8,14 @@
     <title>FriendZone</title>
 
     <!-- Bootstrap -->
-    <link href="../css/bootstrap.min.css" rel="stylesheet"/>
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
   	<!-- Font Awesome -->
   	<link rel="stylesheet" href="../css/font-awesome.min.css"/>
-    <link href="../css/profile.css" rel="stylesheet"/>
+    <link href="/css/profile.css" rel="stylesheet"/>
     <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
     <script src="/socket.io/socket.io.js"></script>
+ 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,9 +25,10 @@
     <![endif]-->
 
   </head>
+
   <body onload="getUnreadMsgs();">
   <div id="bg"></div>
-    <nav class="navbar navbar-default">
+  <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
@@ -66,13 +69,45 @@
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
+
 </nav>
 <div id="resultPanel" class="hidden"></div>
 
-<section id="content" class="col-xs-12 col-md-10 center" ng-app="profile">
-  <div class="jumbotron center">
 
+<section id="content" class="col-xs-12 col-md-10 center" ng-app="profile">
+  {% if (trip != '' || trip != null) %}
+  <div class="jumbotron3 center">
+      <div id="fromWhere" data-info='{{trip.startPoint.latitude}},{{trip.startPoint.longitude}},{{trip.endPoint.latitude}},{{trip.endPoint.longitude}}'></div>
+      <div id="map" onload = "initMap();"></div>
+      <div class="col-md-4" id="tripDescription">
+          <dl class="dl-horizontal">
+            <dt>Found Trip's ID:</dt>
+            <dd>{{trip._id}}</dd>
+            {% if (trip.provider) %}
+            <dt>Provided by: </dt>
+            <dd>{{user.email}}</dd>
+            {% else %}
+            <dt>Wannted by: </dt>
+            <dd>{{user.email}}</dd>
+            {% endif %}
+            <dt>Depature Date:</dt>
+            <dd>{{trip.date}}</dd>
+            <dt>Expected price:</dt>
+            <dd>{{trip.price}}$</dd>
+            <dt>Trip Found</dt>
+            <dd> <--On the Left </dd>
+            <dt>Your Trip</dt>
+            <dd> On the Right --> </dd>
+          </dl>
+      </div>
+      <div id="fromUserWhere" data-info='{{userTrip.startPoint.latitude}},{{userTrip.startPoint.longitude}},{{userTrip.endPoint.latitude}},{{userTrip.endPoint.longitude}}'></div>
+      <div id="map2"></div>
+  </div>
+  {% endif %}
+
+  <div class="jumbotron center">
     <div class="col-xs-12 col-md-3 container" style="text-align: center;">
+
 
       <img id="profilePic_preview" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
       <img id="profilePic_buffer" class="hidden" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
@@ -88,45 +123,46 @@
     </div>
 
     <div class="col-xs-12 col-md-8 center">
-      <form id="profile" data-value="{{user.id}}">
-        <dl class="dl-horizontal">
-          <dt>Email:</dt>
-          <dd id="userEmail">{{user.email}}</dd>
-          <dt>Display Name:</dt>
-          <dd><a href="#" id="displayName" class="editable" data-value="{{user.displayName || user.email}}"></a></dd>
-          <dt>Description:</dt>
-          <dd><a href="#" id="description" class="editable" data-value="{{ user.description || '*** no description ***' }}"></a></dd>
-          {% if (profile.userType==2) %}
-          <dt>User Type:</dt>
-          <dd>
-            {% if (user.userType<2) %}
-            <a href="#" id="userType" class="editable" data-value="{{user.userType}}"></a>
-            {% else %}
-            Super Administrator
+    
+        <form id="profile" data-value="{{user.id}}">
+          <dl class="dl-horizontal">
+            <dt>Email:</dt>
+            <dd>{{user.email}}</dd>
+            <dt>Display Name:</dt>
+            <dd><a href="#" id="displayName" class="editable" data-value="{{user.displayName || user.email}}"></a></dd>
+            <dt>Description:</dt>
+            <dd><a href="#" id="description" class="editable" data-value="{{ user.description || '*** no description ***' }}"></a></dd>
+            {% if (profile.userType==2) %}
+            <dt>User Type:</dt>
+            <dd>
+              {% if (user.userType<2) %}
+              <a href="#" id="userType" class="editable" data-value="{{user.userType}}"></a>
+              {% else %}
+              Super Administrator
+              {% endif %}
+            </dd>
             {% endif %}
-          </dd>
-          {% endif %}
-        </dl>
+          </dl>
 
-        <div class="buttons">
-          {% if (user.id==profile.id) %}
-          <button id="edit" type="button" class="btn btn-default">
-            Edit
-          </button>
-          {% elseif (profile.userType>0) %}
-            {% if (user.userType==0) %}
+          <div class="buttons">
+            {% if (user.id==profile.id) %}
             <button id="edit" type="button" class="btn btn-default">
-            Edit
+              Edit
             </button>
-            {% elseif (profile.userType==2) %}
-            <button id="edit" type="button" class="btn btn-default">
-            Edit
-            </button>
+            {% elseif (profile.userType>0) %}
+              {% if (user.userType==0) %}
+              <button id="edit" type="button" class="btn btn-default">
+              Edit
+              </button>
+              {% elseif (profile.userType==2) %}
+              <button id="edit" type="button" class="btn btn-default">
+              Edit
+              </button>
+              {% endif %}
             {% endif %}
-          {% endif %}
-        </div>
-        <div class="editableform-loading hidden"></div>
-        <span class="edit-menu right hidden">
+          </div>
+          <div class="editableform-loading hidden"></div>
+          <span class="edit-menu right hidden">
             {% if (user.id!=profile.id) %}
             <button id="delete" type="button" class="btn btn-danger">
             Delete User
@@ -140,7 +176,7 @@
             </button>
           </span>
       </form>
-    </div>
+  </div>
     {% if (profile.id == user.id) %}
     <div class="col-xs-12 col-md-8 jumboton2 center edit-menu hidden">
       <div class="col-xs-12 col-md-8">
@@ -314,10 +350,11 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="../js/bootstrap.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
-    <script src="../js/nav.js"></script>
-    <script src="../js/profile.js"></script>
-    <script src="../js/log.js"></script>
+    <script src="/js/nav.js"></script>
+    <script src="/js/profile.js"></script>
+    <script src="/js/log.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8unX0Q0_pe-3mrpEB7yvEPJYv29x-f4E&callback=initMap" async defer></script>
   </body>
 </html>
