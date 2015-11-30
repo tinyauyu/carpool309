@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
 var path = require('path');
 var bcrypt = require('bcrypt');
-var salt = bcrypt.genSaltSync(10);
+var https = require('https');
 
 var UserSchema, User;
 
@@ -29,7 +29,11 @@ AccountManager.prototype.login = function(profile, callback){
 	    	debug("No such email registered");
 	    	callback(false,"Invalid email or password");
 	    } else {
-	      if (bcrypt.compareSync(profile.password, user.passwordHash)) {
+	      if(!user.password.enabled){
+	      	callback(false,"You haven't set a password! Use Google Login!")
+	      	return;
+	      }
+	      if (bcrypt.compareSync(profile.password.plain, user.password.hash)) {
 	      	debug("Login success!")
 	        callback(true,user);
 	      } else {
@@ -38,7 +42,34 @@ AccountManager.prototype.login = function(profile, callback){
 	      }
 	    }
 	});
+}
 
+AccountManager.prototype.loginGoogle = function(profile, callback){
+
+	var options = {
+	  host: 'www.googleapis.com',
+	  path: '/oauth2/v3/tokeninfo?id_token='+profile.id_token
+	};
+
+	https.request(options, function(res){
+		console.log(res.statusCode);
+		res.setEncoding('utf8');
+		res.on('data', function(d) {
+			var googleProfile = JSON.parse(d);
+			debug("Login in attempt using Google API by: "+googleProfile.email);
+			User.findOne({email: googleProfile.email},function(err,user){
+				if(err){
+					callback(false,"Internal Server Error");
+					return;
+				} else {
+					callback(true,user);
+					return;
+				}
+			})
+
+		});
+		//callback(true,"TEST");
+	}).end();
 }
 
 AccountManager.prototype.getUserList = function(callback){
@@ -52,6 +83,7 @@ AccountManager.prototype.getUserList = function(callback){
 }
 
 AccountManager.prototype.getUser = function(id,callback){
+	console.log(id);
 	User.findOne({_id: id}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
@@ -61,11 +93,25 @@ AccountManager.prototype.getUser = function(id,callback){
 		}
 	})
 }
-
+AccountManager.prototype.getUserByEmail = function(email, callback){
+	console.log(email);
+	User.findOne({email: email}, function(err, user){
+		if(err) {throw err;}
+		if(!user){
+			callback(false,null)
+		} else {
+			callback(true,user);
+		}
+	})
+}
 AccountManager.prototype.getUserPic = function(id,callback){
 	User.findOne({_id: id},'profilePic', function(err, user){
 		if (err) {throw err;}
-		if(!user){callback(null)} else {
+		if(!user){
+			callback(null)
+		} else if (typeof user.profilePic == "undefined"){
+			callback("/img/default_profilePic.png")
+		} else {
 			callback(user.profilePic);
 		}
 	})
@@ -80,7 +126,7 @@ AccountManager.prototype.createUser = function(profile, callback){
 			callback(false,"Please fill in the email address!");
 			return;
 		}
-		if(profile.password == ""){
+		if(profile.password.plain == ""){
 			callback(false,"Please fill in your password!");
 			return;
 		}
@@ -106,17 +152,25 @@ AccountManager.prototype.createUser = function(profile, callback){
 					userType = 2;
 				}
 
-
-				var passwordHash = bcrypt.hashSync(profile.password, salt);
+				var salt = bcrypt.genSaltSync(10);
+				var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
 
 				var newUser = new User({
 					userType: userType,
 					email: profile.email,
-					passwordHash: passwordHash,
+					password: {hash: passwordHash, enabled: true},
 					description: profile.description,
 					displayName: profile.displayName,
 					profilePic: profilePic,
-					admin: false
+					admin: false,
+					totalRating: 0,
+					numberOfRating: 0,
+					averageRating: 0,
+					fiveStars: 0,
+					fourStars: 0,
+					threeStars: 0,
+					twoStars: 0,
+					oneStars: 0
 				});
 
 				newUser.save(function(error, data){
@@ -133,6 +187,91 @@ AccountManager.prototype.createUser = function(profile, callback){
 			}
 		});
 	});
+}
+
+
+AccountManager.prototype.createUserGoogle = function(profile, callback){
+
+	var options = {
+	  host: 'www.googleapis.com',
+	  path: '/oauth2/v3/tokeninfo?id_token='+profile.id_token
+	};
+
+	https.request(options, function(res){
+		console.log(res.statusCode);
+		res.setEncoding('utf8');
+		res.on('data', function(d) {
+			debug(d);
+			var data = JSON.parse(d)
+			var displayName = data.name;
+			var email = data.email;
+			var profilePic = data.picture;
+
+			debug("email: "+email)
+			debug("profilePic: "+profilePic)
+
+			debug("Creating user ("+profile.email+") using Google API");
+
+			User.count({}, function(err, count){
+
+				if(profile.email == ""){
+					callback(false,"Please fill in the email address!");
+					return;
+				}
+
+				if(String(profile.description).length > 500){
+					callback(false,"Description must be less than 500 characters!");
+					return;
+				}
+
+				User.find({email: email}, function(err, user){
+					if(user[0]){
+						callback(false,"Email has been used!");
+						return;
+					} else {
+						var userType = 0;
+						if(count==0){
+							User.resetCount(function(err, nextCount){});
+							userType = 2;
+						}
+
+						var newUser = new User({
+							userType: userType,
+							email: email,
+							password: {enabled:false},
+							//description: profile.description,
+							displayName: displayName,
+							profilePic: profilePic,
+							admin: false,
+							ttotalRating: 0,
+							numberOfRating: 0,
+							averageRating: 0,
+							fiveStars: 0,
+							fourStars: 0,
+							threeStars: 0,
+							twoStars: 0,
+							oneStars: 0
+						});
+
+						newUser.save(function(error, data){
+					    	if(error){
+					    		console.log("[ERROR]\t[AccountManager.js]\tCannot save user to database: " + error);
+					        	callback(false,"Internal Server Error");
+					        	return;
+					    	} else {
+					    		debug("User #"+count+" ("+profile.email+") created");
+					    	    callback(true,data);
+					    	    return;
+					    	}
+						});
+					}
+				});
+			});
+
+
+		});
+	}).end();
+
 }
 
 AccountManager.prototype.deleteUser = function(user, profile, callback){
@@ -210,18 +349,77 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 	})
 }
 
+
+
+AccountManager.prototype.getUser = function(id,callback){
+	console.log(id);
+	User.findOne({_id: id}, function(err, user){
+		if(err) {throw err;}
+		if(!user){
+			callback(false,null)
+		} else {
+			callback(true,user);
+		}
+	})
+}
+AccountManager.prototype.updateRating =  function(rating, receiver, callback){
+	var conditions = { _id: receiver }, options = {}, update ={};
+	this.getUser(receiver, function(err, user){
+		if(!err){
+			callback(false, 'Error finding user');
+		}
+		else{
+			rating = parseInt(rating);
+			user.totalRating += rating;
+			//console.log("updating total rating: "+ user.totalRating);
+			user.numberOfRating += 1;
+			switch(rating) {
+				case 1:
+					user.oneStars+=1;
+					break;
+				case 2:
+					user.twoStars+=1;
+					break;
+				case 3:
+					user.threeStars+=1;
+					break;
+				case 4:
+					user.fourStars+=1;
+					break;
+				case 5:
+					user.fiveStars+=1;
+					break;
+				default:
+					break;
+			}
+			user.averageRating = user.totalRating/ user.numberOfRating;
+			User.findOneAndUpdate(conditions, user, options, function(err){
+				if(err){
+					callback(false,err);
+					return;
+				} else {
+					callback(true,"OK");
+					return;
+				}
+			});
+		}
+	});
+}
+
 AccountManager.prototype.changePassword = function(profile, callback){
 
-	if(profile.password==""){
+	if(profile.password.plain==""){
 		callback(false, "New Password cannot be empty!");
 		return;
 	}
 
-	var passwordHash = bcrypt.hashSync(profile.password, salt);
+	var salt = bcrypt.genSaltSync(10);
+	var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
 
 	var newProfile = profile;
-	newProfile.passwordHash = passwordHash;
-	delete newProfile.password;
+	newProfile.password.hash = passwordHash;
+	newProfile.password.enabled = true;
+	delete newProfile.password.plain;
 
 	User.findOneAndUpdate({_id: profile._id}, profile, function(err){
 		if(err){
@@ -232,6 +430,18 @@ AccountManager.prototype.changePassword = function(profile, callback){
 			return;
 		}
 	});
+}
+
+AccountManager.prototype.log = function(user, callback){
+	User.findOneAndUpdate({id: user.id}, user, function(err){
+		if(err){
+			callback(false, err);
+			return;
+		} else {
+			callback(true,"OK");
+			return;
+		}
+	})
 }
 
 module.exports = AccountManager;

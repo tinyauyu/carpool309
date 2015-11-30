@@ -1,0 +1,58 @@
+.popupBox {
+    margin: auto;
+
+}
+.chatArea {
+    border:1px solid grey;
+    resize: none;
+}
+
+.popup-box {
+   background-color: #ffffff;
+    border: 1px solid;
+    bottom: 0;
+    display: none;
+    height: 415px;
+    position: fixed;
+    right: 70px;
+    width: 300px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.control-button {
+    margin-top: 5px;
+    background: transparent none repeat scroll 0 0;
+    font-size: 12px;
+}
+
+.controllers .btn-group {
+    display: inline-flex;
+    margin: 6px 6px 0 0;
+    vertical-align: top !important;
+}
+
+.panel .panel-heading {
+    clear: both;
+    background-color: #76a3a3;
+    color: black;
+    display: inline-table;
+    font-size: 21px;
+    padding: 7px 10px;
+    width: 100%;
+    font-family: Oswald;
+}
+
+.panel-body{
+    overflow-y: scroll;
+    height: 300px;
+}
+.chatArea {
+    width: 100%;
+}
+.panel-footer{
+    background-color: #76a3a3;
+    height:120px;
+}
+#msgYouSend {
+    text-align: right;
+}

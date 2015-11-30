@@ -4,13 +4,15 @@ var debug_http = require('debug')('http');
 debug("Server initializing...");
 
 var mongoose = require('mongoose');
-var ROOT = { root: __dirname+'/public' };
-var express = require('express');
-var app = express();
 var bcrypt = require('bcrypt');
 var bodyParser = require('body-parser');
 var session = require('client-sessions');
 var swig  = require('swig');
+var express = require('express');
+var app = express();
+
+var ROOT = { root: __dirname+'/public' };
+
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public'));
@@ -27,11 +29,18 @@ app.use(session({
   httpOnly:false
 }));
 
+var server = app.listen(process.env.PORT || 3000, function () {
+  var host = server.address().address;
+  var port = server.address().port;
+
+  debug('Server is now running at port '+port);
+});
+
 app.use(function(req, res, next) {
 
 	debug_http(req.method + ' ' + req.url);
 
-	if(req.url=="/" || req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
+	if(req.url=="/" || req.url=="/api/login/?type=google" ||req.url=="/api/login" || (req.url=="/api/users" && req.method=="POST") || req.url=="/api/logout"){
 		next();
 		return;
 	} else {
@@ -57,10 +66,13 @@ var MONGODB_URL = 'mongodb://localhost/';
 /********************** Managers **********************/
 var AccountManager = require('./controller/AccountManager.js');
 var acManager = new AccountManager(MONGODB_URL);
+
 var FeedbackManager = require('./controller/FeedbackManager.js');
 var feedbackManager = new FeedbackManager(MONGODB_URL);
+
 var MessageManager = require('./controller/MessageManager.js');
-var msgManager = new MessageManager(MONGODB_URL);
+
+var msgManager = new MessageManager(MONGODB_URL, server);
 var TripManager =  require('./controller/TripManager.js');
 var tripManager = new TripManager(MONGODB_URL);
 
@@ -116,6 +128,7 @@ app.get('/users/:id', function(req, res){
 						maxView = pageHistory[page];
 					}
 				}
+
 				console.log("maxView: "+pageHistory[page]);
 				*/
 
@@ -162,6 +175,7 @@ app.get('/users/:id', function(req, res){
 			});
 		});		
 	}
+
 });
 
 app.get('/users', function(req, res){
@@ -169,7 +183,7 @@ app.get('/users', function(req, res){
 		acManager.getUserList(function(users){
 			res.render('userList.html', {
    				profile: profile, users: users
-			});	
+			});
 		})
 	});
 	var user = {
@@ -177,7 +191,7 @@ app.get('/users', function(req, res){
 	}
 	var page = "/users";
 	//acManager.logPage(user,page);
-	
+
 });
 /********************** View *************************/
 
@@ -194,7 +208,7 @@ app.delete('/api/users/:id', function(req, res){
 					res.writeHead(400,msg);
 					res.end(msg);
 				}
-				
+
 			});
 		} else {
 			res.writeHead(400,msg);
@@ -204,18 +218,49 @@ app.delete('/api/users/:id', function(req, res){
 })
 
 app.post('/api/login', function(req, res) {
-	var profile = JSON.parse(req.body.json);
-	acManager.login(profile, function(success,user){
-		if(success){
-			req.session._id = user._id;
-			req.session.email = user.email;
-			req.session.displayName = user.displayName;
-			res.end("OK");
-		} else {
-			res.writeHead(400,user);
-			res.end(user);
-		}
-	})
+
+	if(req.query.type=="google"){
+		debug("GOOGLE LOGIN!")
+		var profile = JSON.parse(req.body.json);
+		acManager.loginGoogle(profile, function(success,user){
+			if(success && user){
+				debug("User found and login")
+				req.session._id = user._id;
+				req.session.email = user.email;
+				req.session.displayName = user.displayName;
+				res.end(JSON.stringify({isLogin: true}));
+			} else if(success && !user){
+				debug("User NOT found, create user")
+				acManager.createUserGoogle(profile, function(success,user){
+					if(success && user){
+						req.session._id = user._id;
+						req.session.email = user.email;
+						req.session.displayName = user.displayName;
+						res.end(JSON.stringify({isLogin: true}));
+					}
+				})
+			} else {
+				res.writeHead(400,user);
+				res.end(user);
+			}
+		})
+	} else {
+		var profile = JSON.parse(req.body.json);
+		acManager.login(profile, function(success,user){
+			if(success){
+				req.session._id = user._id;
+				req.session.email = user.email;
+				req.session.displayName = user.displayName;
+				res.end("OK");
+				debug("Login success!")
+			} else {
+				res.writeHead(400,user);
+				res.end(user);
+			}
+		})
+	}
+
+
 });
 
 app.get('/api/logout', function(req, res) {
@@ -224,20 +269,35 @@ app.get('/api/logout', function(req, res) {
 });
 
 app.post('/api/users', function (req, res){
-	console.log("post /api/users");
 	var profile = JSON.parse(req.body.json);
-	debug("receiving profile: "+profile.email);
+	if(req.query.type=="google"){
+		debug("Create user by Google");
 
-	acManager.createUser(profile, function(success,msg){
-		if(success){
-			res.send('OK');
-			return;
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-			return;
-		}
-	});
+		acManager.createUserGoogle(profile, function(success,msg){
+			if(success){
+				res.send('OK');
+				return;
+			} else {
+				res.writeHead(400,msg);
+				res.end(msg);
+				return;
+			}
+		})
+
+	} else {
+		debug("receiving profile: "+profile.email);
+
+		acManager.createUser(profile, function(success,msg){
+			if(success){
+				res.send('OK');
+				return;
+			} else {
+				res.writeHead(400,msg);
+				res.end(msg);
+				return;
+			}
+		});
+	}
 
 });
 
@@ -264,30 +324,50 @@ app.put('/api/changePassword', function (req, res){
 
 	var loginProfile = {
 		email: user.email,
-		password: profile.oldPassword
+		password: {plain: profile.password.old}
 	}
-	delete profile.oldPassword;
+	delete profile.password.old;
 
 	if(user._id!=profile._id){
 		res.writeHead(400,"You have no right to change other user's password!");
-		res.end(msg);
+		res.end("You have no right to change other user's password!");
 	}
 
-	acManager.login(loginProfile, function(success,msg){
-		if(!success){
-			res.writeHead(400,"Original password invalid");
-			res.end("Original password invalid");
-		} else {
-			acManager.changePassword(profile, function(success, msg){
-				if(!success){
-					res.writeHead(400,msg);
-					res.end(msg);
-				} else {
-					res.send('OK');
-				}
-			})
-		}
-	})
+	if(profile.password.enabled){
+		acManager.login(loginProfile, function(success,msg){
+			if(!success){
+				res.writeHead(400,"Original password invalid");
+				res.end("Original password invalid");
+			} else {
+				acManager.changePassword(profile, function(success, msg){
+					if(!success){
+						res.writeHead(400,msg);
+						res.end(msg);
+					} else {
+						res.send('OK');
+					}
+				})
+			}
+		})
+	} else {
+		acManager.getUser(profile._id, function(success, p){
+			if(!p.password.enabled){
+				acManager.changePassword(profile, function(success, msg){
+					if(!success){
+						res.writeHead(400,msg);
+						res.end(msg);
+					} else {
+						res.send('OK');
+					}
+				})
+			} else {
+				res.writeHead(400,"The user has enabled password!")
+				res.send('The user has enabled password!')
+			}
+		})
+	}
+
+
 })
 
 
@@ -318,25 +398,37 @@ app.get('/api/users/current/profilePic', function(req, res){
 
 app.get('/api/users/:id/profilePic', function(req, res){
 	acManager.getUserPic(req.params.id, function(pic){
-		res.contentType('image/png');
+		//res.contentType('image/png');
 		res.send(pic);
 	})
 });
+
 /********************** User Account *************************/
 
 /********************** Feedback **********************/
 app.post('/api/users/:id/feedbacks', function(req, res){
+  //console.log("posting feedback");
 	var feedback = JSON.parse(req.body.json);
 	feedback['sender'] = req.session._id;
 	feedback['receiver'] = req.params.id;
+  //update comment for the user
 	feedbackManager.createFeedback(feedback, function(success,msg){
 		if(success){
-			res.send(msg);
+      //update rating for the user
+      acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
+    		if(success){
+    			res.send(msg);
+    		} else {
+    			res.writeHead(400,msg);
+    			res.end(msg);
+    		}
+      });
 		} else {
 			res.writeHead(400,msg);
 			res.end(msg);
 		}
 	});
+
 });
 
 app.get('/api/users/:id/feedbacks', function(req, res){
@@ -385,31 +477,88 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Feedback **********************/
 
 /********************** Message **********************/
-app.post('/api/users/:id/messages', function(req, res){
-	var message = JSON.parse(req.body.json);
-	message['sender'] = req.session._id;
-	message['receiver'] = req.params.id;
-	msgManager.sendMessage(message, function(success,msg){
-		if(success){
-			res.send(msg);
+
+app.get('/api/users/:email/chatWindow/', function(req, res) {
+	var fs = require('fs');
+	fs.readFile(__dirname + '/views/chatWindow.html', 'utf8', function(err, data){
+		if (err)
+			{throw err;}
+		else {
+			acManager.getUserByEmail(req.params.email, function(success, user){
+				if(success){
+					var profilePic = user.profilePic;
+					console.log(profilePic);
+					var chatWindow = {user: user, window: data, profilePic: profilePic};
+					res.send(chatWindow);
+				} else {
+					res.status(404);
+					res.end();
+				};
+			});
+		};
+	});
+});
+
+app.get('/api/unreadmessage/:email/', function(req, res) {
+	var email = req.params.email;
+	msgManager.getUnreadMsgsForUser(email, function(success, feedbacks) {
+		if (success) {
+			res.send(JSON.stringify(feedbacks))
 		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
+			res.writeHead(404,feedbacks);
+			res.end(feedbacks);
 		}
 	});
 });
 
-app.get('/api/users/:id/messages', function(req, res){
-	msgManager.getConversation(req.params.id, req.session._id, function(success,msg){
-		if(success){
-			res.send(msg);
+app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
+	var sender = req.params.sender;
+	var receiver = req.params.receiver;
+	msgManager.markMsgRead(sender, receiver);
+	res.end();
+});
+
+app.get('/api/getConversation/:user1/:user2/', function(req, res) {
+	var user1 = req.params.user1;
+	var user2 = req.params.user2;
+	console.log(user1);
+	console.log(user2);
+	msgManager.getConversation(user1, user2, function(success, messages) {
+		if (success) {
+			res.send(JSON.stringify(messages));
 		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
+			res.writeHead(404, messages);
+			res.end(messages);
 		}
 	});
 });
+
+// app.post('/api/users/:id/messages', function(req, res){
+// 	var message = JSON.parse(req.body.json);
+// 	message['sender'] = req.session._id;
+// 	message['receiver'] = req.params.id;
+// 	msgManager.sendMessage(message, function(success,msg){
+// 		if(success){
+// 			res.send(msg);
+// 		} else {
+// 			res.writeHead(400,msg);
+// 			res.end(msg);
+// 		}
+// 	});
+// });
+
+// app.get('/api/users/:id/messages', function(req, res){
+// 	msgManager.getConversation(req.params.id, req.session._id, function(success,msg){
+// 		if(success){
+// 			res.send(msg);
+// 		} else {
+// 			res.writeHead(400,msg);
+// 			res.end(msg);
+// 		}
+// 	});
+// });
 /********************** Message **********************/
+
 
 /***********************Search&Trip*******************/
 /*---------------------------------------------------------
@@ -454,8 +603,6 @@ app.get('/searchTrip/:id', function(req,res){
 /***********************Search&Trip*******************/
 
 
-
-/*
 app.post('/api/log', function(req, res){
 	var b = JSON.parse(req.body.json);
 
@@ -467,7 +614,7 @@ app.post('/api/log', function(req, res){
 		screenSize: b.screenSize,
 		location: b.location
 	}
-	
+
 	var user = {
 		id: req.session.id,
 		behavior: behavior
@@ -480,11 +627,4 @@ app.post('/api/log', function(req, res){
 			res.end(msg);
 		}
 	})
-});
-*/
-var server = app.listen(process.env.PORT || 3000, function () {
-  var host = server.address().address;
-  var port = server.address().port;
-
-  debug('Server is now running at port '+port);
 });

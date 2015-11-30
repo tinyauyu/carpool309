@@ -54,3 +54,22 @@ dd{
     top: 35%; 
     right: 2%;
 }
+.glyphicon-envelope{
+    font-size: 25px;
+    padding-right: 0px
+}
+
+#resultPanel {
+    position: absolute;
+    right: 0px;
+    width:300px;
+    z-index: 1;
+}
+
+.W_new_count {
+    position: absolute;
+    right: -4px;
+    top: 2px;
+    font-size: 13px;
+    color: red;
+}

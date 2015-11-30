@@ -1,5 +1,34 @@
 var profilePicBuffer = undefined;
 
+function updateResultPanel(data) {
+    $("#resultPanel").html(data.window);
+    $("#resultPanel").attr('sendto', data.user.email);
+    $.ajax({
+      type: "GET",
+      url: "/api/users/"+data.user._id+"/profilePic",
+      success: function(img){
+        $('#receiverImg').attr("src", img);
+          },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+      }
+    });
+}
+$(document).ready(function() {
+    $("#chat").click(function() {
+      $("#chat").attr("disabled", true);
+      $("#resultPanel").removeClass("hidden");
+      var email = $("#chat").attr("receiver");
+        $.ajax({
+            type: "GET",
+            datatype: "html",
+            url: "/api/users/" + email + "/chatWindow",
+            success: showChatWindow
+        });
+    });
+})
+
+
 function showPasswordInfo(type, msg){
   var head = "";
   if(type=="success"){
@@ -137,7 +166,7 @@ $(document).on('change', '#profilePic', function() {
 
     reader.readAsDataURL(this.files[0]);
 
-    
+
     //Post dataurl to the server with AJAX
 });
 
@@ -181,7 +210,7 @@ $( document ).ready( function(){
 
   // menu
   $('#edit').click(function(){
-    $('.editable').editable('enable');    
+    $('.editable').editable('enable');
     $('#edit').addClass('hidden');
     $('.edit-menu').removeClass('hidden');
   });
@@ -234,10 +263,10 @@ $( document ).ready( function(){
           alert(errorThrown);
           $(".editableform-loading").addClass('hidden');
         }
-      });  
+      });
     }
 
-    
+
   });
 
   $('#changePassword').click(function(){
@@ -251,8 +280,10 @@ $( document ).ready( function(){
     }
 
     if($('#oldPassword').val()==""){
-      showPasswordInfo("danger","Please enter the original password!");
-      return;
+      if(!$('#oldPassword').prop('disabled')){
+        showPasswordInfo("danger","Please enter the original password!");
+        return;
+      }
     }
 
     if($('#newPassword').val()==""){
@@ -261,9 +292,12 @@ $( document ).ready( function(){
     }
 
     var profile = {
-      id: $('#profile').data('value'),
-      password: $('#newPassword').val(),
-      oldPassword: $('#oldPassword').val()
+      _id: $('#profile').data('value'),
+      password:{
+        plain: $('#newPassword').val(),
+        old: $('#oldPassword').val(),
+        enabled: !$('#oldPassword').prop('disabled')
+      }
     }
 
     $.ajax({
@@ -285,6 +319,238 @@ $( document ).ready( function(){
     });
   });
 
+  //button to add comment
+
+  $(".starrr").starrr()
+
+
+  var ratingsField = $('#ratings-hidden');
+  $('.starrr').on('starrr:change', function(e, value){
+    ratingsField.val(value);
+  });
+
+  $('#save').click(function(){
+    var comment =  $("textarea[name='comment']").val();
+    var star = ratingsField.val();
+    var date = new Date();
+    date = date.toString();
+    //console.log(date.toString());
+    //console.log(" star: "+star);
+    if(!star){
+      star = 0;
+      //alert(star);
+    }
+    var feedback = {'comment': comment, 'rating': star, 'sender':'',
+    'receiver': '', 'date': date};
+    var profile_id = $('#profile').data('value');
+    //alert(comment +'  s: ' +star);
+    $.ajax({
+      type: 'POST',
+      url: "/api/users/" + profile_id + "/feedbacks",
+      data: {json: JSON.stringify(feedback)},
+      success: function(data){
+        var curPage = $('#curPage').html();
+        if(!curPage){
+          curPage = 1;
+        }
+        displayComments($('#profile').data('value'),curPage);
+      },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+        //$(".editableform-loading").addClass('hidden');
+      }
+    });
+  });
+  //control the page number buttons
+  $('#pageNumbers').on('click','button',function(event){
+    var page = event.target.innerHTML;
+    displayComments($('#profile').data('value'), page);
+  });
+  displayComments($('#profile').data('value'),1);
+
 });
 
 $.fn.editable.defaults.mode = 'inline';
+
+var commentsPerPage = 3;
+//display comments and rating
+function displayComments(profile_id, pageNumber){
+  //console.log($('#sortable').html());
+  //display average rating
+  var request = $.ajax({
+    type: 'GET',
+    url: '/api/users/' + profile_id,
+    async: true,
+    success: function(user){
+      $('#averageRating').html(user.averageRating.toFixed(2));
+      $('#numberOfRating').html(user.numberOfRating);
+      var stars = "";
+      var intRating = Math.round( user.averageRating );
+      for(var i = 0; i < intRating; i++){
+        stars += '<span class="glyphicon glyphicon-star"></span>';
+      }
+      var emptystar = 5 - intRating;
+      for(var i = 0; i < emptystar; i++){
+        stars +='<span class="glyphicon glyphicon-star-empty"></span>';
+      }
+      $('#averageStars').html(stars);
+      //console.log("fivestars: " + user.fiveStars +" asd "+ user.fiveStars / user.numberOfRating);
+      var fiveStars = (user.fiveStars/user.numberOfRating * 100).toFixed(1);
+      var fourStars = (user.fourStars/user.numberOfRating * 100).toFixed(1);
+      var threeStars = (user.threeStars/user.numberOfRating * 100).toFixed(1);
+      var twoStars = (user.twoStars/user.numberOfRating * 100).toFixed(1);
+      var oneStars = (user.oneStars/user.numberOfRating * 100).toFixed(1);
+      $('#fiveStars').attr( "style", "width:"+fiveStars+"%");
+      $('#fourStars').attr( "style", "width:"+fourStars+"%");
+      $('#threeStars').attr( "style", "width:"+threeStars+"%");
+      $('#twoStars').attr( "style", "width:"+twoStars+"%");
+      $('#oneStars').attr( "style", "width:"+oneStars+"%");
+      $('#fiveStarsTxt').html(fiveStars+"%");
+      $('#fourStarsTxt').html(fourStars+"%");
+      $('#threeStarsTxt').html(threeStars+"%");
+      $('#twoStarsTxt').html(twoStars+"%");
+      $('#oneStarsTxt').html(oneStars+"%");
+    },
+    error: function(jqxhr, textStatus, errorThrown){
+      alert(errorThrown);
+    }
+  });
+  $.ajax({
+    type: 'GET',
+    url: "/api/users/" + profile_id + "/feedbacks",
+    success: function(data){
+      var list = "";
+      var pages = Math.ceil(data.length/commentsPerPage);
+      var buttons = "";
+      for (i =1; i <= pages; i++){
+        if(i == pageNumber){
+          buttons+="<label id='curPage' class='btn btn-primary btn-default'>"+i.toString() +"</label>"
+        }
+        else{
+          buttons += "<button class ='btn'>"+i.toString()+"</button>"
+        }
+      }
+      $('#pageNumbers').html(buttons);
+      for(i = commentsPerPage*(pageNumber-1); i < Math.min(data.length,commentsPerPage*pageNumber); i++){
+        var info = data[i];
+        var senderId = info.sender;
+        var comment = info.comment;
+        var request = $.ajax({
+          type: 'GET',
+          url: '/api/users/' + senderId,
+          async: false,
+          success: function(user){
+            console.log(user.displayName);
+            if(user.displayName == ""){
+              user.displayName = user.email;
+            }
+            list+='<p class="pull-left primary-font margin-left">' + user.displayName + '</p><br>';
+            list+='<small class="pull-right text-muted">' +
+              '<small>rating: ' + info.rating + '/5 </small><br>'+
+              '<span class="glyphicon glyphicon-time"></span>'
+              +info.date + '</small>';
+            list += '<br><br>';
+            //list += '<small>rating: ' + info.rating + '/5 </small><br>'
+            list += '<li class="ui-state-default">' + comment + '</li>';
+            list +='<br>';
+
+          },
+          error: function(jqxhr, textStatus, errorThrown){
+            alert(errorThrown);
+          }
+        });
+      }
+      $('#sortable').html(list);
+    },
+    error: function(jqxhr, textStatus, errorThrown){
+      alert(errorThrown);
+    }
+  });
+}
+
+//for the star rating user click
+var __slice = [].slice;
+(function(e, t) {
+    var n;
+    n = function() {
+        function t(t, n) {
+            var r, i, s, o = this;
+            this.options = e.extend({}, this.defaults, n);
+            this.$el = t;
+            s = this.defaults;
+            for (r in s) {
+                i = s[r];
+                if (this.$el.data(r) != null) {
+                    this.options[r] = this.$el.data(r)
+                }
+            }
+            this.createStars();
+            this.syncRating();
+            this.$el.on("mouseover.starrr", "span", function(e) {
+                return o.syncRating(o.$el.find("span").index(e.currentTarget) + 1)
+            });
+            this.$el.on("mouseout.starrr", function() {
+                return o.syncRating()
+            });
+            this.$el.on("click.starrr", "span", function(e) {
+                return o.setRating(o.$el.find("span").index(e.currentTarget) + 1)
+            });
+            this.$el.on("starrr:change", this.options.change)
+        }
+        t.prototype.defaults = {
+            rating: void 0,
+            numStars: 5,
+            change: function(e, t) {}
+        };
+        t.prototype.createStars = function() {
+            var e, t, n;
+            n = [];
+            for (e = 1, t = this.options.numStars; 1 <= t ? e <= t : e >= t; 1 <= t ? e++ : e--) {
+                n.push(this.$el.append("<span class='glyphicon .glyphicon-star-empty'></span>"))
+            }
+            return n
+        };
+        t.prototype.setRating = function(e) {
+            if (this.options.rating === e) {
+                e = void 0
+            }
+            this.options.rating = e;
+            this.syncRating();
+            return this.$el.trigger("starrr:change", e)
+        };
+        t.prototype.syncRating = function(e) {
+            var t, n, r, i;
+            e || (e = this.options.rating);
+            if (e) {
+                for (t = n = 0, i = e - 1; 0 <= i ? n <= i : n >= i; t = 0 <= i ? ++n : --n) {
+                    this.$el.find("span").eq(t).removeClass("glyphicon-star-empty").addClass("glyphicon-star")
+                }
+            }
+            if (e && e < 5) {
+                for (t = r = e; e <= 4 ? r <= 4 : r >= 4; t = e <= 4 ? ++r : --r) {
+                    this.$el.find("span").eq(t).removeClass("glyphicon-star").addClass("glyphicon-star-empty")
+                }
+            }
+            if (!e) {
+                return this.$el.find("span").removeClass("glyphicon-star").addClass("glyphicon-star-empty")
+            }
+        };
+        return t
+    }();
+    return e.fn.extend({
+        starrr: function() {
+            var t, r;
+            r = arguments[0], t = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+            return this.each(function() {
+                var i;
+                i = e(this).data("star-rating");
+                if (!i) {
+                    e(this).data("star-rating", i = new n(e(this), r))
+                }
+                if (typeof r === "string") {
+                    return i[r].apply(i, t)
+                }
+            })
+        }
+    })
+})(window.jQuery, window);
