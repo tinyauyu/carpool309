@@ -145,13 +145,21 @@ app.get('/users/:id', function(req, res){
 						return;
 					}
 					else {
-						console.log(trip);
-						res.render('profile.html', {
-			   				profile: profile, user: user, mostVisitedPage: "***disabled***", trip: trip
+						tripManager.findOneTrip(req.session.tripId, function(success, userTrip){
+							if(!success){
+								alert("Faile to find the detail of the trip");
+								res.redirect('/users');
+								return;
+							}
+							else {					
+								res.render('profile.html', {
+					   				profile: profile, user: user, mostVisitedPage: "***disabled***", trip: trip, userTrip: userTrip
+								});
+							}
 						});
 					}
-				})
-			})
+				});
+			});
 		});		
 	}
 });
@@ -426,11 +434,15 @@ app.get('/searchTrip/:id', function(req,res){
 	req.session.tripId = tripId;
 	tripManager.searchTrip(tripId, function(success,trips){
 		if (success){
-			console.log(trips);
-			res.render('trips.html', {
-   				trips: trips
+			tripManager.searchSimilarTrip(tripId, function(success,similarTrips){
+				if (success){
+					res.render('trips.html', {trips: trips, similarTrips: similarTrips});
+				}
+				else {
+					res.writeHead(400,trips);
+					res.end(trips);					
+				}
 			});
-			//res.send(trips);	
 		}
 		else {
 			res.writeHead(400,trips);

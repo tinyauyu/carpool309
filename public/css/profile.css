@@ -99,6 +99,12 @@ dd{
     border-radius: 10px;
 }
 
+.jumbotron3{
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background-color: lightgrey ;
+}
+
 #nav-profilePic{
     object-fit: cover;
 }
@@ -116,10 +122,21 @@ dd{
 }
 
 #map {
-    height: 50%;
-    width: 40%;
+    height: 400px;
+    width: 400px;
     z-index: 9999;
-    overflow: scroll;
+    float: left;
+}
+
+#map2 {
+    height: 400px;
+    width: 400px;
+    z-index: 9999;
+    float: right;
+}
+
+#tripDescription {
+    float: center;
 }
 
 .glyphicon { margin-right:5px;}

@@ -45,6 +45,10 @@ dd{
     cursor: pointer;
 }
 
+.similar-trip-row {
+    cursor: pointer;
+}
+
 #nav-profilePic{
     object-fit: cover;
 }

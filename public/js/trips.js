@@ -4,4 +4,10 @@ $(document).ready(function(){
       var url = "/users/" + ids;
       window.location.href = url;
   });
+
+   $('.similar-trip-row').click(function(){
+      var ids = $(this).data('id');
+      var url = "/users/" + ids;
+      window.location.href = url;
+  });
 });
