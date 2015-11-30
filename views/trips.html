@@ -92,13 +92,19 @@
 
     <div class="col-xs-3.5 col-md-3" id="recommendation">
       <div class="panel-head">
-        <span class="glyphicon glyphicon-list"></span> People Closest to You:
+        <span class="glyphicon glyphicon-list"></span> 
+        Wanna TEAM UP? or Compare the Price? <br>
+        There are People Who Share Similar Trip Request Like You:
       </div>
       <div class="panel-body">
           <ul class = "list-group">
-            <li class="list-group-item" id="1" onclick="console.log(1)">Email Address 1</li>
-            <li class="list-group-item" id="2" onclick="console.log(2)">Email Address 2</li>
-            <li class="list-group-item" id="3" onclick="console.log(3)">Email Address 3</li>
+            {% if (similarTrips == []) %}
+              <p>Sorry, No recommendations for you.</p>
+            {% else %}
+              {% for trip in similarTrips %}
+                <li class="list-group-item similar-trip-row" data-id="{{trip.user}}/?trip={{trip._id}}">{{trip._id}}</li>
+              {% endfor %}
+            {% endif %}
           </ul>
       </div>
     </div>

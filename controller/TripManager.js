@@ -91,6 +91,55 @@ TripManager.prototype.searchTrip = function(tripId,callback){
 	});
 }
 
+TripManager.prototype.searchSimilarTrip = function(tripId,callback){
+	var currentTime = new Date();
+	var sortedTrips = [];
+	Trip.findOne({_id:tripId}, function (err,newTrip){
+		if (err){
+    		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
+        	callback(false,"Internal Server Error");
+        	return;		
+		} 
+		else { //FindOne
+			Trip.find({}, function (err,allTrips){
+				if (err){
+					throw err;
+				}
+				else { //Find all
+					var validTrips = [];
+					for (var i in allTrips) {
+						if (new Date(allTrips[i].date) < currentTime){
+							//Delete all those trips that required date has been in the past
+							//console.log(allTrips[i]._id);
+							Trip.findOneAndRemove({_id: allTrips[i]._id}, function (err){
+									if(err){
+										throw err;
+									}
+							});
+						}
+						else{
+							//User can not search for the trip that he provided/wanted themselves
+							var notThemselves = (allTrips[i].user != newTrip.user);
+							//If the user select provider, then only those who are trips wanted user will be searched
+							//Verse-versa, if the user select trips wanted, only the providers will be matched
+							var userType = ((newTrip.provider && allTrips[i].provider) || (!newTrip.provider && !allTrips[i].provider));
+							//If all above conditions satisfied, then this trip is valid/meaningful to search and return to the user
+							if (notThemselves && userType){
+								validTrips.push(allTrips[i]);
+							}
+						}
+					}
+					//After we get a list of valid trips, we will search for trips that are near to user's From and To places
+					sortedTrips = getDistanceAndSort(newTrip, validTrips);
+					//console.log(sortedTrips);
+					callback(true,sortedTrips);
+					return;
+				}
+			});			
+		}
+	});
+}
+
 TripManager.prototype.findOneTrip = function (tripId, callback){
 	Trip.findOne({_id: tripId}, function (err, trip){
 		if (err){
@@ -137,10 +186,13 @@ function getDistanceAndSort(newTrip, validTrips){
 	var sortedTrips = [];
 	for (var i in validTrips){
 		var d = findDistance(newTrip,validTrips[i]);
-		var temple = JSON.stringify(validTrips[i]);
-		temple = JSON.parse(temple);
-		temple['distance'] = d;
-		sortedTrips.push(temple);
+		var smallestDistance = 50000;
+		if (d < smallestDistance){
+			var temple = JSON.stringify(validTrips[i]);
+			temple = JSON.parse(temple);
+			temple['distance'] = d;
+			sortedTrips.push(temple);			
+		}
 	}
 	//Sort the array by the distance element in the json object
 	sortedTrips.sort(function(a, b) {

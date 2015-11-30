@@ -23,9 +23,7 @@
 
   </head>
   <body>
-  
-  <div id="map" style="height: 500px;"></div>
-  
+
   <div id="bg"></div>
   <nav class="navbar navbar-default">
   <div class="container-fluid">
@@ -63,9 +61,38 @@
   </nav>
 
 <section id="content" class="col-xs-12 col-md-10 center" ng-app="profile">
+  {% if (trip != '' || trip != null) %}
+  <div class="jumbotron3 center">
+      <div id="fromWhere" data-info='{{trip.startPoint.latitude}},{{trip.startPoint.longitude}},{{trip.endPoint.latitude}},{{trip.endPoint.longitude}}'></div>
+      <div id="map" onload = "initMap();"></div>
+      <div class="col-md-4" id="tripDescription">
+          <dl class="dl-horizontal">
+            <dt>Found Trip's ID:</dt>
+            <dd>{{trip._id}}</dd>
+            {% if (trip.provider) %}
+            <dt>Provided by: </dt>
+            <dd>{{user.email}}</dd>
+            {% else %}
+            <dt>Wannted by: </dt>
+            <dd>{{user.email}}</dd>
+            {% endif %}
+            <dt>Depature Date:</dt>
+            <dd>{{trip.date}}</dd>
+            <dt>Expected price:</dt>
+            <dd>{{trip.price}}$</dd>
+            <dt>Trip Found</dt>
+            <dd> <--On the Left </dd>
+            <dt>Your Trip</dt>
+            <dd> On the Right --> </dd>
+          </dl>
+      </div>
+      <div id="fromUserWhere" data-info='{{userTrip.startPoint.latitude}},{{userTrip.startPoint.longitude}},{{userTrip.endPoint.latitude}},{{userTrip.endPoint.longitude}}'></div>
+      <div id="map2"></div>
+  </div>
+  {% endif %}
+
   <div class="jumbotron center">
     <div class="col-xs-12 col-md-3 container" style="text-align: center;">
-
       <img id="profilePic_preview" alt="profile picture" data-id="{{user.id}}" src="/img/default_profilePic.png"/>
       <img id="profilePic_buffer" class="hidden" alt="profile picture" data-id="{{user.id}}" src="/img/default_profilePic.png"/>
 
