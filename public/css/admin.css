@@ -1,0 +1,75 @@
+#bg {
+    content : "";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: url(../img/bg.jpg) no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    width: 100%;
+    height: 100%;
+    opacity : 0.8;
+    z-index: -1;
+}
+
+.input-group{
+	margin-bottom:4px;
+}
+
+section{
+	position:absolute;
+    top:0; right:0;
+    bottom:0; left:0;
+    font-size: 16px;
+}
+.vcenter-wrapper { display:table; }
+.vcenter { display:table-cell; vertical-align:middle; }
+
+h1{
+	font-weight: bold;
+}
+
+dt{
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+dd{
+    padding-top:5px;
+    padding-bottom:5px;
+}
+
+
+.user-row:hover {
+    cursor: pointer;
+}
+
+#nav-profilePic{
+    object-fit: cover;
+}
+
+#recommendation{
+    position: fixed; 
+    top: 35%; 
+    right: 2%;
+}
+.glyphicon-envelope{
+    font-size: 25px;
+    padding-right: 0px
+}
+
+#resultPanel {
+    position: absolute;
+    right: 0px;
+    width:300px;
+    z-index: 1;
+}
+
+.W_new_count {
+    position: absolute;
+    right: -4px;
+    top: 2px;
+    font-size: 13px;
+    color: red;
+}
