@@ -151,6 +151,22 @@ app.get('/users', function(req, res){
 	//acManager.logPage(user,page);
 
 });
+
+app.get('/admin', function(req,res){
+	acManager.getUser(req.session._id,function(success, profile){
+		if(profile.userType>=1){
+			acManager.getUserList(function(users){
+				feedbackManager.getAllFeedback(function(feedbacks){
+					res.render('admin.html', {
+		   				profile: profile, users: users, feedbacks: feedbacks
+					});
+				})
+			})
+		} else {
+			res.redirect('/users');
+		}
+	});
+})
 /********************** View *************************/
 
 /********************** User Account *************************/
@@ -361,6 +377,32 @@ app.get('/api/users/:id/profilePic', function(req, res){
 	})
 });
 
+app.post('/api/log', function(req, res){
+	var b = JSON.parse(req.body.json);
+
+	var behavior = {
+		ip_addr : req.connection.remoteAddress,
+		browser: b.browser,
+		os: b.os,
+		mobile: b.mobile,
+		screenSize: b.screenSize,
+		location: b.location
+	}
+
+	var user = {
+		id: req.session.id,
+		behavior: behavior
+	}
+	acManager.log(user, function(success, msg){
+		if(success){
+			res.send("OK");
+		} else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
+	})
+});
+
 /********************** User Account *************************/
 
 /********************** Feedback **********************/
@@ -517,28 +559,9 @@ app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 // });
 /********************** Message **********************/
 
-app.post('/api/log', function(req, res){
-	var b = JSON.parse(req.body.json);
 
-	var behavior = {
-		ip_addr : req.connection.remoteAddress,
-		browser: b.browser,
-		os: b.os,
-		mobile: b.mobile,
-		screenSize: b.screenSize,
-		location: b.location
-	}
+/********************** Admin Panel **********************/
 
-	var user = {
-		id: req.session.id,
-		behavior: behavior
-	}
-	acManager.log(user, function(success, msg){
-		if(success){
-			res.send("OK");
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-		}
-	})
-});
+
+
+/********************** Admin Panel **********************/
