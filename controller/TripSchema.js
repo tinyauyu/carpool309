@@ -4,7 +4,10 @@ var autoIncrement = require('mongoose-auto-increment');
 TripSchema = mongoose.Schema({
 	user: {type: Number, ref: 'User'},
 	startPoint: {latitude: Number, longitude: Number},
-	endPoint:{latitude: Number, longitude: Number}
+	endPoint:{latitude: Number, longitude: Number},
+	date: String,
+	price: Number,
+	provider: Boolean
 });
 
 TripSchema.plugin(autoIncrement.plugin, 'Trip');

@@ -5,7 +5,8 @@ FeedbackSchema = mongoose.Schema({
 	sender: {type: Number, ref: 'User'},
 	receiver: {type: Number, ref: 'User'},
 	comment: String,
-	rating: Number
+	rating: Number,
+	date: String
 });
 
 /*** Things to add: ***

@@ -53,6 +53,79 @@ function isValidProfile(profile){
 
 }
 
+var map, map2;
+function initMap() {
+  var data = $('#fromWhere').data('info');
+  data = data.split(",");
+  var from = {lat: Number(data[0]), lng: Number(data[1])};
+  var to = {lat: Number(data[2]), lng: Number(data[3])};
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 6,
+    center: from
+  });
+
+  var markerFrom = new google.maps.Marker({
+    position: from,
+    map: map,
+    title: 'From',
+  });
+
+  var markerTo = new google.maps.Marker({
+    position: to,
+    map: map,
+    title: 'To',
+  });
+
+  var lineSymbol = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+  };
+
+  // Create the polyline and add the symbol via the 'icons' property.
+  var line = new google.maps.Polyline({
+    path: [from, to],
+    icons: [{
+      icon: lineSymbol,
+      offset: '100%'
+    }],
+    map: map
+  });
+
+  data = $('#fromUserWhere').data('info');
+  data = data.split(",");
+  from = {lat: Number(data[0]), lng: Number(data[1])};
+  to = {lat: Number(data[2]), lng: Number(data[3])};
+  var map2 = new google.maps.Map(document.getElementById('map2'), {
+    zoom: 6,
+    center: from
+  });
+
+  var markerFrom = new google.maps.Marker({
+    position: from,
+    map: map2,
+    title: 'From',
+  });
+
+  var markerTo = new google.maps.Marker({
+    position: to,
+    map: map2,
+    title: 'To',
+  });
+
+  var lineSymbol = {
+    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+  };
+
+  // Create the polyline and add the symbol via the 'icons' property.
+  var line = new google.maps.Polyline({
+    path: [from, to],
+    icons: [{
+      icon: lineSymbol,
+      offset: '100%'
+    }],
+    map: map2
+  });
+}
+
 $(document).on('change', '#profilePic', function() {
   var reader = new FileReader();
 
@@ -246,9 +319,154 @@ $( document ).ready( function(){
     });
   });
 
+  //button to add comment
+
+  $(".starrr").starrr()
+
+
+  var ratingsField = $('#ratings-hidden');
+  $('.starrr').on('starrr:change', function(e, value){
+    ratingsField.val(value);
+  });
+
+  $('#save').click(function(){
+    var comment =  $("textarea[name='comment']").val();
+    var star = ratingsField.val();
+    var date = new Date();
+    date = date.toString();
+    //console.log(date.toString());
+    //console.log(" star: "+star);
+    if(!star){
+      star = 0;
+      //alert(star);
+    }
+    var feedback = {'comment': comment, 'rating': star, 'sender':'',
+    'receiver': '', 'date': date};
+    var profile_id = $('#profile').data('value');
+    //alert(comment +'  s: ' +star);
+    $.ajax({
+      type: 'POST',
+      url: "/api/users/" + profile_id + "/feedbacks",
+      data: {json: JSON.stringify(feedback)},
+      success: function(data){
+        var curPage = $('#curPage').html();
+        if(!curPage){
+          curPage = 1;
+        }
+        displayComments($('#profile').data('value'),curPage);
+      },
+      error: function(jqxhr, textStatus, errorThrown){
+        alert(errorThrown);
+        //$(".editableform-loading").addClass('hidden');
+      }
+    });
+  });
+  //control the page number buttons
+  $('#pageNumbers').on('click','button',function(event){
+    var page = event.target.innerHTML;
+    displayComments($('#profile').data('value'), page);
+  });
+  displayComments($('#profile').data('value'),1);
+
 });
 
 $.fn.editable.defaults.mode = 'inline';
+
+var commentsPerPage = 3;
+//display comments and rating
+function displayComments(profile_id, pageNumber){
+  //console.log($('#sortable').html());
+  //display average rating
+  var request = $.ajax({
+    type: 'GET',
+    url: '/api/users/' + profile_id,
+    async: true,
+    success: function(user){
+      $('#averageRating').html(user.averageRating.toFixed(2));
+      $('#numberOfRating').html(user.numberOfRating);
+      var stars = "";
+      var intRating = Math.round( user.averageRating );
+      for(var i = 0; i < intRating; i++){
+        stars += '<span class="glyphicon glyphicon-star"></span>';
+      }
+      var emptystar = 5 - intRating;
+      for(var i = 0; i < emptystar; i++){
+        stars +='<span class="glyphicon glyphicon-star-empty"></span>';
+      }
+      $('#averageStars').html(stars);
+      //console.log("fivestars: " + user.fiveStars +" asd "+ user.fiveStars / user.numberOfRating);
+      var fiveStars = (user.fiveStars/user.numberOfRating * 100).toFixed(1);
+      var fourStars = (user.fourStars/user.numberOfRating * 100).toFixed(1);
+      var threeStars = (user.threeStars/user.numberOfRating * 100).toFixed(1);
+      var twoStars = (user.twoStars/user.numberOfRating * 100).toFixed(1);
+      var oneStars = (user.oneStars/user.numberOfRating * 100).toFixed(1);
+      $('#fiveStars').attr( "style", "width:"+fiveStars+"%");
+      $('#fourStars').attr( "style", "width:"+fourStars+"%");
+      $('#threeStars').attr( "style", "width:"+threeStars+"%");
+      $('#twoStars').attr( "style", "width:"+twoStars+"%");
+      $('#oneStars').attr( "style", "width:"+oneStars+"%");
+      $('#fiveStarsTxt').html(fiveStars+"%");
+      $('#fourStarsTxt').html(fourStars+"%");
+      $('#threeStarsTxt').html(threeStars+"%");
+      $('#twoStarsTxt').html(twoStars+"%");
+      $('#oneStarsTxt').html(oneStars+"%");
+    },
+    error: function(jqxhr, textStatus, errorThrown){
+      alert(errorThrown);
+    }
+  });
+  $.ajax({
+    type: 'GET',
+    url: "/api/users/" + profile_id + "/feedbacks",
+    success: function(data){
+      var list = "";
+      var pages = Math.ceil(data.length/commentsPerPage);
+      var buttons = "";
+      for (i =1; i <= pages; i++){
+        if(i == pageNumber){
+          buttons+="<label id='curPage' class='btn btn-primary btn-default'>"+i.toString() +"</label>"
+        }
+        else{
+          buttons += "<button class ='btn'>"+i.toString()+"</button>"
+        }
+      }
+      $('#pageNumbers').html(buttons);
+      for(i = commentsPerPage*(pageNumber-1); i < Math.min(data.length,commentsPerPage*pageNumber); i++){
+        var info = data[i];
+        var senderId = info.sender;
+        var comment = info.comment;
+        var request = $.ajax({
+          type: 'GET',
+          url: '/api/users/' + senderId,
+          async: false,
+          success: function(user){
+            console.log(user.displayName);
+            if(user.displayName == ""){
+              user.displayName = user.email;
+            }
+            list+='<p class="pull-left primary-font margin-left">' + user.displayName + '</p><br>';
+            list+='<small class="pull-right text-muted">' +
+              '<small>rating: ' + info.rating + '/5 </small><br>'+
+              '<span class="glyphicon glyphicon-time"></span>'
+              +info.date + '</small>';
+            list += '<br><br>';
+            //list += '<small>rating: ' + info.rating + '/5 </small><br>'
+            list += '<li class="ui-state-default">' + comment + '</li>';
+            list +='<br>';
+
+          },
+          error: function(jqxhr, textStatus, errorThrown){
+            alert(errorThrown);
+          }
+        });
+      }
+      $('#sortable').html(list);
+    },
+    error: function(jqxhr, textStatus, errorThrown){
+      alert(errorThrown);
+    }
+  });
+}
 
 //for the star rating user click
 var __slice = [].slice;
@@ -336,6 +554,3 @@ var __slice = [].slice;
         }
     })
 })(window.jQuery, window);
-$(function() {
-    return $(".starrr").starrr()
-})

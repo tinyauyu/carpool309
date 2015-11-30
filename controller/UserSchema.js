@@ -19,7 +19,15 @@ UserSchema = mongoose.Schema({
 			latitude: Number,
 			longitude: Number
 		}
-	}
+	},
+	totalRating: Number,
+	numberOfRating: Number,
+	averageRating: Number,
+	fiveStars: Number,
+	fourStars: Number,
+	threeStars: Number,
+	twoStars: Number,
+	oneStars: Number
 });
 
 UserSchema.plugin(autoIncrement.plugin, 'User');

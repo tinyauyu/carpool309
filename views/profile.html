@@ -8,13 +8,16 @@
     <title>FriendZone</title>
 
     <!-- Bootstrap -->
-    <link href="../css/chatWindow.css" rel="stylesheet"/>
-    <link href="../css/bootstrap.min.css" rel="stylesheet"/>
+
+    <link href="/css/chatWindow.css" rel="stylesheet"/>
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+
   	<!-- Font Awesome -->
   	<link rel="stylesheet" href="../css/font-awesome.min.css"/>
-    <link href="../css/profile.css" rel="stylesheet"/>
+    <link href="/css/profile.css" rel="stylesheet"/>
     <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
     <script src="/socket.io/socket.io.js"></script>
+ 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -24,9 +27,10 @@
     <![endif]-->
 
   </head>
+
   <body onload="getUnreadMsgs();">
   <div id="bg"></div>
-    <nav class="navbar navbar-default">
+  <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
@@ -50,7 +54,7 @@
             <em class="W_new_count hidden">New</em>
           </a>
           <ul id="newMsgList" class="dropdown-menu hidden">
-            
+
           </ul>
         </li>
         <li class="dropdown">
@@ -67,13 +71,45 @@
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
+
 </nav>
 <div id="resultPanel" class="hidden"></div>
 
-<section id="content" class="col-xs-12 col-md-10 center" ng-app="profile">
-  <div class="jumbotron center">
 
+<section id="content" class="col-xs-12 col-md-10 center" ng-app="profile">
+  {% if (trip != '' || trip != null) %}
+  <div class="jumbotron3 center">
+      <div id="fromWhere" data-info='{{trip.startPoint.latitude}},{{trip.startPoint.longitude}},{{trip.endPoint.latitude}},{{trip.endPoint.longitude}}'></div>
+      <div id="map" onload = "initMap();"></div>
+      <div class="col-md-4" id="tripDescription">
+          <dl class="dl-horizontal">
+            <dt>Found Trip's ID:</dt>
+            <dd>{{trip._id}}</dd>
+            {% if (trip.provider) %}
+            <dt>Provided by: </dt>
+            <dd>{{user.email}}</dd>
+            {% else %}
+            <dt>Wannted by: </dt>
+            <dd>{{user.email}}</dd>
+            {% endif %}
+            <dt>Depature Date:</dt>
+            <dd>{{trip.date}}</dd>
+            <dt>Expected price:</dt>
+            <dd>{{trip.price}}$</dd>
+            <dt>Trip Found</dt>
+            <dd> <--On the Left </dd>
+            <dt>Your Trip</dt>
+            <dd> On the Right --> </dd>
+          </dl>
+      </div>
+      <div id="fromUserWhere" data-info='{{userTrip.startPoint.latitude}},{{userTrip.startPoint.longitude}},{{userTrip.endPoint.latitude}},{{userTrip.endPoint.longitude}}'></div>
+      <div id="map2"></div>
+  </div>
+  {% endif %}
+
+  <div class="jumbotron center">
     <div class="col-xs-12 col-md-3 container" style="text-align: center;">
+
 
       <img id="profilePic_preview" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
       <img id="profilePic_buffer" class="hidden" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
@@ -89,45 +125,46 @@
     </div>
 
     <div class="col-xs-12 col-md-8 center">
-      <form id="profile" data-value="{{user.id}}">
-        <dl class="dl-horizontal">
-          <dt>Email:</dt>
-          <dd id="userEmail">{{user.email}}</dd>
-          <dt>Display Name:</dt>
-          <dd><a href="#" id="displayName" class="editable" data-value="{{user.displayName || user.email}}"></a></dd>
-          <dt>Description:</dt>
-          <dd><a href="#" id="description" class="editable" data-value="{{ user.description || '*** no description ***' }}"></a></dd>
-          {% if (profile.userType==2) %}
-          <dt>User Type:</dt>
-          <dd>
-            {% if (user.userType<2) %}
-            <a href="#" id="userType" class="editable" data-value="{{user.userType}}"></a>
-            {% else %}
-            Super Administrator
+    
+        <form id="profile" data-value="{{user.id}}">
+          <dl class="dl-horizontal">
+            <dt>Email:</dt>
+            <dd>{{user.email}}</dd>
+            <dt>Display Name:</dt>
+            <dd><a href="#" id="displayName" class="editable" data-value="{{user.displayName || user.email}}"></a></dd>
+            <dt>Description:</dt>
+            <dd><a href="#" id="description" class="editable" data-value="{{ user.description || '*** no description ***' }}"></a></dd>
+            {% if (profile.userType==2) %}
+            <dt>User Type:</dt>
+            <dd>
+              {% if (user.userType<2) %}
+              <a href="#" id="userType" class="editable" data-value="{{user.userType}}"></a>
+              {% else %}
+              Super Administrator
+              {% endif %}
+            </dd>
             {% endif %}
-          </dd>
-          {% endif %}
-        </dl>
+          </dl>
 
-        <div class="buttons">
-          {% if (user.id==profile.id) %}
-          <button id="edit" type="button" class="btn btn-default">
-            Edit
-          </button>
-          {% elseif (profile.userType>0) %}
-            {% if (user.userType==0) %}
+          <div class="buttons">
+            {% if (user.id==profile.id) %}
             <button id="edit" type="button" class="btn btn-default">
-            Edit
+              Edit
             </button>
-            {% elseif (profile.userType==2) %}
-            <button id="edit" type="button" class="btn btn-default">
-            Edit
-            </button>
+            {% elseif (profile.userType>0) %}
+              {% if (user.userType==0) %}
+              <button id="edit" type="button" class="btn btn-default">
+              Edit
+              </button>
+              {% elseif (profile.userType==2) %}
+              <button id="edit" type="button" class="btn btn-default">
+              Edit
+              </button>
+              {% endif %}
             {% endif %}
-          {% endif %}
-        </div>
-        <div class="editableform-loading hidden"></div>
-        <span class="edit-menu right hidden">
+          </div>
+          <div class="editableform-loading hidden"></div>
+          <span class="edit-menu right hidden">
             {% if (user.id!=profile.id) %}
             <button id="delete" type="button" class="btn btn-danger">
             Delete User
@@ -141,7 +178,7 @@
             </button>
           </span>
       </form>
-    </div>
+  </div>
     {% if (profile.id == user.id) %}
     <div class="col-xs-12 col-md-8 jumboton2 center edit-menu hidden">
       <div class="col-xs-12 col-md-8">
@@ -174,15 +211,15 @@
               <div class ="noclass"> <!--this div is not in use for now-->
                   <div class="row">
                       <div class="col-xs-12 col-md-6 text-center">
-                          <h1 class="rating-num">
-                              4.0</h1>
-                          <div class="rating">
+                          <h1 id="averageRating" class="rating-num">0.0</h1>
+                          <div id="averageStars" class="rating">
                               <span class="glyphicon glyphicon-star"></span><span class="glyphicon glyphicon-star">
                               </span><span class="glyphicon glyphicon-star"></span><span class="glyphicon glyphicon-star">
                               </span><span class="glyphicon glyphicon-star-empty"></span>
                           </div>
                           <div>
-                              <span class="glyphicon glyphicon-user"></span>1,050,008 total
+                              <span class="glyphicon glyphicon-user"></span>
+                              <label id="numberOfRating">0 </label> total
                           </div>
                       </div>
                       <div class="col-xs-12 col-md-6">
@@ -192,9 +229,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress progress-striped">
-                                      <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 80%">
-                                          <span class="sr-only">80%</span>
+                                      <div id ='fiveStars' class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id ='fiveStarsTxt'class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -204,9 +241,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 60%">
-                                          <span class="sr-only">60%</span>
+                                      <div id ='fourStars' class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id='fourStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -216,9 +253,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 40%">
-                                          <span class="sr-only">40%</span>
+                                      <div id ='threeStars' class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id = 'threeStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -228,9 +265,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="20"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 20%">
-                                          <span class="sr-only">20%</span>
+                                      <div id = 'twoStars' class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="20"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id = 'twoStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -240,9 +277,9 @@
                               </div>
                               <div class="col-xs-8 col-md-9">
                                   <div class="progress">
-                                      <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80"
-                                          aria-valuemin="0" aria-valuemax="100" style="width: 15%">
-                                          <span class="sr-only">15%</span>
+                                      <div id ='oneStars' class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="80"
+                                          aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                          <span id = 'oneStarsTxt' class="sr-only">0%</span>
                                       </div>
                                   </div>
                               </div>
@@ -256,20 +293,19 @@
       </div>
   </div>
 
-  <!--comment area-->
-
+  <!--user comment-->
 <div id='comments' class="jumbotron center" >
     <div class="col-md-12 col-sm-6 text-center center">
       <h4>What is on your mind?</h4>
-      <div class="input-group">
-        <form accept-charset="UTF-8" action="" method="post">
-            <!--input id="ratings-hidden" name="rating" type="hidden"-->
+      <div class="input-group center-block">
+        <!--form accept-charset="UTF-8" action="" method="post"-->
+            <input id="ratings-hidden" name="rating" type="hidden">
             <textarea class="form-control" id="cbox" rows="2" cols="150" name="comment" placeholder="Enter your review here..."></textarea>
-            <div >
-                <div class="stars starrr" data-rating="0"></div>
-                <button class="btn btn-primary btn-md" type="submit"><span class="glyphicon glyphicon-comment"></span>Save</button>
-            </div>
-        </form>
+
+            <div class="stars starrr" data-rating="0"></div>
+            <button id='save' class="btn btn-primary btn-md"><span class="glyphicon glyphicon-comment"></span>Save</button>
+
+        <!--/form-->
         <!--textarea row="4" form ="xxformneed to be filled" id="userComment" class="form-control input-sm chat-input" placeholder="Write your message here..." ></textarea>
   	    <span class="input-group-btn" onclick="addComment()" id='commentButton'>
             <a href="#" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-comment"></span> Add Comment</a>
@@ -277,18 +313,8 @@
       </div>
       <hr data-brackets-id="12673">
       <ul data-brackets-id="12674" id="sortable" class="list-unstyled ui-sortable">
-          <strong class="pull-left primary-font">James</strong>
-          <small class="pull-right text-muted">
-             <span class="glyphicon glyphicon-time"></span>7 mins ago</small>
-          </br>
-          <li class="ui-state-default">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </li>
-          </br>
-           <strong class="pull-left primary-font">Taylor</strong>
-          <small class="pull-right text-muted">
-             <span class="glyphicon glyphicon-time"></span>14 mins ago</small>
-          </br>
-          <li class="ui-state-default">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</li>
       </ul>
+      <div id = 'pageNumbers'></div>
     </div>
 </div>
 
@@ -332,5 +358,7 @@
     <script src="/js/profile.js"></script>
     <script src="/js/log.js"></script>
     <script src="/js/chatWindow.js" type="text/javascript"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8unX0Q0_pe-3mrpEB7yvEPJYv29x-f4E&callback=initMap" async defer></script>
+
   </body>
 </html>
