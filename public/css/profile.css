@@ -165,6 +165,7 @@ dd{
 
 .glyphicon { margin-right:5px;}
 
+
 .rating .glyphicon {font-size: 22px;}
 .rating-num { margin-top:0px;font-size: 54px; }
 .progress { margin-bottom: 5px;}
@@ -181,7 +182,7 @@ dd{
     position: absolute;
     right: 0px;
     width:300px;
-    z-index: 100;
+    z-index: 10000;
 }
 #chat {
     margin-top: 10px;
@@ -195,4 +196,7 @@ dd{
     top: 2px;
     font-size: 13px;
     color: red;
+}
+.rtSideBtn{
+    margin-right: 0px;
 }
