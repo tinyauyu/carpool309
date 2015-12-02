@@ -27,6 +27,11 @@ $(document).ready(function(){
 	  window.location.href = url;
 	});
 
+	$('.user-row').click(function(){
+  		var id = $(this).data('id');
+		window.location.href = "/users/"+id;
+	});	
+
 	$('#searchUser').click(function(){
 		$.ajax({
 			type: "GET",

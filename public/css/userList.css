@@ -77,3 +77,8 @@ dd{
 .trip-row {
     cursor: pointer;
 }
+
+.showAll {
+    height:100%;
+    overflow-y: auto;
+}
