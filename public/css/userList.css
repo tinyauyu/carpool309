@@ -73,3 +73,7 @@ dd{
     font-size: 13px;
     color: red;
 }
+
+.trip-row {
+    cursor: pointer;
+}

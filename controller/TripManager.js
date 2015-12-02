@@ -154,6 +154,20 @@ TripManager.prototype.findOneTrip = function (tripId, callback){
 	});
 }
 
+TripManager.prototype.findAllTrips = function (userId, callback){
+	Trip.find({user: userId}, function (err, trip){
+		if (err){
+    		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
+        	callback(false,"Internal Server Error");
+        	return;		
+		}
+		else {
+			callback(true,trip);
+			return;
+		}
+	});
+}
+
 function findDistance(trip1, trip2){
 	var lat1 = trip1.startPoint.latitude * Math.PI / 180; 
 	var lat2 = trip2.startPoint.latitude * Math.PI / 180;

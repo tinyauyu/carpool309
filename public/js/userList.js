@@ -25,6 +25,11 @@ $(document).ready(function(){
 		}
 	});
 
+	$('.trip-row').click(function(){
+	  var ids = $(this).data('id');
+	  var url = "/searchTrip/" + ids;
+	  window.location.href = url;
+	});
 	/*$('#searchFor').click(function(){
 		if ($('searchFor').val() == ''){
 			alert("Nothing to Serach For");

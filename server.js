@@ -194,9 +194,11 @@ app.get('/users/:id', function(req, res){
 app.get('/users', function(req, res){
 	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
-			res.render('userList.html', {
-   				profile: profile, users: users
-			});
+			tripManager.findAllTrips(req.session._id,function(success, allTrips){
+				res.render('userList.html', {
+	   				profile: profile, users: users, allTrips:allTrips
+				});
+			});		
 		})
 	});
 	var user = {
