@@ -17,9 +17,7 @@ var sender = $('.navbar-brand').attr('loggedInUser');
 socket.emit('register', {sender: sender});
 var receiver;
 
-
 $(document).on('click', '#msgButton', function() {
-    console.log("aaaaaaa");
     var msg = $('#msg').val();
     var attr = $('button#chat').attr('receiver');
     if(typeof attr !== typeof undefined && attr !== false){
@@ -27,13 +25,22 @@ $(document).on('click', '#msgButton', function() {
     } else {
         receiver = $('#resultPanel').attr('sendto');
     };
-    var ele = $('<p>');
-    $('#messages').append(ele.text(msg));
-    ele.attr('id', 'msgYouSend');
+    var ele = $('<div id="chat-body" class="pull-right clearfix" style="width:260px">');
+    var content =$('<div class="pull-left clearfix" style="width:200px">');
+
+    ele.append('<span class="chat-img pull-right"><img src="/img/me.png" alt="User Avatar" class="img-circle" /></span>');
+    var curTime = new Date();
+
+    content.append($('<p id="time" style="text-align:right">').text(dateToStr(curTime)));
+    content.append($('<p id="text" style="text-align:right">').text(msg));
+    ele.append(content);
+    $("#messages").append(ele);
+    //ele.attr('id', 'msgYouSend');
     var data = {
         sender: sender,
         receiver: receiver,
-        msg: msg
+        msg: msg,
+        date: curTime
     };
 
     socket.emit('chat message', data);
@@ -42,11 +49,15 @@ $(document).on('click', '#msgButton', function() {
 });
 
 socket.on('chat message', function(data) {
-    console.log("bbbbbbbbbb");
     if ($("#resultPanel").is(':visible') && $("#resultPanel").attr('sendto') == data.sender) {
-        var ele = $('<p>');
-        $('#messages').append(ele.text(data.msg));
-        ele.attr('id', 'msgYouGet');
+        var ele = $('<div id="chat-body" class="pull-left clearfix" style="width:260px">');
+        var content =$('<div class="pull-right clearfix" style="width:200px">');
+        ele.append('<span class="chat-img pull-left"><img src="/img/u.png" alt="User Avatar" class="img-circle" /></span>');
+        content.append($('<p id="time" style="text-align:left">').text(dateToStr(data.date)));
+        content.append($('<p id="text" style="text-align:left">').text(data.msg));
+        ele.append(content);
+        $("#messages").append(ele);
+        //ele.attr('id', 'msgYouGet');
         $.ajax({
           type: "POST",
           url: "/api/markMsgRead/" + data.sender + "/" + data.receiver + "/",
@@ -54,5 +65,3 @@ socket.on('chat message', function(data) {
         });
     }
 });
-
-

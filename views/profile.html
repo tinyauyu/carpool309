@@ -115,8 +115,9 @@
 
       <img id="profilePic_preview" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
       <img id="profilePic_buffer" class="hidden" alt="profile picture" data-id="{{user.id}}" src="../img/default_profilePic.png"/>
-      <div> <button id="chat" receiver="{{ user.email }}">Send Message</button></div>
-
+      {% if (user.email != profile.email) %}
+        <div> <button id="chat" receiver="{{ user.email }}">Send Message</button></div>
+      {% endif %}
 
       <p class="edit-menu hidden">
         <span class="btn btn-info btn-file">

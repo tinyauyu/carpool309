@@ -487,7 +487,6 @@ app.get('/api/users/:email/chatWindow/', function(req, res) {
 			acManager.getUserByEmail(req.params.email, function(success, user){
 				if(success){
 					var profilePic = user.profilePic;
-					console.log(profilePic);
 					var chatWindow = {user: user, window: data, profilePic: profilePic};
 					res.send(chatWindow);
 				} else {
@@ -521,8 +520,6 @@ app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 	var user1 = req.params.user1;
 	var user2 = req.params.user2;
-	console.log(user1);
-	console.log(user2);
 	msgManager.getConversation(user1, user2, function(success, messages) {
 		if (success) {
 			res.send(JSON.stringify(messages));
