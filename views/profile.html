@@ -48,7 +48,10 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href="/users">Look for Friends</a></li>
+        <li class="active"><a href="/users">Home </a></li>
+        {% if (profile.userType>0) %}
+        <li class=""><a href="/admin">Admin Panel </a></li>
+        {% endif %}
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -56,7 +59,7 @@
             <em class="W_new_count hidden">New</em>
           </a>
           <ul id="newMsgList" class="dropdown-menu hidden">
-
+            <!-- <li>aaaa</li> -->
           </ul>
         </li>
         <li class="dropdown">
@@ -73,7 +76,6 @@
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
-
 </nav>
 <div id="resultPanel" class="hidden"></div>
 
