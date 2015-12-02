@@ -63,7 +63,7 @@ dd{
     position: absolute;
     right: 0px;
     width:300px;
-    z-index: 10000;
+    z-index: 1;
 }
 
 .W_new_count {
@@ -72,13 +72,4 @@ dd{
     top: 2px;
     font-size: 13px;
     color: red;
-}
-
-.trip-row {
-    cursor: pointer;
-}
-
-.showAll {
-    height:100%;
-    overflow-y: auto;
 }

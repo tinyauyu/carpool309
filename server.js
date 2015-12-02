@@ -26,8 +26,20 @@ app.use(session({
   secret: secret,
   duration: 30 * 60 * 1000,
   activeDuration: 5 * 60 * 1000,
-  httpOnly:false
+  httpOnly: true
 }));
+
+var Ddos = require('ddos')
+var ddos = new Ddos({
+	maxcount: 30,
+	burst: 8,
+	limit: 8 * 30,
+	maxexpiry: 120,
+	checkinterval : 0.5,
+	errormessage : '[DDOS Alert] Please wait 120 seconds and try again!',
+	testmode: false
+});
+app.use(ddos.express)
 
 var server = app.listen(process.env.PORT || 3000, function () {
   var host = server.address().address;
@@ -51,6 +63,7 @@ app.use(function(req, res, next) {
 		    		return;
 		    	}
 		    	// finishing processing the middleware and run the route
+
 		    	next();
 		    });
 		} else {
@@ -181,9 +194,11 @@ app.get('/users/:id', function(req, res){
 app.get('/users', function(req, res){
 	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
-			res.render('userList.html', {
-   				profile: profile, users: users
-			});
+			tripManager.findAllTrips(req.session._id,function(success, allTrips){
+				res.render('userList.html', {
+	   				profile: profile, users: users, allTrips:allTrips
+				});
+			});		
 		})
 	});
 	var user = {
@@ -193,6 +208,22 @@ app.get('/users', function(req, res){
 	//acManager.logPage(user,page);
 
 });
+
+app.get('/admin', function(req,res){
+	acManager.getUser(req.session._id,function(success, profile){
+		if(profile.userType>=1){
+			acManager.getUserList(function(users){
+				feedbackManager.getAllFeedback(function(success,feedbacks){
+					res.render('admin.html', {
+		   				profile: profile, users: users, feedbacks: feedbacks
+					});
+				})
+			})
+		} else {
+			res.redirect('/users');
+		}
+	});
+})
 /********************** View *************************/
 
 /********************** User Account *************************/
@@ -377,6 +408,17 @@ app.get('/api/users', function(req, res){
 	});
 });
 
+app.get('/api/users/search', function(req, res){
+	acManager.searchUser(req.query.keyword, function(success, users){
+		if(success){
+			res.send(users);
+		} else {
+			res.writeHead(400,"Internal Server Error");
+			res.end("Internal Server Error");
+		}
+	})
+})
+
 app.get('/api/users/current', function(req,res){
 	acManager.getUser(req.session._id, function(success, user){
 		res.send(user);
@@ -400,6 +442,32 @@ app.get('/api/users/:id/profilePic', function(req, res){
 	acManager.getUserPic(req.params.id, function(pic){
 		//res.contentType('image/png');
 		res.send(pic);
+	})
+});
+
+app.post('/api/log', function(req, res){
+	var b = JSON.parse(req.body.json);
+
+	var behavior = {
+		ip_addr : req.connection.remoteAddress,
+		browser: b.browser,
+		os: b.os,
+		mobile: b.mobile,
+		screenSize: b.screenSize,
+		location: b.location
+	}
+
+	var user = {
+		id: req.session._id,
+		behavior: behavior
+	}
+	acManager.log(user, function(success, msg){
+		if(success){
+			res.send("OK");
+		} else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
 	})
 });
 
@@ -487,6 +555,7 @@ app.get('/api/users/:email/chatWindow/', function(req, res) {
 			acManager.getUserByEmail(req.params.email, function(success, user){
 				if(success){
 					var profilePic = user.profilePic;
+					//debug(profilePic);
 					var chatWindow = {user: user, window: data, profilePic: profilePic};
 					res.send(chatWindow);
 				} else {
@@ -520,6 +589,8 @@ app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 	var user1 = req.params.user1;
 	var user2 = req.params.user2;
+	debug(user1);
+	debug(user2);
 	msgManager.getConversation(user1, user2, function(success, messages) {
 		if (success) {
 			res.send(JSON.stringify(messages));
@@ -600,28 +671,10 @@ app.get('/searchTrip/:id', function(req,res){
 /***********************Search&Trip*******************/
 
 
-app.post('/api/log', function(req, res){
-	var b = JSON.parse(req.body.json);
 
-	var behavior = {
-		ip_addr : req.connection.remoteAddress,
-		browser: b.browser,
-		os: b.os,
-		mobile: b.mobile,
-		screenSize: b.screenSize,
-		location: b.location
-	}
 
-	var user = {
-		id: req.session.id,
-		behavior: behavior
-	}
-	acManager.log(user, function(success, msg){
-		if(success){
-			res.send("OK");
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-		}
-	})
-});
+/********************** Admin Panel **********************/
+
+
+
+/********************** Admin Panel **********************/

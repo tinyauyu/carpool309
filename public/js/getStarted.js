@@ -151,8 +151,13 @@ $('#submit').click(function(){
 $( document ).ready( function(){
 	$('input').css('background-color', 'rgba(255,255,255,0.8)');
 	$('textarea').css('background-color', 'rgba(255,255,255,0.8)');
-	$('#register').click(function(){
+	$('#registerUI').click(function(){
         $('#loginModal').removeClass('show');
         $('#registerModal').addClass('show');
-      });
+    });
+
+    $('#loginUI').click(function(){
+        $('#loginModal').addClass('show');
+        $('#registerModal').removeClass('show');
+    });
 });

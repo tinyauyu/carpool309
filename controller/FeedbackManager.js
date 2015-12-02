@@ -114,7 +114,7 @@ FeedbackManager.prototype.deleteFeedbacksByUser = function(userId,callback){
 }
 
 FeedbackManager.prototype.getAllFeedback = function(callback){
-	Feedback.find({}, function(err, feedbacks) {
+	Feedback.find({}).populate('sender receiver').exec(function(err, feedbacks) {
 		if(err){
 			console.log("[ERROR]\t[FeedbackManager.js]\tCannot get feedbacks to database: " + err);
 			callback(false, "Internal Server Error");

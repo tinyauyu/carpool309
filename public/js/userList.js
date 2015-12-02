@@ -1,8 +1,4 @@
 $(document).ready(function(){
-	$('.user-row').click(function(){
-  		var id = $(this).data('id');
-  		window.location.href = "/users/"+id;
-	});
 
 	$('#findTrip').click(function(){
 		var provider;
@@ -25,6 +21,39 @@ $(document).ready(function(){
 		}
 	});
 
+	$('.trip-row').click(function(){
+	  var ids = $(this).data('id');
+	  var url = "/searchTrip/" + ids;
+	  window.location.href = url;
+	});
+
+	$('.user-row').click(function(){
+  		var id = $(this).data('id');
+		window.location.href = "/users/"+id;
+	});	
+
+	$('#searchUser').click(function(){
+		$.ajax({
+			type: "GET",
+			url: "/api/users/search/?keyword=" + $('#searchUserKeyword').val(),
+			success: function(users){
+				if(users.length>0){
+					$('#userList').html(showUsers(users));
+					$('.user-row').click(function(){
+				  		var id = $(this).data('id');
+				  		window.location.href = "/users/"+id;
+					});	
+				} else {
+					$('#userList').html("<span>No user found. </span>");
+				}
+				
+			},
+			error: function(err){
+				alert(err);
+			}
+		})
+	})
+
 	/*$('#searchFor').click(function(){
 		if ($('searchFor').val() == ''){
 			alert("Nothing to Serach For");
@@ -34,6 +63,16 @@ $(document).ready(function(){
 		}
 	});*/
 });
+
+function showUsers(users){
+	var html = "";
+	for(i in users){
+		html = html + "<tr class='user-row' data-id='"+users[i]._id+"''>";
+		html = html + "<th>"+users[i].email+"</th>";
+		html = html + "<th>"+users[i].displayName+"</th></tr>";	
+	}
+	return html;
+}
 
 //Helper function: Getting Lat Long Using Goolge API:
 function updateTrip(provider,expectedDate){
