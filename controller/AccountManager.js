@@ -443,4 +443,30 @@ AccountManager.prototype.log = function(user, callback){
 	})
 }
 
+AccountManager.prototype.searchUser = function(keyword, callback){
+	User.find({ $text: { $search: keyword} },'_id email displayName', function(err, users){
+		if(err){
+			debug(err);
+			callback(false,err);
+		} else {
+			callback(true,users);
+		}
+	})
+	/*
+	User.textSearch(keyword, function(err, result){
+		if(err){
+			debug(err);
+			callback(false, err);
+		} else {
+			var users;
+			for (i in result.results){
+				debug(result.results[i].score);
+				users[i] = result.results[i].obj;
+			}
+			callback(true,users);
+		}
+	});
+	*/
+}
+
 module.exports = AccountManager;

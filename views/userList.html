@@ -74,27 +74,66 @@
 </nav>
 <div id="resultPanel"></div>
 
-
-<div id="content" class="col-xs-5 col-md-5 col-md-offset-1" ng-app="userList" ng-controller="userListCtrl">
-  <h1>Hi! <span id="displayName">{{ profile.displayName || profile.email }}</span></h1>
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Email</th>
-          <th>Display Name</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for user in users %}
-        <tr class="user-row" data-id="{{user.id}}">
-          <th>{{user.email}}</th>
-          <th>{{user.displayName || user.email}}</th>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="alert alert-success" role="alert">
+    Hi! <span id="displayName">{{ profile.displayName || profile.email }}</span>
   </div>
+
+<div id="content" class="col-xs-12 col-md-5 col-md-offset-1" ng-app="userList" ng-controller="userListCtrl">
+
+  <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
+    <div class="panel-heading">
+      <h3 class="panel-title">Look for a user?</h3>
+    </div>
+    <div class="panel-body table-responsive">
+        
+        <div class="input-group">
+          <input id="searchUserKeyword" type="text" class="form-control" placeholder="I am looking for..." aria-describedby="sizing-addon2">
+          <span class="input-group-btn">
+            <button id="searchUser" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+          </span>
+        </div>
+        
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Display Name</th>
+            </tr>
+          </thead>
+          <tbody id="userList">
+            <!--
+            <tr class="user-row" data-id="{{user.id}}">
+              <th>{{user.email}}</th>
+              <th>{{user.displayName || user.email}}</th>
+            </tr>
+            -->
+          </tbody>
+        </table>
+    </div>
+  </div>
+</div>
+
+<div class="container col-xs-12 col-md-5">
+  <form class="form" id="tripForm">
+      <label for="fromWhere" class = "control-label">From: </label>
+      <input id="fromWhere" class="form-control" placeholder="From: eg.L4C 2C7 OR 123 Main Ave, Toronto, ON, CA" required autofocus>
+      <label for="toWhere" class="control-label">To:</label>
+      <input id="toWhere" class="form-control" placeholder="To: eg.L5C 7C8 OR Street# Stree, City, Country" required>
+      <label for="expectedPrice" class="control-label">Expected Price:</label>
+      <input id="expectedPrice" class="form-control" placeholder="$60, Default is All Price Range" required>
+      <label for="expectedDate" class="control-label">Expected Date (Minimum is Today):</label>
+      <input type="datetime-local" id="expectedDate" class="form-control" min="2015-11-21" required>
+      <hr>
+      <label for="tripProvider" class="control-label">Trip Provider? Or Trip Wanted:</label><br>
+      <input type="radio" name="type" value="true"/> TripProvider
+      <input type="radio" name="type" value="false"/> TripWanted
+      <hr>
+      <input type="button" value="Let us Search the Trips for You" id = "findTrip" class="btn-primary">
+  </form>
+  <hr>
+</div>
+
+<div class="container col-xs-12 col-md-5 col-md-offset-1">
   {% if (allTrips != '' || allTrips != null)%}
     <h2>All your Trips on Record: </h2>
     <div class="table-responsive">
@@ -120,27 +159,6 @@
       </table>
     </div>
   {% endif %}
-</div>
-
-<hr><hr><hr>
-<div class="container col-xs-5 col-md-5 col-md-offset-0.5">
-  <form class="form" id="tripForm">
-      <label for="fromWhere" class = "control-label">From: </label>
-      <input id="fromWhere" class="form-control" placeholder="From: eg.L4C 2C7 OR 123 Main Ave, Toronto, ON, CA" required autofocus>
-      <label for="toWhere" class="control-label">To:</label>
-      <input id="toWhere" class="form-control" placeholder="To: eg.L5C 7C8 OR Street# Stree, City, Country" required>
-      <label for="expectedPrice" class="control-label">Expected Price:</label>
-      <input id="expectedPrice" class="form-control" placeholder="$60, Default is All Price Range" required>
-      <label for="expectedDate" class="control-label">Expected Date (Minimum is Today):</label>
-      <input type="datetime-local" id="expectedDate" class="form-control" min="2015-11-21" required>
-      <hr>
-      <label for="tripProvider" class="control-label">Trip Provider? Or Trip Wanted:</label><br>
-      <input type="radio" name="type" value="true"/> TripProvider
-      <input type="radio" name="type" value="false"/> TripWanted
-      <hr>
-      <input type="button" value="Let us Search the Trips for You" id = "findTrip" class="btn-primary">
-  </form>
-  <hr>
 </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

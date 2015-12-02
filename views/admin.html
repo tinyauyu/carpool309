@@ -109,6 +109,9 @@
     <div class="panel-body table-responsive">
       <table class="table table-hover">
           <tbody>
+            {% if !feedbacks.length %}
+              <span> No review submitted </span>
+            {% endif %}
             {% for feedback in feedbacks %}
             <tr class="feedback-row" data-id="{{feedback._id}}"><th>
               <p class="pull-left primary-font margin-left">{{feedback.sender.displayName}}</p><br>
@@ -116,15 +119,11 @@
               <small class="pull-right text-muted">
               <small>rating: {{feedback.rating}}/5 </small><br>
               <small>sender: {{feedback.sender.displayName}} </small><br>
-              <span class="glyphicon glyphicon-time"></span>
-              {{feedback.date}}</small><br><br>
-              
+              <span class="glyphicon glyphicon-time"></span> {{feedback.date}}</small><br><br>
             </tr>
             {% endfor %}
           </tbody>
-        </table>
-        <ul data-brackets-id="12674" id="sortable" class="list-unstyled ui-sortable">
-        
+      </table>
     </div>
   </div>
 </div>

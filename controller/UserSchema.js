@@ -32,5 +32,6 @@ UserSchema = mongoose.Schema({
 });
 
 UserSchema.plugin(autoIncrement.plugin, 'User');
+UserSchema.index({ '$**': 'text' });
 
 module.exports.UserSchema = UserSchema;

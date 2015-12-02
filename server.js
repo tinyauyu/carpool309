@@ -408,6 +408,17 @@ app.get('/api/users', function(req, res){
 	});
 });
 
+app.get('/api/users/search', function(req, res){
+	acManager.searchUser(req.query.keyword, function(success, users){
+		if(success){
+			res.send(users);
+		} else {
+			res.writeHead(400,"Internal Server Error");
+			res.end("Internal Server Error");
+		}
+	})
+})
+
 app.get('/api/users/current', function(req,res){
 	acManager.getUser(req.session._id, function(success, user){
 		res.send(user);
