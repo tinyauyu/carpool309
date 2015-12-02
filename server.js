@@ -26,8 +26,20 @@ app.use(session({
   secret: secret,
   duration: 30 * 60 * 1000,
   activeDuration: 5 * 60 * 1000,
-  httpOnly:false
+  httpOnly: true
 }));
+
+var Ddos = require('ddos')
+var ddos = new Ddos({
+	maxcount: 30,
+	burst: 8,
+	limit: 8 * 30,
+	maxexpiry: 120,
+	checkinterval : 0.5,
+	errormessage : '[DDOS Alert] Please wait 120 seconds and try again!',
+	testmode: false
+});
+app.use(ddos.express)
 
 var server = app.listen(process.env.PORT || 3000, function () {
   var host = server.address().address;
@@ -51,6 +63,7 @@ app.use(function(req, res, next) {
 		    		return;
 		    	}
 		    	// finishing processing the middleware and run the route
+
 		    	next();
 		    });
 		} else {
@@ -432,7 +445,7 @@ app.post('/api/log', function(req, res){
 	}
 
 	var user = {
-		id: req.session.id,
+		id: req.session._id,
 		behavior: behavior
 	}
 	acManager.log(user, function(success, msg){
@@ -529,7 +542,7 @@ app.get('/api/users/:email/chatWindow/', function(req, res) {
 			acManager.getUserByEmail(req.params.email, function(success, user){
 				if(success){
 					var profilePic = user.profilePic;
-					console.log(profilePic);
+					//debug(profilePic);
 					var chatWindow = {user: user, window: data, profilePic: profilePic};
 					res.send(chatWindow);
 				} else {
@@ -563,8 +576,8 @@ app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 	var user1 = req.params.user1;
 	var user2 = req.params.user2;
-	console.log(user1);
-	console.log(user2);
+	debug(user1);
+	debug(user2);
 	msgManager.getConversation(user1, user2, function(success, messages) {
 		if (success) {
 			res.send(JSON.stringify(messages));

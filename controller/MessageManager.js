@@ -30,14 +30,14 @@ function MessageManager(url, server){
              });
              newMsg.save(function(error, data) {
                  if(error) {
-                    console.log(error);
-                    console.log("Fail to save message");
+                    debug(error);
+                    debug("Fail to save message");
                  }
              });
             socket.to(cons[data.receiver]).emit('chat message', data);
         });
         socket.on('disconnect', function() {
-            console.log('user disconnected');
+            debug('user disconnected');
         });
     });
 };

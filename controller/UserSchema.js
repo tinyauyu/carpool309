@@ -6,6 +6,7 @@ UserSchema = mongoose.Schema({
 	admin: {type:Boolean, required: true},
 	email: {type:String, required: true, trim: true},
 	password: {enabled: Boolean, hash:String},
+	nonce: Number,
 	description: String,
 	profilePic: Buffer,
 	displayName: String,

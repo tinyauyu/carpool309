@@ -34,14 +34,18 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/" loggedInUser="{{profile.email}}">Carpool309</a>
+      <a class="navbar-brand" href="/" loggedInUser="{{profile.email}}" style="padding:0px">
+        <img src="/img/logo.png" style="height:50px; width:50px"> </img>
+      </a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class=""><a href="/users">Start a Trip! </span></a></li>
+        <li class=""><a href="/users">Home </a></li>
+        {% if (profile.userType>0) %}
         <li class="active"><a href="/admin">Admin Panel <span class="sr-only">(current)</span></a></li>
+        {% endif %}
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -69,13 +73,9 @@
 </nav>
 <div id="resultPanel"></div>
 
-<div class="jumbotron col-xs-12 col-md-12">
-  <h3>Hello, {{ profile.displayName || profile.email }}!</h3>
-  <p>Number of Online Users: -1</p>
-  <p><a class="btn btn-primary" href="/users" role="button">Switch to User Mode</a></p>
-</div>
+<div class="alert alert-success" role="alert">Current number of Online Users: -1</div>
 
-<div class="col-xs-12 col-md-5">
+<div class="col-xs-12 col-md-4">
   <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
     <div class="panel-heading">
       <h3 class="panel-title">User List</h3>
@@ -101,10 +101,36 @@
   </div>
 </div>
 
-<div class="col-xs-12 col-md-5">
+<div class="col-xs-12 col-md-4">
   <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
     <div class="panel-heading">
-      <h3 class="panel-title">Review</h3>
+      <h3 class="panel-title">Reviews</h3>
+    </div>
+    <div class="panel-body table-responsive">
+      <table class="table table-hover">
+          <tbody>
+            {% for feedback in feedbacks %}
+            <tr class="feedback-row" data-id="{{feedback._id}}">
+              <p class="pull-left primary-font margin-left">{{feedback.sender.displayName}}</p><br>
+              <small class="pull-right text-muted">
+              <small>rating: {{feedback.rating}}/5 </small><br>
+              <span class="glyphicon glyphicon-time"></span>
+              {{feedback.date}}</small><br><br>
+              <li class="ui-state-default">{{feedback.comment}}</li><br>    
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <ul data-brackets-id="12674" id="sortable" class="list-unstyled ui-sortable">
+        
+    </div>
+  </div>
+</div>
+
+<div class="col-xs-12 col-md-4">
+  <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
+    <div class="panel-heading">
+      <h3 class="panel-title">Trips</h3>
     </div>
     <div class="panel-body table-responsive">
         <div id="sortable"></div>
