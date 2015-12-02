@@ -211,7 +211,7 @@ app.get('/admin', function(req,res){
 	acManager.getUser(req.session._id,function(success, profile){
 		if(profile.userType>=1){
 			acManager.getUserList(function(users){
-				feedbackManager.getAllFeedback(function(feedbacks){
+				feedbackManager.getAllFeedback(function(success,feedbacks){
 					res.render('admin.html', {
 		   				profile: profile, users: users, feedbacks: feedbacks
 					});

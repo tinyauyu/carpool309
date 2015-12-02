@@ -110,13 +110,15 @@
       <table class="table table-hover">
           <tbody>
             {% for feedback in feedbacks %}
-            <tr class="feedback-row" data-id="{{feedback._id}}">
+            <tr class="feedback-row" data-id="{{feedback._id}}"><th>
               <p class="pull-left primary-font margin-left">{{feedback.sender.displayName}}</p><br>
+              <span class="ui-state-default">"{{feedback.comment}}"</li><br>
               <small class="pull-right text-muted">
               <small>rating: {{feedback.rating}}/5 </small><br>
+              <small>sender: {{feedback.sender.displayName}} </small><br>
               <span class="glyphicon glyphicon-time"></span>
               {{feedback.date}}</small><br><br>
-              <li class="ui-state-default">{{feedback.comment}}</li><br>    
+              
             </tr>
             {% endfor %}
           </tbody>
