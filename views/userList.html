@@ -75,23 +75,48 @@
 <div id="content" class="col-xs-5 col-md-5 col-md-offset-1" ng-app="userList" ng-controller="userListCtrl">
   <h1>Hi! <span id="displayName">{{ profile.displayName || profile.email }}</span></h1>
   <div class="table-responsive">
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th>Email</th>
-        <th>Display Name</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for user in users %}
-      <tr class="user-row" data-id="{{user.id}}">
-        <th>{{user.email}}</th>
-        <th>{{user.displayName || user.email}}</th>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Display Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr class="user-row" data-id="{{user.id}}">
+          <th>{{user.email}}</th>
+          <th>{{user.displayName || user.email}}</th>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if (allTrips != '' || allTrips != null)%}
+    <h2>All your Trips on Record: </h2>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Trip's Date</th>
+            <th>Trip's Price</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for trip in allTrips %}
+          <tr class="trip-row" data-id="{{trip._id}}">
+            <th>{{trip.date}}</th>
+            {% if (trip.price == null) %}
+            <th>Any</th>
+            {% else %}
+            <th>{{trip.price}}</th>
+            {% endif %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
 </div>
 
 <hr><hr><hr>
