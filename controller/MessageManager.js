@@ -32,9 +32,10 @@ function MessageManager(url, server){
                  if(error) {
                     debug(error);
                     debug("Fail to save message");
+                 } else {
+                    socket.to(cons[data.receiver]).emit('chat message', data);
                  }
              });
-            socket.to(cons[data.receiver]).emit('chat message', data);
         });
         socket.on('disconnect', function() {
             debug('user disconnected');
