@@ -71,8 +71,9 @@ $('#login').click(function(){
 	var profile = {
 		email: $('#login-email').val(),
 		password:{plain: $('#login-password').val()}
-	}
-	
+
+	};
+
 	$.ajax({
 		type: "POST",
 		url: "./api/login",
