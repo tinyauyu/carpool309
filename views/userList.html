@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <title>Carpool309</title>
+    <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
     <link href="../css/chatWindow.css" rel="stylesheet"/>
 
     <!-- Bootstrap -->
@@ -100,12 +101,12 @@
             </tr>
           </thead>
           <tbody id="userList">
-            <!--
+            {% for user in users %}
             <tr class="user-row" data-id="{{user.id}}">
               <th>{{user.email}}</th>
               <th>{{user.displayName || user.email}}</th>
             </tr>
-            -->
+            {% endfor %}
           </tbody>
         </table>
     </div>
