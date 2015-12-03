@@ -76,6 +76,8 @@ function showUsers(users){
 
 //Helper function: Getting Lat Long Using Goolge API:
 function updateTrip(provider,expectedDate){
+	startAddress_plain = $("#fromWhere").val();
+	endAddress_plain =  $("#toWhere").val();
 	startAddress = ($("#fromWhere").val()).replace(/[ ,.\#]/g,"+");
 	endAddress = ($("#toWhere").val()).replace(/[ ,.\#]/g,"+");
 	var date = expectedDate;
@@ -91,7 +93,7 @@ function updateTrip(provider,expectedDate){
 
 	$.ajax({
 		type: "GET",
-		url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + startAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk",
+		url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + startAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk&language=en",
 		success: function(data){
 			if (data.status == "ZERO_RESULTS"){
 				alert("Incorrect Address Entered");
@@ -99,15 +101,15 @@ function updateTrip(provider,expectedDate){
 			else {
 				var lat = Number(data.results[0].geometry.location.lat);
 				var lng = Number(data.results[0].geometry.location.lng);
-				latlng = {latitude: lat, longitude: lng};
+				latlng = {latitude: lat, longitude: lng, text: data.results[0].formatted_address};
 				trip.startPoint = latlng;
 				$.ajax({
 					type: "GET",
-					url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + endAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk",
+					url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + endAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk&language=en",
 					success: function(data){
 						var lat = Number(data.results[0].geometry.location.lat);
 						var lng = Number(data.results[0].geometry.location.lng);
-						latlng = {latitude: lat, longitude: lng};
+						latlng = {latitude: lat, longitude: lng, text: data.results[0].formatted_address};
 						trip.endPoint = latlng;
 						$.ajax({
 							type:"POST",

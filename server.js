@@ -194,7 +194,7 @@ app.get('/users/:id', function(req, res){
 app.get('/users', function(req, res){
 	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
-			tripManager.findAllTrips(req.session._id,function(success, allTrips){
+			tripManager.findAllTripsByUser(req.session._id,function(success, allTrips){
 				res.render('userList.html', {
 	   				profile: profile, users: users, allTrips:allTrips
 				});
@@ -483,6 +483,7 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 	feedbackManager.createFeedback(feedback, function(success,msg){
 		if(success){
       //update rating for the user
+      debug("feedback.receiver = "+feedback['receiver'])
       acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
     		if(success){
     			res.send(msg);
@@ -661,6 +662,17 @@ app.post('/api/updateTrip', function(req,res){
 		}
 	});
 });
+
+app.get('/api/trips', function(req,res){
+	tripManager.findAllTrips(function(success, trips){
+		if(success){
+			res.send(trips)
+		} else {
+			res.writeHead(400,trips);
+			res.end(msg);
+		}
+	})
+})
 
 app.get('/searchTrip/:id', function(req,res){
 	var tripId = req.params.id;

@@ -158,18 +158,21 @@
               <thead>
                 <tr>
                   <th>Trip's Date</th>
-                  <th>Trip's Price</th>
+                  <th>From</th>
+                  <th>To</th>
                 </tr>
               </thead>
               <tbody>
               {% for trip in allTrips %}
                 <tr class="trip-row" data-id="{{trip._id}}">
                   <th>{{trip.date}}</th>
-                  {% if (trip.price == null) %}
+                  <th>{{trip.startPoint.text}}</th>
+                  <th>{{trip.endPoint.text}}</th>
+                  {#<!--{% if (trip.price == null) %}
                   <th>Any</th>
                   {% else %}
                   <th>{{trip.price}}</th>
-                  {% endif %}
+                  {% endif %}-->#}
                 </tr>
               {% endfor %}
               </tbody>
