@@ -141,32 +141,44 @@
   </div>
 </div>
 
-<div class="container col-xs-12 col-md-5 col-md-offset-1">
-  {% if (allTrips != '' || allTrips != null)%}
-    <h2>All your Trips on Record: </h2>
-    <div class="table-responsive">
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>Trip's Date</th>
-            <th>Trip's Price</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for trip in allTrips %}
-          <tr class="trip-row" data-id="{{trip._id}}">
-            <th>{{trip.date}}</th>
-            {% if (trip.price == null) %}
-            <th>Any</th>
-            {% else %}
-            <th>{{trip.price}}</th>
-            {% endif %}
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+
+<div class="container col-xs-12 col-md-5">
+  <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
+    <div class="panel-heading">
+      <h3 class="panel-title">Look for a trip?</h3>
     </div>
-  {% endif %}
+
+    <div class="panel-body showAll">
+
+      <div class="container col-xs-12 col-md-5 col-md-offset-1">
+        {% if (allTrips != '' || allTrips != null)%}
+          <h2>All your Trips on Record: </h2>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Trip's Date</th>
+                  <th>Trip's Price</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for trip in allTrips %}
+                <tr class="trip-row" data-id="{{trip._id}}">
+                  <th>{{trip.date}}</th>
+                  {% if (trip.price == null) %}
+                  <th>Any</th>
+                  {% else %}
+                  <th>{{trip.price}}</th>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
