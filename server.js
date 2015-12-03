@@ -522,12 +522,12 @@ app.get('/api/feedbacks', function(req, res){
 });
 
 app.get('/api/feedbacks/:id', function(req, res){
-	feedbackManager.getFeedbackById(req.params.id, function(success,feedbacks){
+	feedbackManager.getFeedbackById(req.params.id, function(success,feedback){
 		if(success){
-			res.send(JSON.stringify(feedbacks));
+			res.send(JSON.stringify(feedback));
 		} else {
-			res.writeHead(400,feedbacks);
-			res.end(feedbacks);
+			res.writeHead(400,feedback);
+			res.end(feedback);
 		}
 	})
 });
