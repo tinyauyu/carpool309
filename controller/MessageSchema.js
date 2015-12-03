@@ -5,7 +5,7 @@ MessageSchema = mongoose.Schema({
 	sender: {type: String, ref: 'User.email'},
 	receiver: {type: String, ref: 'User.email'},
 	content: String,
-	date: {type: Date, default: Date.now},
+	date: {type: Date, default: Date.now, expires: 604800},
     alreadyRead: {type: Boolean, default: false}
 });
 
