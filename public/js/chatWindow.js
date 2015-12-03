@@ -53,8 +53,8 @@ socket.on('chat message', function(data) {
         var ele = $('<div id="chat-body" class="pull-left clearfix" style="width:260px">');
         var content =$('<div class="pull-right clearfix" style="width:200px">');
         ele.append('<span class="chat-img pull-left"><img src="/img/u.png" alt="User Avatar" class="img-circle" /></span>');
-        content.append($('<p id="time" style="text-align:left">').text(dateToStr(data.date)));
-        content.append($('<p id="text" style="text-align:left">').text(data.msg));
+        content.append($('<p id="time" style="text-align:left">').text(dateToStr(new Date(data.date))));
+        content.append($('<p id="text" style="text-align:left">').text(data.content));
         ele.append(content);
         $("#messages").append(ele);
         //ele.attr('id', 'msgYouGet');
