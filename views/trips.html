@@ -62,39 +62,49 @@
       </div><!-- /.container-fluid -->
     </nav>
 
-    <div id="content" class="col-xs-3 col-md-7 col-md-offset-1" ng-app="userList" ng-controller="userListCtrl">
-      <h1>List of trips suits you the Best:</h1>
-        {% if (trips == [] || trips == null) %}
-          <p>Sorry, No matches meet your criterias.</p>
-        {% else %}
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Trip's ID</th>
-                  <th>Trip's Date</th>
-                  <th>Trip's Price</th>
-                </tr>
-              </thead>
-              <tbody>
-              {% for trip in trips %}
-                <tr class="trip-row" data-id="{{trip.user}}/?trip={{trip._id}}">
-                  <th>{{trip._id}}</th>
-                  <th>{{trip.date}}</th>
-                  {% if (trip.price == null) %}
-                  <th>Not Specified By User</th>
-                  {% else %}
-                  <th>{{trip.price}}</th>
-                  {% endif %}
-                </tr>
-              {% endfor %}
-            {% endif %}
-            </tbody>
-          </table>
+
+    <div id="content" class="col-xs-12 col-md-7 col-md-offset-1 container">
+      <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
+        <div class="panel-heading">
+          <h1 class="panel-title">List of trips suits you the Best:</h1>
         </div>
+
+        <div class="panel-body">
+          {% if (trips == [] || trips == null) %}
+            <p>Sorry, No matches meet your criterias.</p>
+          {% else %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Trip's From</th>
+                    <th>Trip's To</th>
+                    <th>Trip's Date</th>
+                    <th>Trip's Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for trip in trips %}
+                  <tr class="trip-row" data-id="{{trip.user}}/?trip={{trip._id}}">
+                    <th>{{trip.startPoint.text}}</th>
+                    <th>{{trip.endPoint.text}}</th>
+                    <th>{{trip.date}}</th>
+                    {% if (trip.price == null) %}
+                    <th>Not Specified By User</th>
+                    {% else %}
+                    <th>{{trip.price}}</th>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="col-xs-3.5 col-md-3" id="recommendation">
+    <div class="col-xs-12 col-md-3 col-md-offset-0.5" id="recommendation">
       <div class="panel-head">
         <span class="glyphicon glyphicon-list"></span> 
         Wanna TEAM UP? or Compare the Price? <br>

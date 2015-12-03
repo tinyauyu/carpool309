@@ -53,8 +53,12 @@ dd{
     object-fit: cover;
 }
 
-#recommendation{
-    position: fixed; 
-    top: 35%; 
-    right: 2%;
+#recommendation{ 
+    overflow-y: auto;
+    height: 300px;
+}
+
+#content{
+    overflow-y: auto;
+    height: 400px;
 }
