@@ -31,7 +31,7 @@ function getBase64Image(img) {
 }
 
 function showAlert(msg){
-	$("#alert").html("<div class='alert alert-danger alert-dismissible' role='alert'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>Oops! </strong>"+msg+"</div>");
+	$(".alertBox:visible").html("<div class='alert alert-danger alert-dismissible' role='alert'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>Oops! </strong>"+msg+"</div>");
 }
 
 function isValidEmailAddress(emailAddress) {
@@ -72,6 +72,7 @@ $('#login').click(function(){
 		email: $('#login-email').val(),
 		password:{plain: $('#login-password').val()}
 	}
+	
 	$.ajax({
 		type: "POST",
 		url: "./api/login",
@@ -80,7 +81,7 @@ $('#login').click(function(){
 			window.location.href = "/users";
 		},
 		error: function(jqxhr, textStatus, errorThrown){
-			alert(errorThrown);
+			showAlert(errorThrown);
 		}
 	});
 });
