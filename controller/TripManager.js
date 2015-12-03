@@ -101,7 +101,7 @@ TripManager.prototype.searchSimilarTrip = function(tripId,callback){
         	return;		
 		} 
 		else { //FindOne
-			Trip.find({}, function (err,allTrips){
+			Trip.find({}).populate('user').exec(function (err,allTrips){
 				if (err){
 					throw err;
 				}
@@ -119,7 +119,7 @@ TripManager.prototype.searchSimilarTrip = function(tripId,callback){
 						}
 						else{
 							//User can not search for the trip that he provided/wanted themselves
-							var notThemselves = (allTrips[i].user != newTrip.user);
+							var notThemselves = (allTrips[i].user._id != newTrip.user);
 							//If the user select provider, then only those who are trips wanted user will be searched
 							//Verse-versa, if the user select trips wanted, only the providers will be matched
 							var userType = ((newTrip.provider && allTrips[i].provider) || (!newTrip.provider && !allTrips[i].provider));

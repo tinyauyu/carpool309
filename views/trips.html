@@ -106,7 +106,7 @@
               <p>Sorry, No recommendations for you.</p>
             {% else %}
               {% for trip in similarTrips %}
-                <li class="list-group-item similar-trip-row" data-id="{{trip.user}}/?trip={{trip._id}}">{{trip._id}}</li>
+                <li class="list-group-item similar-trip-row" data-id="{{trip.user._id}}/?trip={{trip._id}}">{{trip.user.email}}</li>
               {% endfor %}
             {% endif %}
           </ul>
