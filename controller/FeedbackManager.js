@@ -72,7 +72,7 @@ FeedbackManager.prototype.getFeedbackByUser = function(toUserId,callback){
 }
 
 FeedbackManager.prototype.getFeedbackById = function(id,callback){
-	Feedback.find({_id:id}, function(err, feedback) {
+	Feedback.findOne({_id:id}, function(err, feedback) {
 		if(err){
 			console.log("[ERROR]\t[FeedbackManager.js]\tCannot get feedback from database: " + err);
 			callback(false, "Internal Server Error");

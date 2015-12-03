@@ -45,6 +45,10 @@ dd{
     cursor: pointer;
 }
 
+.feedback-row {
+    cursor: pointer;
+}
+
 #nav-profilePic{
     object-fit: cover;
 }

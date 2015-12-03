@@ -533,13 +533,29 @@ app.get('/api/feedbacks/:id', function(req, res){
 });
 
 app.delete('/api/feedbacks/:id', function(req, res){
-	feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
-		if(success){
-			res.send(JSON.stringify(feedbacks));
-		} else {
-			res.writeHead(400,feedbacks);
-			res.end(feedbacks);
-		}
+	feedbackManager.getFeedbackById(req.params.id, function(success, feedback){
+		debug(feedback)
+		debug(feedback.rating);
+		debug(feedback.receiver);
+      //update rating for the user
+      acManager.removeRating(feedback.rating, feedback.receiver, function(success,msg){
+    		if(success){
+    			feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
+					if(success){
+						debug("delete ok")
+						res.send(req.params.id.toString());
+					} else {
+						debug(feedbacks)
+						res.writeHead(400,feedbacks);
+						res.end(feedbacks);
+					}
+				})
+    		} else {
+    			debug(msg);
+    			res.writeHead(400,msg);
+    			res.end(msg);
+    		}
+      });
 	})
 });
 /********************** Feedback **********************/
