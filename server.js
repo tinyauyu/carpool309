@@ -215,7 +215,7 @@ app.get('/admin', function(req,res){
 			acManager.getUserList(function(users){
 				feedbackManager.getAllFeedback(function(success,feedbacks){
 					res.render('admin.html', {
-		   				profile: profile, users: users, feedbacks: feedbacks
+		   				profile: profile, users: users, feedbacks: feedbacks, numOnlineUsers: msgManager.getNumOnlineUsers()
 					});
 				})
 			})
