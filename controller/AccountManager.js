@@ -20,6 +20,7 @@ function AccountManager(url){  //mongodb://localhost/
 	/*** initialize variables ***/
 	UserSchema = require('./UserSchema.js').UserSchema;
 	User = mongoose.model('User', UserSchema);
+	User.collection.ensureIndex({email: 'text', description: 'text', displayName: 'text'}, function(error) {});
 
 }
 

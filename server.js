@@ -669,7 +669,9 @@ app.get('/searchTrip/:id', function(req,res){
 		if (success){
 			tripManager.searchSimilarTrip(tripId, function(success,similarTrips){
 				if (success){
-					res.render('trips.html', {trips: trips, similarTrips: similarTrips});
+					acManager.getUser(req.session._id, function(success, profile){
+						res.render('trips.html', {profile: profile, trips: trips, similarTrips: similarTrips});
+					})
 				}
 				else {
 					res.writeHead(400,trips);
