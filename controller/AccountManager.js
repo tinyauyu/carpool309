@@ -234,7 +234,7 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							displayName: xss(displayName),
 							profilePic: profilePic,
 							admin: false,
-							ttotalRating: 0,
+							totalRating: 0,
 							numberOfRating: 0,
 							averageRating: 0,
 							fiveStars: 0,
@@ -392,7 +392,10 @@ AccountManager.prototype.updateRating =  function(rating, receiver, callback){
 				default:
 					break;
 			}
-			user.averageRating = user.totalRating/ user.numberOfRating;
+			user.averageRating = user.totalRating / user.numberOfRating;
+			debug("user total rating: "+ user.totalRating);
+			debug("user num of rating: "+user.numberOfRating)
+			debug("user average rating: "+ user.averageRating);
 			User.findOneAndUpdate(conditions, user, options, function(err){
 				if(err){
 					callback(false,err);

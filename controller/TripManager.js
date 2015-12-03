@@ -154,7 +154,7 @@ TripManager.prototype.findOneTrip = function (tripId, callback){
 	});
 }
 
-TripManager.prototype.findAllTrips = function (userId, callback){
+TripManager.prototype.findAllTripsByUser = function (userId, callback){
 	Trip.find({user: userId}, function (err, trip){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
@@ -162,6 +162,21 @@ TripManager.prototype.findAllTrips = function (userId, callback){
         	return;		
 		}
 		else {
+			callback(true,trip);
+			return;
+		}
+	});
+}
+
+TripManager.prototype.findAllTrips = function (callback){
+	Trip.find({}, function (err, trip){
+		if (err){
+    		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
+        	callback(false,"Internal Server Error");
+        	return;		
+		}
+		else {
+			debug(trip);
 			callback(true,trip);
 			return;
 		}
