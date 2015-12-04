@@ -6,6 +6,8 @@ $(document).ready(function(){
 		var currentTime = new Date();
 		var tempDate = $("#expectedDate").val().replace("T", " ") + " GMT-0500 (Eastern Standard Time)";
 		var expectedDate = new Date(tempDate);
+		var reg = /^\d+$/;
+		var checkPrice = $('#expectedPrice').val();
 		if (currentTime > expectedDate || expectedDate == null){
 			//Check for date entered is after the time right now
 			alert("Please Select a Date After RIGHT NOW!");
@@ -14,7 +16,15 @@ $(document).ready(function(){
 			alert("Please Enter your From And To places");
 		}
 		else if(provider == null){
-			alert("Please choose Trip Provider or Trip Wanted")
+			alert("Please choose Trip Provider or Trip Wanted");
+		}
+		else if (checkPrice != ''){
+			if (!reg.test(checkPrice)){
+				alert("Please Input a NUMBER only/nothing for price");
+			}
+			else{
+				updateTrip(provider,expectedDate);
+			}
 		}
 		else{
 			updateTrip(provider,expectedDate);
