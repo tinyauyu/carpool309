@@ -201,7 +201,7 @@ app.get('/users/:id', function(req, res){
 app.get('/users', function(req, res){
 	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
-			tripManager.findAllTrips(req.session._id,function(success, allTrips){
+			tripManager.findAllTripsByUser(req.session._id,function(success, allTrips){
 				res.render('userList.html', {
 	   				profile: profile, users: users, allTrips:allTrips
 				});
@@ -488,6 +488,7 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 	feedbackManager.createFeedback(feedback, function(success,msg){
 		if(success){
       //update rating for the user
+      debug("feedback.receiver = "+feedback['receiver'])
       acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
     		if(success){
     			res.send(msg);
@@ -527,24 +528,40 @@ app.get('/api/feedbacks', function(req, res){
 });
 
 app.get('/api/feedbacks/:id', function(req, res){
-	feedbackManager.getFeedbackById(req.params.id, function(success,feedbacks){
+	feedbackManager.getFeedbackById(req.params.id, function(success,feedback){
 		if(success){
-			res.send(JSON.stringify(feedbacks));
+			res.send(JSON.stringify(feedback));
 		} else {
-			res.writeHead(400,feedbacks);
-			res.end(feedbacks);
+			res.writeHead(400,feedback);
+			res.end(feedback);
 		}
 	})
 });
 
 app.delete('/api/feedbacks/:id', function(req, res){
-	feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
-		if(success){
-			res.send(JSON.stringify(feedbacks));
-		} else {
-			res.writeHead(400,feedbacks);
-			res.end(feedbacks);
-		}
+	feedbackManager.getFeedbackById(req.params.id, function(success, feedback){
+		debug(feedback)
+		debug(feedback.rating);
+		debug(feedback.receiver);
+      //update rating for the user
+      acManager.removeRating(feedback.rating, feedback.receiver, function(success,msg){
+    		if(success){
+    			feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
+					if(success){
+						debug("delete ok")
+						res.send(req.params.id.toString());
+					} else {
+						debug(feedbacks)
+						res.writeHead(400,feedbacks);
+						res.end(feedbacks);
+					}
+				})
+    		} else {
+    			debug(msg);
+    			res.writeHead(400,msg);
+    			res.end(msg);
+    		}
+      });
 	})
 });
 /********************** Feedback **********************/
@@ -651,6 +668,17 @@ app.post('/api/updateTrip', function(req,res){
 	});
 });
 
+app.get('/api/trips', function(req,res){
+	tripManager.findAllTrips(function(success, trips){
+		if(success){
+			res.send(trips)
+		} else {
+			res.writeHead(400,trips);
+			res.end(msg);
+		}
+	})
+})
+
 app.get('/searchTrip/:id', function(req,res){
 	var tripId = req.params.id;
 	req.session.tripId = tripId;
@@ -658,7 +686,9 @@ app.get('/searchTrip/:id', function(req,res){
 		if (success){
 			tripManager.searchSimilarTrip(tripId, function(success,similarTrips){
 				if (success){
-					res.render('trips.html', {trips: trips, similarTrips: similarTrips});
+					acManager.getUser(req.session._id, function(success, profile){
+						res.render('trips.html', {profile: profile, trips: trips, similarTrips: similarTrips});
+					})
 				}
 				else {
 					res.writeHead(400,trips);

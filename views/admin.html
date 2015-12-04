@@ -78,10 +78,7 @@
 <div id="users" class="col-xs-12 col-md-4">
   <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
     <div class="panel-heading">
-      <div class="col-xs-10 col-md-10"><h2 class="panel-title">User List</h2></div>
-      <div class="col-xs-2 col-md-2">
-        <button id="usersDrop" type="button" class="btn btn-sm btn-danger pull-right">Drop</button>
-      </div>
+      <h2 class="panel-title">User List</h2>
     </div>
     <div class="panel-body table-responsive">
         <table class="table table-hover">
@@ -107,10 +104,7 @@
 <div id="reviews" class="col-xs-12 col-md-4">
   <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
     <div class="panel-heading">
-      <div class="col-xs-10 col-md-10"><h2 class="panel-title">Reviews</h2></div>
-      <div class="col-xs-2 col-md-2">
-        <button id="feedbacksDrop" type="button" class="btn btn-sm btn-danger pull-right">Drop</button>
-      </div>
+      <h2 class="panel-title">Reviews</h2>
     </div>
     <div class="panel-body table-responsive">
       <table class="table table-hover">
@@ -119,12 +113,15 @@
               <span> No review submitted </span>
             {% endif %}
             {% for feedback in feedbacks %}
-            <tr class="feedback-row" data-id="{{feedback._id}}"><th>
-              <span class="ui-state-default">"{{feedback.comment}}"</li><br>
-              <small class="pull-right text-muted">
-              <small>rating: {{feedback.rating}}/5 </small><br>
-              <small>{{feedback.sender.displayName}} >>> {{feedback.receiver.displayName}}</small><br>
-              <span class="glyphicon glyphicon-time"></span> {{feedback.date}}</small><br><br>
+            <tr>
+              <th class="feedback-row" data-id="{{feedback._id}}" data-receiver="{{feedback.receiver._id}}">
+                <span class="ui-state-default">"{{feedback.comment}}"</li><br>
+                <small class="pull-right text-muted">
+                <small>rating: {{feedback.rating}}/5 </small><br>
+                <small>{{feedback.sender.displayName}} >>> {{feedback.receiver.displayName}}</small><br>
+                <span class="glyphicon glyphicon-time"></span> {{feedback.date}}</small><br><br>
+              </th>
+              <th><button type='button' class='delete-feedback close' data-id="{{feedback._id}}" aria-label='Close'><span aria-hidden='true'>&times;</span></button></th>
             </tr>
             {% endfor %}
           </tbody>
@@ -136,10 +133,7 @@
 <div id="trips" class="col-xs-12 col-md-4">
   <div class="panel panel-info" style="background: rgba(217, 237, 247,0.4)">
     <div class="panel-heading">
-      <div class="col-xs-10 col-md-10"><h2 class="panel-title">Trips</h2></div>
-      <div class="col-xs-2 col-md-2">
-        <button id="feedbacksDrop" type="button" class="btn btn-sm btn-danger pull-right">Drop</button>
-      </div>
+      <h2 class="panel-title">Trips</h2>
     </div>
     <div class="panel-body table-responsive">
         <div id="sortable"></div>
@@ -153,6 +147,7 @@
     <script src="js/bootstrap.min.js"></script>
     <script src="js/nav.js"></script>
     <script src="js/userList.js"></script>
+    <script src="js/admin.js"></script>
     <script src="js/log.js"></script>
     
   </body>

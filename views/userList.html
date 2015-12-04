@@ -74,8 +74,9 @@
 </nav>
 <div id="resultPanel"></div>
 
-  <div class="alert alert-success" role="alert">
-    Hi! <span id="displayName">{{ profile.displayName || profile.email }}</span>
+  <div class="alert alert-success alert-dismissible" role="alert">
+    <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+    <strong>Hi! </strong><span id="displayName">{{ profile.displayName || profile.email }}, fancy for a trip today?</span>
   </div>
 
 <div id="content" class="col-xs-12 col-md-4 col-md-offset-0">
@@ -157,18 +158,21 @@
               <thead>
                 <tr>
                   <th>Trip's Date</th>
-                  <th>Trip's Price</th>
+                  <th>From</th>
+                  <th>To</th>
                 </tr>
               </thead>
               <tbody>
               {% for trip in allTrips %}
                 <tr class="trip-row" data-id="{{trip._id}}">
                   <th>{{trip.date}}</th>
-                  {% if (trip.price == null) %}
+                  <th>{{trip.startPoint.text}}</th>
+                  <th>{{trip.endPoint.text}}</th>
+                  {#<!--{% if (trip.price == null) %}
                   <th>Any</th>
                   {% else %}
                   <th>{{trip.price}}</th>
-                  {% endif %}
+                  {% endif %}-->#}
                 </tr>
               {% endfor %}
               </tbody>

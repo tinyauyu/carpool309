@@ -6,6 +6,8 @@ $(document).ready(function(){
 		var currentTime = new Date();
 		var tempDate = $("#expectedDate").val().replace("T", " ") + " GMT-0500 (Eastern Standard Time)";
 		var expectedDate = new Date(tempDate);
+		var reg = /^\d+$/;
+		var checkPrice = $('#expectedPrice').val();
 		if (currentTime > expectedDate || expectedDate == null){
 			//Check for date entered is after the time right now
 			alert("Please Select a Date After RIGHT NOW!");
@@ -14,7 +16,15 @@ $(document).ready(function(){
 			alert("Please Enter your From And To places");
 		}
 		else if(provider == null){
-			alert("Please choose Trip Provider or Trip Wanted")
+			alert("Please choose Trip Provider or Trip Wanted");
+		}
+		else if (checkPrice != ''){
+			if (!reg.test(checkPrice)){
+				alert("Please Input a NUMBER only/nothing for price");
+			}
+			else{
+				updateTrip(provider,expectedDate);
+			}
 		}
 		else{
 			updateTrip(provider,expectedDate);
@@ -76,6 +86,8 @@ function showUsers(users){
 
 //Helper function: Getting Lat Long Using Goolge API:
 function updateTrip(provider,expectedDate){
+	startAddress_plain = $("#fromWhere").val();
+	endAddress_plain =  $("#toWhere").val();
 	startAddress = ($("#fromWhere").val()).replace(/[ ,.\#]/g,"+");
 	endAddress = ($("#toWhere").val()).replace(/[ ,.\#]/g,"+");
 	var date = expectedDate;
@@ -91,7 +103,7 @@ function updateTrip(provider,expectedDate){
 
 	$.ajax({
 		type: "GET",
-		url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + startAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk",
+		url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + startAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk&language=en",
 		success: function(data){
 			if (data.status == "ZERO_RESULTS"){
 				alert("Incorrect Address Entered");
@@ -99,15 +111,15 @@ function updateTrip(provider,expectedDate){
 			else {
 				var lat = Number(data.results[0].geometry.location.lat);
 				var lng = Number(data.results[0].geometry.location.lng);
-				latlng = {latitude: lat, longitude: lng};
+				latlng = {latitude: lat, longitude: lng, text: data.results[0].formatted_address};
 				trip.startPoint = latlng;
 				$.ajax({
 					type: "GET",
-					url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + endAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk",
+					url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + endAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk&language=en",
 					success: function(data){
 						var lat = Number(data.results[0].geometry.location.lat);
 						var lng = Number(data.results[0].geometry.location.lng);
-						latlng = {latitude: lat, longitude: lng};
+						latlng = {latitude: lat, longitude: lng, text: data.results[0].formatted_address};
 						trip.endPoint = latlng;
 						$.ajax({
 							type:"POST",

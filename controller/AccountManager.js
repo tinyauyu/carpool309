@@ -20,6 +20,7 @@ function AccountManager(url){  //mongodb://localhost/
 	/*** initialize variables ***/
 	UserSchema = require('./UserSchema.js').UserSchema;
 	User = mongoose.model('User', UserSchema);
+	User.collection.ensureIndex({email: 'text', description: 'text', displayName: 'text'}, function(error) {});
 
 }
 
@@ -233,7 +234,7 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							displayName: xss(displayName),
 							profilePic: profilePic,
 							admin: false,
-							ttotalRating: 0,
+							totalRating: 0,
 							numberOfRating: 0,
 							averageRating: 0,
 							fiveStars: 0,
@@ -354,16 +355,17 @@ AccountManager.prototype.getUser = function(id,callback){
 	User.findOne({_id: id}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
-			callback(false,null)
+			callback(false, null)
 		} else {
-			callback(true,user);
+			callback(true, user);
 		}
 	})
 }
+
 AccountManager.prototype.updateRating =  function(rating, receiver, callback){
 	var conditions = { _id: receiver }, options = {}, update ={};
-	this.getUser(receiver, function(err, user){
-		if(!err){
+	this.getUser(receiver, function(success, user){
+		if(!success){
 			callback(false, 'Error finding user');
 		}
 		else{
@@ -390,7 +392,58 @@ AccountManager.prototype.updateRating =  function(rating, receiver, callback){
 				default:
 					break;
 			}
-			user.averageRating = user.totalRating/ user.numberOfRating;
+			user.averageRating = user.totalRating / user.numberOfRating;
+			debug("user total rating: "+ user.totalRating);
+			debug("user num of rating: "+user.numberOfRating)
+			debug("user average rating: "+ user.averageRating);
+			User.findOneAndUpdate(conditions, user, options, function(err){
+				if(err){
+					callback(false,err);
+					return;
+				} else {
+					callback(true,"OK");
+					return;
+				}
+			});
+		}
+	});
+}
+
+AccountManager.prototype.removeRating =  function(rating, receiver, callback){
+	var conditions = { _id: receiver }, options = {}, update ={};
+	debug("removing rating for user#" + receiver);
+	this.getUser(receiver, function(success, user){
+		if(!success){
+			callback(false, user);
+		} else {
+			rating = parseInt(rating);
+			user.totalRating -= rating;
+			//console.log("updating total rating: "+ user.totalRating);
+			user.numberOfRating -= 1;
+			switch(rating) {
+				case 1:
+					user.oneStars-=1;
+					break;
+				case 2:
+					user.twoStars-=1;
+					break;
+				case 3:
+					user.threeStars-=1;
+					break;
+				case 4:
+					user.fourStars-=1;
+					break;
+				case 5:
+					user.fiveStars-=1;
+					break;
+				default:
+					break;
+			}
+			if(user.numberOfRating==0){
+				user.averageRating = 0;
+			} else {
+				user.averageRating = user.totalRating / user.numberOfRating;
+			}
 			User.findOneAndUpdate(conditions, user, options, function(err){
 				if(err){
 					callback(false,err);

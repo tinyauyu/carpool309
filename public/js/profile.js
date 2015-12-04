@@ -53,78 +53,6 @@ function isValidProfile(profile){
 
 }
 
-var map, map2;
-function initMap() {
-  var data = $('#fromWhere').data('info');
-  data = data.split(",");
-  var from = {lat: Number(data[0]), lng: Number(data[1])};
-  var to = {lat: Number(data[2]), lng: Number(data[3])};
-  var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 6,
-    center: from
-  });
-
-  var markerFrom = new google.maps.Marker({
-    position: from,
-    map: map,
-    title: 'From',
-  });
-
-  var markerTo = new google.maps.Marker({
-    position: to,
-    map: map,
-    title: 'To',
-  });
-
-  var lineSymbol = {
-    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
-  };
-
-  // Create the polyline and add the symbol via the 'icons' property.
-  var line = new google.maps.Polyline({
-    path: [from, to],
-    icons: [{
-      icon: lineSymbol,
-      offset: '100%'
-    }],
-    map: map
-  });
-
-  data = $('#fromUserWhere').data('info');
-  data = data.split(",");
-  from = {lat: Number(data[0]), lng: Number(data[1])};
-  to = {lat: Number(data[2]), lng: Number(data[3])};
-  var map2 = new google.maps.Map(document.getElementById('map2'), {
-    zoom: 6,
-    center: from
-  });
-
-  var markerFrom = new google.maps.Marker({
-    position: from,
-    map: map2,
-    title: 'From',
-  });
-
-  var markerTo = new google.maps.Marker({
-    position: to,
-    map: map2,
-    title: 'To',
-  });
-
-  var lineSymbol = {
-    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
-  };
-
-  // Create the polyline and add the symbol via the 'icons' property.
-  var line = new google.maps.Polyline({
-    path: [from, to],
-    icons: [{
-      icon: lineSymbol,
-      offset: '100%'
-    }],
-    map: map2
-  });
-}
 
 $(document).on('change', '#profilePic', function() {
   var reader = new FileReader();
@@ -433,35 +361,50 @@ function displayComments(profile_id, pageNumber){
       $('#pageNumbers').html(buttons);
       for(i = commentsPerPage*(pageNumber-1); i < Math.min(data.length,commentsPerPage*pageNumber); i++){
         var info = data[i];
-        var senderId = info.sender;
-        var comment = info.comment;
-        var request = $.ajax({
-          type: 'GET',
-          url: '/api/users/' + senderId,
-          async: false,
-          success: function(user){
-            console.log(user.displayName);
-            if(user.displayName == ""){
-              user.displayName = user.email;
+            if(info.sender.displayName == ""){
+              info.sender.displayName = user.email;
             }
-            list+='<p class="pull-left primary-font margin-left">' + user.displayName + '</p><br>';
+            list+='<div class="feedback-row" data-id="'+info._id+'">';
+            list+='<li class="ui-state-default">"' + info.comment + '"</li>';
             list+='<small class="pull-right text-muted">' +
+              '<small><a href="/users/'+info.sender._id+'">' + info.sender.displayName + '</a></small><br>' +
               '<small>rating: ' + info.rating + '/5 </small><br>'+
               '<span class="glyphicon glyphicon-time"></span>'
               +info.date + '</small>';
             list += '<br><br>';
             //list += '<small>rating: ' + info.rating + '/5 </small><br>'
-            list += '<li class="ui-state-default">' + comment + '</li>';
             list +='<br>';
+            list+='</div>';
 
-          },
-          error: function(jqxhr, textStatus, errorThrown){
-            alert(errorThrown);
-          }
-        });
+            $('#sortable').html(list);
+
+            addDeleteBtn(info.sender._id, info._id, function(isAuth, id){
+              if(isAuth){
+                console.log($('.feedback-row[data-id='+id+']'));
+                $('.feedback-row[data-id='+id+']').prepend('<button type="button" class="delete-feedback close" data-id="'+info._id+'" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+              }
+              $('.delete-feedback[data-id='+id+']').click(function(){
+                var id = $(this).data('id');
+                //alert(id);
+                var c = confirm("Are you sure to delete this review (#"+id+")?");
+                if(c){
+                  $.ajax({
+                    type: "DELETE",
+                    url: "/api/feedbacks/" + id,
+                    success: function(){
+                      $('.feedback-row[data-id='+id+']').parent().remove();
+                    },
+                    error: function(err){
+                      alert(err);
+                    }
+                  })
+                }
+              })
+            });
       }
-      $('#sortable').html(list);
+
     },
+    
     error: function(jqxhr, textStatus, errorThrown){
       alert(errorThrown);
     }
@@ -554,3 +497,24 @@ var __slice = [].slice;
         }
     })
 })(window.jQuery, window);
+
+function addDeleteBtn(senderId, feedbackId, callback){
+  $.ajax({
+      type: 'GET',
+      url: "/api/users/current",
+      success: function(data){
+        console.log(data.userType);
+        console.log(data._id);
+        if(data.userType>=1){
+          callback(true,feedbackId);
+        } else if (data._id==senderId){
+          callback(true,feedbackId);
+        } else {
+          //callback(false);
+        }
+      },
+      error: function(jqxhr, textStatus, errorThrown){
+        //callback(false);
+      }
+    });
+}
