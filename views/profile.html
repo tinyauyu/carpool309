@@ -307,8 +307,9 @@
             <textarea class="form-control" id="cbox" rows="2" cols="150" name="comment" placeholder="Enter your review here..."></textarea>
 
             <div class="stars starrr" data-rating="0"></div>
+            {% if (user.email != profile.email) %}
             <button id='save' class="btn btn-primary btn-md"><span class="glyphicon glyphicon-comment"></span>Save</button>
-
+            {% endif %}
         <!--/form-->
         <!--textarea row="4" form ="xxformneed to be filled" id="userComment" class="form-control input-sm chat-input" placeholder="Write your message here..." ></textarea>
   	    <span class="input-group-btn" onclick="addComment()" id='commentButton'>

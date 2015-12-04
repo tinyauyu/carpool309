@@ -271,6 +271,7 @@ $( document ).ready( function(){
     var feedback = {'comment': comment, 'rating': star, 'sender':'',
     'receiver': '', 'date': date};
     var profile_id = $('#profile').data('value');
+    var currentUser = $('#profilePic_buffer').data('id');
     //alert(comment +'  s: ' +star);
     $.ajax({
       type: 'POST',
@@ -295,7 +296,6 @@ $( document ).ready( function(){
     displayComments($('#profile').data('value'), page);
   });
   displayComments($('#profile').data('value'),1);
-
 });
 
 $.fn.editable.defaults.mode = 'inline';
