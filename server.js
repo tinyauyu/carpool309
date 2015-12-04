@@ -10,13 +10,18 @@ var session = require('client-sessions');
 var swig  = require('swig');
 var express = require('express');
 var app = express();
+var compression = require('compression');
 
 var ROOT = { root: __dirname+'/public' };
 
+app.use(compression());
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
-app.use(express.static(__dirname + '/public'));
-//app.use(bodyParser.json());
+app.use(express.static(__dirname + '/public',{
+	maxAge: 86400000
+}));
+
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 var salt = bcrypt.genSaltSync(10);
@@ -29,7 +34,8 @@ app.use(session({
   httpOnly: true
 }));
 
-/*var Ddos = require('ddos')
+/*
+var Ddos = require('ddos')
 var ddos = new Ddos({
 	maxcount: 30,
 	burst: 8,
@@ -72,6 +78,7 @@ app.use(function(req, res, next) {
 		}
 	}
 });
+
 
 var MONGODB_URL = 'mongodb://localhost/';
 //var MONGODB_URL = 'mongodb://carpool309:muchbetterthanuber@ds055564.mongolab.com:55564/heroku_7wrc6q07';
@@ -223,7 +230,7 @@ app.get('/admin', function(req,res){
 			res.redirect('/users');
 		}
 	});
-})
+});
 /********************** View *************************/
 
 /********************** User Account *************************/
@@ -246,7 +253,7 @@ app.delete('/api/users/:id', function(req, res){
 			res.end(msg);
 		}
 	})
-})
+});
 
 app.post('/api/login', function(req, res) {
 
@@ -397,9 +404,7 @@ app.put('/api/changePassword', function (req, res){
 			}
 		})
 	}
-
-
-})
+});
 
 
 app.get('/api/users', function(req, res){
@@ -417,7 +422,7 @@ app.get('/api/users/search', function(req, res){
 			res.end("Internal Server Error");
 		}
 	})
-})
+});
 
 app.get('/api/users/current', function(req,res){
 	acManager.getUser(req.session._id, function(success, user){
