@@ -49,6 +49,10 @@ function showChatWindow(data) {
         //ele.attr('id', 'msgYouGet');
       }
     }
+
+    $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
+    console.log('down')
+
     var displayName = data.user.displayName;
     if (!displayName) {
       displayName = sender;

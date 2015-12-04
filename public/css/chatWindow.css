@@ -65,7 +65,7 @@
     border-bottom: 1px dotted #B3A9A9;
 
 }
-#displayName {
+.chatHead #displayName {
     margin-left: 60px;
     margin-top: 7px;
     white-space: nowrap; 

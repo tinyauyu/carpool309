@@ -393,6 +393,7 @@ function displayComments(profile_id, pageNumber){
                     url: "/api/feedbacks/" + id,
                     success: function(){
                       $('.feedback-row[data-id='+id+']').parent().remove();
+                      location.reload();
                     },
                     error: function(err){
                       alert(err);
