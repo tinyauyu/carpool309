@@ -136,7 +136,40 @@
       <h2 class="panel-title">Trips</h2>
     </div>
     <div class="panel-body table-responsive">
-        <div id="sortable"></div>
+      <div class="">
+        {% if (allTrips != '' || allTrips != null)%}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>From</th>
+                  <th>To</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for trip in allTrips %}
+                <tr class="trip-row" data-id="{{trip._id}}">
+                  <th>{{trip.user.displayName}}</th>
+                  <th>
+                  {% if trip.provider %}
+                  Provider
+                  {% else %}
+                  Wanter
+                  {% endif %}
+                  </th>
+                  <th>{{trip.startPoint.text}}</th>
+                  <th>{{trip.endPoint.text}}</th>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <span>You haven't searched a trip! Start one right now!</span>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

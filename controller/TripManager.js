@@ -169,7 +169,7 @@ TripManager.prototype.findAllTripsByUser = function (userId, callback){
 }
 
 TripManager.prototype.findAllTrips = function (callback){
-	Trip.find({}, function (err, trip){
+	Trip.find({}).populate('user').exec(function (err, trip){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");

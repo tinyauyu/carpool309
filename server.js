@@ -221,9 +221,11 @@ app.get('/admin', function(req,res){
 		if(profile.userType>=1){
 			acManager.getUserList(function(users){
 				feedbackManager.getAllFeedback(function(success,feedbacks){
-					res.render('admin.html', {
-		   				profile: profile, users: users, feedbacks: feedbacks, numOnlineUsers: msgManager.getNumOnlineUsers()
-					});
+					tripManager.findAllTrips(function(success, trips){
+						res.render('admin.html', {
+			   				allTrips: trips, profile: profile, users: users, feedbacks: feedbacks, numOnlineUsers: msgManager.getNumOnlineUsers()
+						});
+					})
 				})
 			})
 		} else {
