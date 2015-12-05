@@ -367,7 +367,8 @@ function displayComments(profile_id, pageNumber){
               info.sender.displayName = info.sender.email;
             }
             list+='<div class="feedback-row" data-id="'+info._id+'">';
-            list+='<li class="ui-state-default">"' + info.comment + '"</li>';
+            list+='<li class="ui-state-default">'
+            + info.comment + '"</li>';
             list+='<small class="pull-right text-muted">' +
               '<small><a href="/users/'+info.sender._id+'">' +
               info.sender.displayName + '</a></small><br>' +
@@ -378,7 +379,7 @@ function displayComments(profile_id, pageNumber){
             //list += '<small>rating: ' + info.rating + '/5 </small><br>'
             list +='<br>';
             list+='</div>';
-            console.log('hihihi ' + list);
+
             $('#sortable').html(list);
 
             addDeleteBtn(info.sender._id, info._id, function(isAuth, id){
