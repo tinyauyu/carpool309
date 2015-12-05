@@ -136,7 +136,7 @@ describe('HTTP Server Test', function(){
       post_req.end();
     });
 
-		it('should login fail', function(done){
+		it('should login fail when wrong email', function(done){
 
       userInfo = {email: 'noexist@test.com', password:{
           plain:'test'
@@ -175,7 +175,7 @@ describe('HTTP Server Test', function(){
       post_req.write(post_data);
       post_req.end();
     });
-		it('should login fail 2', function(done){
+		it('should login fail when wrong password', function(done){
 
       userInfo = {email: 'test@test.com', password:{
           plain:'wrong password'
@@ -476,23 +476,51 @@ describe('HTTP Server Test', function(){
     });
 		it('should create feedback fail with no sender',
 		function(done){
-       feedbackwrong = { comment: 'wrong testing feedback',
+       var feedbackwrong = { comment: 'wrong testing feedback',
             rating: '5',
-            sender: null,
-            receiver: '0',
+            sender: undefined,
+            receiver: 1,
             date: 'Fri Dec 04 2015 15:24:51 GMT-0500 (EST)' };
       //createFeedback
-      feedbackManager.createFeedback(feedbacks,
+      feedbackManager.createFeedback(feedbackwrong,
 				function(success, data){
-					console.log(data);
-        	if(!success){
-						console.log(data);
-
-					}
+					assert(!success);
+					assert.equal('Feedback must have a sender.', data);
 					done();
       });
     });
-
+		it('should create feedback fail with no comment',
+		function(done){
+       var feedbackwrong = { comment: '',
+            rating: '5',
+            sender: 0,
+            receiver: 1,
+            date: 'Fri Dec 04 2015 15:24:51 GMT-0500 (EST)' };
+      //createFeedback
+      feedbackManager.createFeedback(feedbackwrong,
+				function(success, data){
+					assert(!success);
+					assert.equal('Feedback must contain either comment or rating.'
+						, data);
+					done();
+      });
+    });
+		it('should create feedback fail with no rating',
+		function(done){
+       var feedbackwrong = { comment: '',
+            rating: null,
+            sender: 0,
+            receiver: 1,
+            date: 'Fri Dec 04 2015 15:24:51 GMT-0500 (EST)' };
+      //createFeedback
+      feedbackManager.createFeedback(feedbackwrong,
+				function(success, data){
+					assert(!success);
+					assert.equal('Feedback must contain either comment or rating.'
+						, data);
+					done();
+      });
+    });
 
     //make sure we insert correctly
     var feedBackId;
