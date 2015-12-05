@@ -200,3 +200,11 @@ dd{
 .rtSideBtn{
     margin-right: 0px;
 }
+
+.top{
+    z-index: 10000;
+}
+
+a{
+    color: #777;
+}

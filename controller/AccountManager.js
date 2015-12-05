@@ -4,6 +4,7 @@ var autoIncrement = require('mongoose-auto-increment');
 var path = require('path');
 var bcrypt = require('bcrypt');
 var https = require('https');
+var xss = require('xss');
 
 var UserSchema, User;
 
@@ -19,6 +20,7 @@ function AccountManager(url){  //mongodb://localhost/
 	/*** initialize variables ***/
 	UserSchema = require('./UserSchema.js').UserSchema;
 	User = mongoose.model('User', UserSchema);
+	User.collection.ensureIndex({email: 'text', description: 'text', displayName: 'text'}, function(error) {});
 
 }
 
@@ -52,7 +54,7 @@ AccountManager.prototype.loginGoogle = function(profile, callback){
 	};
 
 	https.request(options, function(res){
-		console.log(res.statusCode);
+		//console.log(res.statusCode);
 		res.setEncoding('utf8');
 		res.on('data', function(d) {
 			var googleProfile = JSON.parse(d);
@@ -82,19 +84,8 @@ AccountManager.prototype.getUserList = function(callback){
 	})
 }
 
-AccountManager.prototype.getUser = function(id,callback){
-	console.log(id);
-	User.findOne({_id: id}, function(err, user){
-		if(err) {throw err;}
-		if(!user){
-			callback(false,null)
-		} else {
-			callback(true,user);
-		}
-	})
-}
 AccountManager.prototype.getUserByEmail = function(email, callback){
-	console.log(email);
+	debug("Get user by email: "+email);
 	User.findOne({email: email}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
@@ -159,8 +150,8 @@ AccountManager.prototype.createUser = function(profile, callback){
 					userType: userType,
 					email: profile.email,
 					password: {hash: passwordHash, enabled: true},
-					description: profile.description,
-					displayName: profile.displayName,
+					description: xss(profile.description),
+					displayName: xss(profile.displayName),
 					profilePic: profilePic,
 					admin: false,
 					totalRating: 0,
@@ -240,10 +231,10 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							email: email,
 							password: {enabled:false},
 							//description: profile.description,
-							displayName: displayName,
+							displayName: xss(displayName),
 							profilePic: profilePic,
 							admin: false,
-							ttotalRating: 0,
+							totalRating: 0,
 							numberOfRating: 0,
 							averageRating: 0,
 							fiveStars: 0,
@@ -334,6 +325,14 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 			callback(false,"You have no right to update this profile!");
 			return;
 		} else {
+
+			for (var key in profile) {
+			   if (profile.hasOwnProperty(key)) {
+			   	profile[key] = xss(profile[key]);
+			   }
+			}
+
+
 			// check field to update
 			User.findOneAndUpdate({_id: profile._id}, profile, function(err){
 				if(err){
@@ -352,20 +351,21 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 
 
 AccountManager.prototype.getUser = function(id,callback){
-	console.log(id);
+	debug("Get profile of user#"+id);
 	User.findOne({_id: id}, function(err, user){
 		if(err) {throw err;}
 		if(!user){
-			callback(false,null)
+			callback(false, null)
 		} else {
-			callback(true,user);
+			callback(true, user);
 		}
 	})
 }
+
 AccountManager.prototype.updateRating =  function(rating, receiver, callback){
 	var conditions = { _id: receiver }, options = {}, update ={};
-	this.getUser(receiver, function(err, user){
-		if(!err){
+	this.getUser(receiver, function(success, user){
+		if(!success){
 			callback(false, 'Error finding user');
 		}
 		else{
@@ -392,7 +392,58 @@ AccountManager.prototype.updateRating =  function(rating, receiver, callback){
 				default:
 					break;
 			}
-			user.averageRating = user.totalRating/ user.numberOfRating;
+			user.averageRating = user.totalRating / user.numberOfRating;
+			debug("user total rating: "+ user.totalRating);
+			debug("user num of rating: "+user.numberOfRating)
+			debug("user average rating: "+ user.averageRating);
+			User.findOneAndUpdate(conditions, user, options, function(err){
+				if(err){
+					callback(false,err);
+					return;
+				} else {
+					callback(true,"OK");
+					return;
+				}
+			});
+		}
+	});
+}
+
+AccountManager.prototype.removeRating =  function(rating, receiver, callback){
+	var conditions = { _id: receiver }, options = {}, update ={};
+	debug("removing rating for user#" + receiver);
+	this.getUser(receiver, function(success, user){
+		if(!success){
+			callback(false, user);
+		} else {
+			rating = parseInt(rating);
+			user.totalRating -= rating;
+			//console.log("updating total rating: "+ user.totalRating);
+			user.numberOfRating -= 1;
+			switch(rating) {
+				case 1:
+					user.oneStars-=1;
+					break;
+				case 2:
+					user.twoStars-=1;
+					break;
+				case 3:
+					user.threeStars-=1;
+					break;
+				case 4:
+					user.fourStars-=1;
+					break;
+				case 5:
+					user.fiveStars-=1;
+					break;
+				default:
+					break;
+			}
+			if(user.numberOfRating==0){
+				user.averageRating = 0;
+			} else {
+				user.averageRating = user.totalRating / user.numberOfRating;
+			}
 			User.findOneAndUpdate(conditions, user, options, function(err){
 				if(err){
 					callback(false,err);
@@ -433,7 +484,8 @@ AccountManager.prototype.changePassword = function(profile, callback){
 }
 
 AccountManager.prototype.log = function(user, callback){
-	User.findOneAndUpdate({id: user.id}, user, function(err){
+	debug(user);
+	User.findOneAndUpdate({_id: user.id}, user, function(err){
 		if(err){
 			callback(false, err);
 			return;
@@ -442,6 +494,32 @@ AccountManager.prototype.log = function(user, callback){
 			return;
 		}
 	})
+}
+
+AccountManager.prototype.searchUser = function(keyword, callback){
+	User.find({ $text: { $search: keyword} },'_id email displayName', function(err, users){
+		if(err){
+			debug(err);
+			callback(false,err);
+		} else {
+			callback(true,users);
+		}
+	})
+	/*
+	User.textSearch(keyword, function(err, result){
+		if(err){
+			debug(err);
+			callback(false, err);
+		} else {
+			var users;
+			for (i in result.results){
+				debug(result.results[i].score);
+				users[i] = result.results[i].obj;
+			}
+			callback(true,users);
+		}
+	});
+	*/
 }
 
 module.exports = AccountManager;

@@ -10,13 +10,18 @@ var session = require('client-sessions');
 var swig  = require('swig');
 var express = require('express');
 var app = express();
+var compression = require('compression');
 
 var ROOT = { root: __dirname+'/public' };
 
+app.use(compression());
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
-app.use(express.static(__dirname + '/public'));
-//app.use(bodyParser.json());
+app.use(express.static(__dirname + '/public',{
+	maxAge: 86400000
+}));
+
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 var salt = bcrypt.genSaltSync(10);
@@ -26,8 +31,21 @@ app.use(session({
   secret: secret,
   duration: 30 * 60 * 1000,
   activeDuration: 5 * 60 * 1000,
-  httpOnly:false
+  httpOnly: true
 }));
+
+/*
+var Ddos = require('ddos')
+var ddos = new Ddos({
+	maxcount: 30,
+	burst: 8,
+	limit: 8 * 30,
+	maxexpiry: 120,
+	checkinterval : 0.5,
+	errormessage : '[DDOS Alert] Please wait 120 seconds and try again!',
+	testmode: false
+});
+app.use(ddos.express)*/
 
 var server = app.listen(process.env.PORT || 3000, function () {
   var host = server.address().address;
@@ -51,6 +69,7 @@ app.use(function(req, res, next) {
 		    		return;
 		    	}
 		    	// finishing processing the middleware and run the route
+
 		    	next();
 		    });
 		} else {
@@ -59,6 +78,7 @@ app.use(function(req, res, next) {
 		}
 	}
 });
+
 
 var MONGODB_URL = 'mongodb://localhost/';
 //var MONGODB_URL = 'mongodb://carpool309:muchbetterthanuber@ds055564.mongolab.com:55564/heroku_7wrc6q07';
@@ -181,8 +201,10 @@ app.get('/users/:id', function(req, res){
 app.get('/users', function(req, res){
 	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
-			res.render('userList.html', {
-   				profile: profile, users: users
+			tripManager.findAllTripsByUser(req.session._id,function(success, allTrips){
+				res.render('userList.html', {
+	   				profile: profile, users: users, allTrips:allTrips
+				});
 			});
 		})
 	});
@@ -192,6 +214,22 @@ app.get('/users', function(req, res){
 	var page = "/users";
 	//acManager.logPage(user,page);
 
+});
+
+app.get('/admin', function(req,res){
+	acManager.getUser(req.session._id,function(success, profile){
+		if(profile.userType>=1){
+			acManager.getUserList(function(users){
+				feedbackManager.getAllFeedback(function(success,feedbacks){
+					res.render('admin.html', {
+		   				profile: profile, users: users, feedbacks: feedbacks, numOnlineUsers: msgManager.getNumOnlineUsers()
+					});
+				})
+			})
+		} else {
+			res.redirect('/users');
+		}
+	});
 });
 /********************** View *************************/
 
@@ -215,7 +253,7 @@ app.delete('/api/users/:id', function(req, res){
 			res.end(msg);
 		}
 	})
-})
+});
 
 app.post('/api/login', function(req, res) {
 	if(req.query.type=="google"){
@@ -363,9 +401,7 @@ app.put('/api/changePassword', function (req, res){
 			}
 		})
 	}
-
-
-})
+});
 
 
 app.get('/api/users', function(req, res){
@@ -373,6 +409,17 @@ app.get('/api/users', function(req, res){
 	acManager.getUserList(function(users){
 		res.send(users);
 	});
+});
+
+app.get('/api/users/search', function(req, res){
+	acManager.searchUser(req.query.keyword, function(success, users){
+		if(success){
+			res.send(users);
+		} else {
+			res.writeHead(400,"Internal Server Error");
+			res.end("Internal Server Error");
+		}
+	})
 });
 
 app.get('/api/users/current', function(req,res){
@@ -401,6 +448,32 @@ app.get('/api/users/:id/profilePic', function(req, res){
 	})
 });
 
+app.post('/api/log', function(req, res){
+	var b = JSON.parse(req.body.json);
+
+	var behavior = {
+		ip_addr : req.connection.remoteAddress,
+		browser: b.browser,
+		os: b.os,
+		mobile: b.mobile,
+		screenSize: b.screenSize,
+		location: b.location
+	}
+
+	var user = {
+		id: req.session._id,
+		behavior: behavior
+	}
+	acManager.log(user, function(success, msg){
+		if(success){
+			res.send("OK");
+		} else {
+			res.writeHead(400,msg);
+			res.end(msg);
+		}
+	})
+});
+
 /********************** User Account *************************/
 
 /********************** Feedback **********************/
@@ -413,6 +486,7 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 	feedbackManager.createFeedback(feedback, function(success,msg){
 		if(success){
       //update rating for the user
+      debug("feedback.receiver = "+feedback['receiver'])
       acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
     		if(success){
     			res.send(msg);
@@ -452,24 +526,40 @@ app.get('/api/feedbacks', function(req, res){
 });
 
 app.get('/api/feedbacks/:id', function(req, res){
-	feedbackManager.getFeedbackById(req.params.id, function(success,feedbacks){
+	feedbackManager.getFeedbackById(req.params.id, function(success,feedback){
 		if(success){
-			res.send(JSON.stringify(feedbacks));
+			res.send(JSON.stringify(feedback));
 		} else {
-			res.writeHead(400,feedbacks);
-			res.end(feedbacks);
+			res.writeHead(400,feedback);
+			res.end(feedback);
 		}
 	})
 });
 
 app.delete('/api/feedbacks/:id', function(req, res){
-	feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
-		if(success){
-			res.send(JSON.stringify(feedbacks));
-		} else {
-			res.writeHead(400,feedbacks);
-			res.end(feedbacks);
-		}
+	feedbackManager.getFeedbackById(req.params.id, function(success, feedback){
+		debug(feedback)
+		debug(feedback.rating);
+		debug(feedback.receiver);
+      //update rating for the user
+      acManager.removeRating(feedback.rating, feedback.receiver, function(success,msg){
+    		if(success){
+    			feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
+					if(success){
+						debug("delete ok")
+						res.send(req.params.id.toString());
+					} else {
+						debug(feedbacks)
+						res.writeHead(400,feedbacks);
+						res.end(feedbacks);
+					}
+				})
+    		} else {
+    			debug(msg);
+    			res.writeHead(400,msg);
+    			res.end(msg);
+    		}
+      });
 	})
 });
 /********************** Feedback **********************/
@@ -485,7 +575,7 @@ app.get('/api/users/:email/chatWindow/', function(req, res) {
 			acManager.getUserByEmail(req.params.email, function(success, user){
 				if(success){
 					var profilePic = user.profilePic;
-					console.log(profilePic);
+					//debug(profilePic);
 					var chatWindow = {user: user, window: data, profilePic: profilePic};
 					res.send(chatWindow);
 				} else {
@@ -519,8 +609,8 @@ app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 	var user1 = req.params.user1;
 	var user2 = req.params.user2;
-	console.log(user1);
-	console.log(user2);
+	debug(user1);
+	debug(user2);
 	msgManager.getConversation(user1, user2, function(success, messages) {
 		if (success) {
 			res.send(JSON.stringify(messages));
@@ -576,6 +666,17 @@ app.post('/api/updateTrip', function(req,res){
 	});
 });
 
+app.get('/api/trips', function(req,res){
+	tripManager.findAllTrips(function(success, trips){
+		if(success){
+			res.send(trips)
+		} else {
+			res.writeHead(400,trips);
+			res.end(msg);
+		}
+	})
+})
+
 app.get('/searchTrip/:id', function(req,res){
 	var tripId = req.params.id;
 	req.session.tripId = tripId;
@@ -583,7 +684,9 @@ app.get('/searchTrip/:id', function(req,res){
 		if (success){
 			tripManager.searchSimilarTrip(tripId, function(success,similarTrips){
 				if (success){
-					res.render('trips.html', {trips: trips, similarTrips: similarTrips});
+					acManager.getUser(req.session._id, function(success, profile){
+						res.render('trips.html', {profile: profile, trips: trips, similarTrips: similarTrips});
+					})
 				}
 				else {
 					res.writeHead(400,trips);
@@ -601,17 +704,8 @@ app.get('/searchTrip/:id', function(req,res){
 /***********************Search&Trip*******************/
 
 
-app.post('/api/log', function(req, res){
-	var b = JSON.parse(req.body.json);
+/********************** Admin Panel **********************/
 
-	var behavior = {
-		ip_addr : req.connection.remoteAddress,
-		browser: b.browser,
-		os: b.os,
-		mobile: b.mobile,
-		screenSize: b.screenSize,
-		location: b.location
-	}
 
 	var user = {
 		id: req.session.id,

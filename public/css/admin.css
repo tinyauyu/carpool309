@@ -14,11 +14,11 @@
 }
 
 .input-group{
-    margin-bottom:4px;
+	margin-bottom:4px;
 }
 
 section{
-    position:absolute;
+	position:absolute;
     top:0; right:0;
     bottom:0; left:0;
     font-size: 16px;
@@ -27,7 +27,7 @@ section{
 .vcenter { display:table-cell; vertical-align:middle; }
 
 h1{
-    font-weight: bold;
+	font-weight: bold;
 }
 
 dt{
@@ -41,11 +41,7 @@ dd{
 }
 
 
-.trip-row:hover {
-    cursor: pointer;
-}
-
-.similar-trip-row {
+.user-row:hover {
     cursor: pointer;
 }
 
@@ -53,12 +49,27 @@ dd{
     object-fit: cover;
 }
 
-#recommendation{ 
-    overflow-y: auto;
-    height: 300px;
+#recommendation{
+    position: fixed; 
+    top: 35%; 
+    right: 2%;
+}
+.glyphicon-envelope{
+    font-size: 25px;
+    padding-right: 0px
 }
 
-#content{
-    overflow-y: auto;
-    height: 400px;
+#resultPanel {
+    position: absolute;
+    right: 0px;
+    width:300px;
+    z-index: 1;
+}
+
+.W_new_count {
+    position: absolute;
+    right: -4px;
+    top: 2px;
+    font-size: 13px;
+    color: red;
 }

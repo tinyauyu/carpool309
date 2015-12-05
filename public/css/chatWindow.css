@@ -59,3 +59,17 @@
 .rtSideBtn{
     margin-right: 0px;
 }
+#messages div#chat-body {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #B3A9A9;
+
+}
+.chatHead #displayName {
+    margin-left: 60px;
+    margin-top: 7px;
+    white-space: nowrap; 
+    width: 130px; 
+    overflow: hidden;
+    text-overflow: ellipsis; 
+}

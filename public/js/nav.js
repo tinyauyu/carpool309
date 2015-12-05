@@ -1,5 +1,4 @@
 $( document ).ready( function(){
-  console.log('nav.js');
   $.ajax({
     type: "GET",
     url: "/api/users/current/profilePic",
@@ -23,19 +22,42 @@ function showChatWindow(data) {
   var receiver = getLoggedInUser();
   var show = function(msgs) {
     msgs = JSON.parse(msgs);
-    console.log(data.html);
     $("#resultPanel").html(data.window);
     $("#resultPanel").attr('sendto', sender);
     for (i = 0; i < msgs.length; i++) {
       var msg = msgs[i];
-      var ele = $('<p>');
-      $('#messages').append(ele.text(msg.content));
+      var ele;
+      var content;
       if (msg.sender == receiver) {
-        ele.attr('id', 'msgYouSend');
+        ele = $('<div id="chat-body" class="pull-right clearfix" style="width:260px">');
+        content =$('<div class="pull-left clearfix" style="width:200px">');
+        ele.append('<span class="chat-img pull-right"><img src="/img/me.png" alt="User Avatar" class="img-circle" /></span>');
+        content.append($('<p id="time" style="text-align:right">').text(dateToStr(new Date(msg.date))));
+        content.append($('<p id="text" style="text-align:right">').text(msg.content));
+        ele.append(content);
+        $("#messages").append(ele);
+
+        //ele.attr('id', 'msgYouSend');
       } else {
-        ele.attr('id', 'msgYouGet');
+        ele = $('<div id="chat-body" class="pull-left clearfix" style="width:260px">');
+        content =$('<div class="pull-right clearfix" style="width:200px">');
+        ele.append('<span class="chat-img pull-left"><img src="/img/u.png" alt="User Avatar" class="img-circle" /></span>');
+        content.append($('<p id="time" style="text-align:left">').text(dateToStr(new Date(msg.date))));
+        content.append($('<p id="text" style="text-align:left">').text(msg.content));
+        ele.append(content);
+        $("#messages").append(ele);
+        //ele.attr('id', 'msgYouGet');
       }
-    };
+    }
+
+    $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
+    console.log('down')
+
+    var displayName = data.user.displayName;
+    if (!displayName) {
+      displayName = sender;
+    }
+    $("#displayName").text(displayName);
     $.ajax({
       type: "GET",
       url: "/api/users/"+data.user._id+"/profilePic",
@@ -117,3 +139,22 @@ socket.on('chat message', function(data) {
   }
   getUnreadMsgs();
 });
+
+function dateToStr(date) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    if (parseInt(day) < 10) {
+        day = "0" + day;
+    }
+    var year = date.getFullYear();
+    var hour = date.getHours();
+    if (parseInt(hour) < 10) {
+        hour = "0" + hour;
+    }
+    var min = date.getMinutes();
+    if (parseInt(min) < 10) {
+        min = "0" + min;
+    }
+
+    return year + "-" + month + "-" + day + ", " + hour + ": " + min; 
+}

@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
 
 var cons = {};
+var numOnlineUser = 0;
 
 function MessageManager(url, server){
     mongoose.createConnection(url);
@@ -18,6 +19,7 @@ function MessageManager(url, server){
     
     this.client = require('socket.io').listen(server).sockets;
     this.client.on('connection', function(socket) {
+        numOnlineUser++;
         socket.on('register', function(data) {
             cons[data.sender] = socket.id;
         });
@@ -30,14 +32,16 @@ function MessageManager(url, server){
              });
              newMsg.save(function(error, data) {
                  if(error) {
-                    console.log(error);
-                    console.log("Fail to save message");
+                    debug(error);
+                    debug("Fail to save message");
+                 } else {
+                    socket.to(cons[data.receiver]).emit('chat message', data);
                  }
              });
-            socket.to(cons[data.receiver]).emit('chat message', data);
         });
         socket.on('disconnect', function() {
-            console.log('user disconnected');
+            debug('user disconnected');
+            numOnlineUser--;
         });
     });
 };
@@ -106,6 +110,10 @@ MessageManager.prototype.markMsgRead = function(sender, receiver) {
     Message.update({sender: sender, receiver: receiver}, {$set: {alreadyRead: true}}, {multi: true}, function(err, docs) {
         return;
     });
+}
+
+MessageManager.prototype.getNumOnlineUsers = function(callback){
+    return numOnlineUser;
 }
 
 

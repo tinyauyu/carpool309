@@ -4,7 +4,6 @@ var isClickedSignIn = false;
       console.log(googleUser);
 
       if(!isClickedSignIn){
-        gapi.auth.signOut();
         return;
       }
 

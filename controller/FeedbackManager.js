@@ -1,6 +1,7 @@
 var debug = require('debug')('FeedbackManager.js');
 var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
+var xss = require('xss');
 
 var FeedbackSchema;
 
@@ -40,6 +41,8 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 		}
 		/***********************/
 
+		feedback.comment = xss(feedback.comment);
+
 		var newFeedback = new Feedback(feedback);
 
 		newFeedback.save(function(error, data){
@@ -58,7 +61,7 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 }
 
 FeedbackManager.prototype.getFeedbackByUser = function(toUserId,callback){
-	Feedback.find({receiver:toUserId}, function(err, feedbacks) {
+	Feedback.find({receiver:toUserId}).populate('sender receiver').exec(function(err, feedbacks) {
 		if(err){
 			console.log("[ERROR]\t[FeedbackManager.js]\tCannot get feedbacks from database: " + err);
 			callback(false, "Internal Server Error");
@@ -72,7 +75,7 @@ FeedbackManager.prototype.getFeedbackByUser = function(toUserId,callback){
 }
 
 FeedbackManager.prototype.getFeedbackById = function(id,callback){
-	Feedback.find({_id:id}, function(err, feedback) {
+	Feedback.findOne({_id:id}, function(err, feedback) {
 		if(err){
 			console.log("[ERROR]\t[FeedbackManager.js]\tCannot get feedback from database: " + err);
 			callback(false, "Internal Server Error");
@@ -114,7 +117,7 @@ FeedbackManager.prototype.deleteFeedbacksByUser = function(userId,callback){
 }
 
 FeedbackManager.prototype.getAllFeedback = function(callback){
-	Feedback.find({}, function(err, feedbacks) {
+	Feedback.find({}).populate('sender receiver').exec(function(err, feedbacks) {
 		if(err){
 			console.log("[ERROR]\t[FeedbackManager.js]\tCannot get feedbacks to database: " + err);
 			callback(false, "Internal Server Error");
