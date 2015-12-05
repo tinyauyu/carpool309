@@ -135,7 +135,7 @@ app.get('/users/:id', function(req, res){
 				//TODO: if exite, if not exits, get the trip object and pass in to render
 				res.render('profile.html', {
 	   				profile: profile, user: user, mostVisitedPage: "***disabled***"
-				});	
+				});
 			})
 		});
 	}
@@ -164,7 +164,7 @@ app.get('/users/:id', function(req, res){
 								res.redirect('/users');
 								return;
 							}
-							else {					
+							else {
 								res.render('profile.html', {
 					   				profile: profile, user: user, mostVisitedPage: "***disabled***", trip: trip, userTrip: userTrip
 								});
@@ -173,7 +173,7 @@ app.get('/users/:id', function(req, res){
 					}
 				});
 			});
-		});		
+		});
 	}
 
 });
@@ -218,7 +218,6 @@ app.delete('/api/users/:id', function(req, res){
 })
 
 app.post('/api/login', function(req, res) {
-
 	if(req.query.type=="google"){
 		debug("GOOGLE LOGIN!")
 		var profile = JSON.parse(req.body.json);
@@ -259,8 +258,6 @@ app.post('/api/login', function(req, res) {
 			}
 		})
 	}
-
-
 });
 
 app.get('/api/logout', function(req, res) {
@@ -372,6 +369,7 @@ app.put('/api/changePassword', function (req, res){
 
 
 app.get('/api/users', function(req, res){
+  //console.log('getting user api');
 	acManager.getUserList(function(users){
 		res.send(users);
 	});
@@ -589,7 +587,7 @@ app.get('/searchTrip/:id', function(req,res){
 				}
 				else {
 					res.writeHead(400,trips);
-					res.end(trips);					
+					res.end(trips);
 				}
 			});
 		}
@@ -628,3 +626,7 @@ app.post('/api/log', function(req, res){
 		}
 	})
 });
+
+exports.close = function(){
+  server.close();
+}
