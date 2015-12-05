@@ -150,6 +150,27 @@ describe('HTTP Server Test', function(){
       req.end();
     });
   });
+	describe('test delete user api', function(){
+    it('should response', function(done){
+      var get_options = {
+       host: 'localhost',
+       port: '3000',
+       path: '/api/users/0',
+       method: 'DELETE',
+      };
+      var req = http.request(get_options, function(response){
+        var body = '';
+        response.on('data', function(d){
+          body += d;
+        });
+        response.on('end', function(){
+					assert.equal('Found. Redirecting to /',body);
+          done();
+        });
+      });
+      req.end();
+    });
+  });
 
   describe('test AccountManager', function(){
     var profile = {
@@ -178,14 +199,48 @@ describe('HTTP Server Test', function(){
   });
 
   describe('test message manager', function(){
-    it('should get message when exist', function(done){
-      msgManager.getUnreadMsgsForUser('test@test.com', function(success, msg){
+    it('should get message by email', function(done){
+      msgManager.getUnreadMsgsForUser('test@test.com',
+			function(success, msg){
+        if(success){
+          done();
+        }
+      })
+    });
+		it('should get message by email corner case', function(done){
+      msgManager.getUnreadMsgsForUser('noexist@test.com',
+			function(success, msg){
+        if(success){
+          done();
+        }
+      })
+    });
+		it('should get conversation for 2 users', function(done){
+      msgManager.getConversation(0, 1,
+				function(success, msg){
+        if(success){
+          done();
+        }
+      })
+    });
+		it('should get conversation corner case', function(done){
+      msgManager.getConversation(0, 0,
+				function(success, msg){
+        if(success){
+          done();
+        }
+      })
+    });
+		it('should get conversation corner case2', function(done){
+      msgManager.getConversation(10000000000, 10000000000,
+				function(success, msg){
         if(success){
           done();
         }
       })
     });
   });
+
   describe('test trip manager', function(){
 
     var trip = {
@@ -194,75 +249,114 @@ describe('HTTP Server Test', function(){
     	endPoint:{latitude: 110, longitude: 100},
     	date: '2015/01/01',
     	price: 15,
-    	provider: 'tester'};
+    	provider: 'tester'
+		};
       it('should create new trip', function(done){
-          tripManager.updateTrip(trip, function(success, msg){
+          tripManager.updateTrip(trip,
+						function(success, msg){
             if(success){
               done();
             }
           });
       });
       it('should search trip', function(done){
-        tripManager.searchTrip(0, function(success, msg){
+        tripManager.searchTrip(0,
+					function(success, msg){
           if(success){
             done();
           }
         });
       });
       it('should recommend trip', function(done){
-        tripManager.searchSimilarTrip(0, function(success, msg){
+        tripManager.searchSimilarTrip(0,
+					function(success, msg){
           if(success){
             done();
           }
         });
       });
-      it('should calculate distance', function(done){
+      it('should calculate distance',
+			function(done){
         var result = TripManager.findOneDistance(100, 100, 110, 100);
         assert.equal(12405227.292647015, result);
         done();
       });
-      it('should calculate distance corner case', function(done){
+      it('should calculate distance corner case',
+			function(done){
         var result = TripManager.findOneDistance(100, 100, 100, 100);
         assert.equal(0, result);
         done();
       });
-      it('should calculate distance corner case2', function(done){
+      it('should calculate distance corner case2',
+			function(done){
         var result = TripManager.findOneDistance(0, 0, 0, 0);
         assert.equal(0, result);
         done();
       });
-			it('should calculate user distance', function(done){
+			it('should calculate user distance',
+			function(done){
         var result = TripManager.findDistance(trip, trip);
         assert.equal(0, result);
         done();
       });
-			it('should find all trips', function(done){
-				tripManager.findAllTrips(function(success, data){
+			var trip2 = {
+	      user: 0,
+	    	startPoint:{latitude: 100, longitude: 110},
+	    	endPoint:{latitude: 110, longitude: 110},
+	    	date: '2015/01/01',
+	    	price: 15,
+	    	provider: 'tester'
+			};
+			it('should calculate user distance',
+			function(done){
+        var result = TripManager.findDistance(trip, trip2);
+        assert.equal(572733.1463071385, result);
+        done();
+      });
+			it('should find all trips',
+			function(done){
+				tripManager.findAllTrips(
+					function(success, data){
 					if(success){
-							console.log(data);
+							//console.log(data);
 							done();
 					}
 				});
 			});
+			it('should find all trips by user',
+			function(done){
+				tripManager.findAllTripsByUser(0,
+					function(success, data){
+					if(success){
+							done();
+					}
+				});
+			});
+
   });
-  describe('test feedback manger', function(){
+  describe('test feedback manger',
+	function(){
     var feedbacks;
-    it('should insert feedback', function(done){
+    it('should insert feedback',
+		function(done){
        feedbacks = { comment: 'testing feedback',
             rating: '5',
             sender: 0,
             receiver: '0',
             date: 'Fri Dec 04 2015 15:24:51 GMT-0500 (EST)' };
       //createFeedback
-      feedbackManager.createFeedback(feedbacks, function(success, data){
+      feedbackManager.createFeedback(feedbacks,
+				function(success, data){
         done();
       });
     });
 
     //make sure we insert correctly
     var feedBackId;
-    it('should get the feedback', function(done){
-      feedbackManager.getFeedbackByUser(0, function(success, data){
+    it('should get the feedback',
+		function(done){
+      feedbackManager.getFeedbackByUser(0,
+				function(success, data){
         for(var i = 0; i < data.length; i++){
           if(data[i].comment == 'testing feedback'){
             feedBackId = data[i]._id;
@@ -274,8 +368,10 @@ describe('HTTP Server Test', function(){
       });
     });
 
-    it('should remove the feedback', function(done){
-      feedbackManager.deleteFeedbackById(feedBackId, function(success, msg){
+    it('should remove the feedback',
+		function(done){
+      feedbackManager.deleteFeedbackById(feedBackId,
+				function(success, msg){
         done();
       });
     });
