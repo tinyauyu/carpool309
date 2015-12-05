@@ -701,25 +701,6 @@ app.get('/searchTrip/:id', function(req,res){
 	});
 });
 
-/***********************Search&Trip*******************/
-
-
-/********************** Admin Panel **********************/
-
-
-	var user = {
-		id: req.session.id,
-		behavior: behavior
-	}
-	acManager.log(user, function(success, msg){
-		if(success){
-			res.send("OK");
-		} else {
-			res.writeHead(400,msg);
-			res.end(msg);
-		}
-	})
-});
 
 exports.close = function(){
   server.close();
