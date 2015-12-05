@@ -38,7 +38,7 @@ describe('HTTP Server Test', function(){
     server.close();
   });
 
-  describe('/', function(){
+  describe('test home page', function(){
     it('should return start page', function(done){
       http.get('http://localhost:3000', function(response){
         //assert the status code
@@ -56,11 +56,37 @@ describe('HTTP Server Test', function(){
     });
   });
 
-  describe('test feedbacks API', function(){
-    it('should return feedbacks', function(done){
+	describe('test AccountManager', function(){
+		var profile = {
+			email:'test@test.com',
+			password:{
+				plain: 'test'
+			}
+		}
+		it('should create user', function(done){
+			acManager.createUser(profile, function(success, msg){
+				done();
+			});
+		});
+		it('should be able to login user correctly', function(done){
+			acManager.login(profile, function(success, msg){
+				//console.log(msg);
+				if(success){done();}
+			});
+		});
+		it('should get the user by email', function(done){
+			acManager.getUserByEmail(profile.email, function(success, msg){
+				assert.equal(msg.email, profile.email);
+				done();
+			});
+		});
+	});
 
-      userInfo = {email: '1@1.com', password:{
-          plain:'1'
+  describe('test login API', function(){
+    it('should login', function(done){
+
+      userInfo = {email: 'test@test.com', password:{
+          plain:'test'
       }};
       var post_data = querystring.stringify({
         'json' : JSON.stringify(userInfo)
@@ -109,7 +135,87 @@ describe('HTTP Server Test', function(){
       post_req.write(post_data);
       post_req.end();
     });
+
+		it('should login fail', function(done){
+
+      userInfo = {email: 'noexist@test.com', password:{
+          plain:'test'
+      }};
+      var post_data = querystring.stringify({
+        'json' : JSON.stringify(userInfo)
+      });
+      var post_options = {
+       host: 'localhost',
+       port: '3000',
+       path: '/api/login',
+       cookie: cookie,
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/x-www-form-urlencoded',
+           'Content-Length': Buffer.byteLength(post_data)
+       }
+      };
+      var post_req = http.request(post_options, function(res) {
+        cookie = res.headers['set-cookie'];
+        header = res.headers;
+        //console.log(cookie);
+        res.setEncoding('utf8');
+				var body ='';
+        res.on('data', function (chunk) {
+            //console.log('Response: ' + chunk);
+						body += chunk;
+						//console.log(body);
+        });
+        res.on('end', function(){
+					assert.equal('Invalid email or password',body);
+					done();
+        });
+      });
+      // post the data to server
+      post_req.write(post_data);
+      post_req.end();
+    });
+		it('should login fail 2', function(done){
+
+      userInfo = {email: 'test@test.com', password:{
+          plain:'wrong password'
+      }};
+      var post_data = querystring.stringify({
+        'json' : JSON.stringify(userInfo)
+      });
+      var post_options = {
+       host: 'localhost',
+       port: '3000',
+       path: '/api/login',
+       cookie: cookie,
+       method: 'POST',
+       headers: {
+           'Content-Type': 'application/x-www-form-urlencoded',
+           'Content-Length': Buffer.byteLength(post_data)
+       }
+      };
+      var post_req = http.request(post_options, function(res) {
+        cookie = res.headers['set-cookie'];
+        header = res.headers;
+        //console.log(cookie);
+        res.setEncoding('utf8');
+				var body ='';
+        res.on('data', function (chunk) {
+            //console.log('Response: ' + chunk);
+						body += chunk;
+						//console.log(body);
+        });
+        res.on('end', function(){
+					assert.equal('Invalid email or password',body);
+					done();
+        });
+      });
+      // post the data to server
+      post_req.write(post_data);
+      post_req.end();
+    });
   });
+
   describe('test feedback api', function(){
     it('should response', function(done){
       var get_options = {
@@ -171,30 +277,46 @@ describe('HTTP Server Test', function(){
       req.end();
     });
   });
-
-  describe('test AccountManager', function(){
-    var profile = {
-      email:'test@test.com',
-      password:{
-        plain: 'test'
-      }
-    }
-    it('should create user', function(done){
-      acManager.createUser(profile, function(success, msg){
-        done();
+	describe('test logout user api', function(){
+    it('should response', function(done){
+      var get_options = {
+       host: 'localhost',
+       port: '3000',
+       path: '/api/logout',
+       method: 'GET',
+      };
+      var req = http.request(get_options, function(response){
+        var body = '';
+        response.on('data', function(d){
+          body += d;
+        });
+        response.on('end', function(){
+					assert.equal('Found. Redirecting to /',body);
+          done();
+        });
       });
+      req.end();
     });
-    it('should be able to login user correctly', function(done){
-      acManager.login(profile, function(success, msg){
-        //console.log(msg);
-        if(success){done();}
+  });
+	describe('test wrong api address', function(){
+    it('should response', function(done){
+      var get_options = {
+       host: 'localhost',
+       port: '3000',
+       path: '/api/wrongapi',
+       method: 'GET',
+      };
+      var req = http.request(get_options, function(response){
+        var body = '';
+        response.on('data', function(d){
+          body += d;
+        });
+        response.on('end', function(){
+					assert.equal('Found. Redirecting to /',body);
+          done();
+        });
       });
-    });
-    it('should get the user by email', function(done){
-      acManager.getUserByEmail(profile.email, function(success, msg){
-        assert.equal(msg.email, profile.email);
-        done();
-      });
+      req.end();
     });
   });
 
@@ -347,9 +469,30 @@ describe('HTTP Server Test', function(){
       //createFeedback
       feedbackManager.createFeedback(feedbacks,
 				function(success, data){
-        done();
+					if(success){
+        		done();
+					}
       });
     });
+		it('should create feedback fail with no sender',
+		function(done){
+       feedbackwrong = { comment: 'wrong testing feedback',
+            rating: '5',
+            sender: null,
+            receiver: '0',
+            date: 'Fri Dec 04 2015 15:24:51 GMT-0500 (EST)' };
+      //createFeedback
+      feedbackManager.createFeedback(feedbacks,
+				function(success, data){
+					console.log(data);
+        	if(!success){
+						console.log(data);
+
+					}
+					done();
+      });
+    });
+
 
     //make sure we insert correctly
     var feedBackId;
