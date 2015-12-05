@@ -231,6 +231,19 @@ describe('HTTP Server Test', function(){
         assert.equal(0, result);
         done();
       });
+			it('should calculate user distance', function(done){
+        var result = TripManager.findDistance(trip, trip);
+        assert.equal(0, result);
+        done();
+      });
+			it('should find all trips', function(done){
+				tripManager.findAllTrips(function(success, data){
+					if(success){
+							console.log(data);
+							done();
+					}
+				});
+			});
   });
   describe('test feedback manger', function(){
     var feedbacks;

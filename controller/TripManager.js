@@ -159,7 +159,7 @@ TripManager.prototype.findAllTripsByUser = function (userId, callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
+        	return;
 		}
 		else {
 			callback(true,trip);
@@ -173,7 +173,7 @@ TripManager.prototype.findAllTrips = function (callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
+        	return;
 		}
 		else {
 			debug(trip);
@@ -232,3 +232,4 @@ function getDistanceAndSort(newTrip, validTrips){
 
 module.exports = TripManager;
 module.exports.findOneDistance = findOneDistance;
+module.exports.findDistance = findDistance;
