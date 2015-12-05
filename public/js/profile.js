@@ -359,15 +359,18 @@ function displayComments(profile_id, pageNumber){
         }
       }
       $('#pageNumbers').html(buttons);
-      for(i = commentsPerPage*(pageNumber-1); i < Math.min(data.length,commentsPerPage*pageNumber); i++){
-        var info = data[i];
+      for(i = commentsPerPage*(pageNumber-1);
+        i < Math.min(data.length,commentsPerPage*pageNumber);
+        i++){
+            var info = data[i];
             if(info.sender.displayName == ""){
-              info.sender.displayName = user.email;
+              info.sender.displayName = info.sender.email;
             }
             list+='<div class="feedback-row" data-id="'+info._id+'">';
             list+='<li class="ui-state-default">"' + info.comment + '"</li>';
             list+='<small class="pull-right text-muted">' +
-              '<small><a href="/users/'+info.sender._id+'">' + info.sender.displayName + '</a></small><br>' +
+              '<small><a href="/users/'+info.sender._id+'">' +
+              info.sender.displayName + '</a></small><br>' +
               '<small>rating: ' + info.rating + '/5 </small><br>'+
               '<span class="glyphicon glyphicon-time"></span>'
               +info.date + '</small>';
@@ -375,13 +378,16 @@ function displayComments(profile_id, pageNumber){
             //list += '<small>rating: ' + info.rating + '/5 </small><br>'
             list +='<br>';
             list+='</div>';
-
+            console.log('hihihi ' + list);
             $('#sortable').html(list);
 
             addDeleteBtn(info.sender._id, info._id, function(isAuth, id){
               if(isAuth){
                 console.log($('.feedback-row[data-id='+id+']'));
-                $('.feedback-row[data-id='+id+']').prepend('<button type="button" class="delete-feedback close" data-id="'+info._id+'" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
+                $('.feedback-row[data-id='+id+']').prepend(
+                  '<button type="button" class="delete-feedback close" data-id="'+
+                info._id+
+                '" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
               }
               $('.delete-feedback[data-id='+id+']').click(function(){
                 var id = $(this).data('id');
@@ -405,7 +411,7 @@ function displayComments(profile_id, pageNumber){
       }
 
     },
-    
+
     error: function(jqxhr, textStatus, errorThrown){
       alert(errorThrown);
     }
