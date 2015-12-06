@@ -208,3 +208,9 @@ dd{
 a{
     color: #777;
 }
+
+.ui-state-default{
+	color:darkblue;
+	text-align: left;
+	margin-left: 8%;
+}

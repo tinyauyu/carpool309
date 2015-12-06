@@ -24,7 +24,7 @@ TripManager.prototype.updateTrip = function(trip,callback){
 		if (error){
     		console.log("[ERROR]\t[TripManager.js]\tCannot save trip to database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
+        	return;
 		}
 		else {
 			callback(true, data._id.toString());
@@ -40,8 +40,8 @@ TripManager.prototype.searchTrip = function(tripId,callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
-		} 
+        	return;
+		}
 		else { //FindOne
 			Trip.find({}, function (err,allTrips){
 				if (err){
@@ -67,7 +67,7 @@ TripManager.prototype.searchTrip = function(tripId,callback){
 								var priceBoolean = (allTrips[i].price < newTrip.price || newTrip.price == '' || newTrip.price == null);
 							}//If the user is a provider, then no need to consider those price which are lower than their expected price
 							else {
-								var priceBoolean = (allTrips[i].price > newTrip.price || newTrip.price == '' || newTrip.price == null);	
+								var priceBoolean = (allTrips[i].price > newTrip.price || newTrip.price == '' || newTrip.price == null);
 							}
 							//User can not search for the trip that he provided/wanted themselves
 							var notThemselves = (allTrips[i].user != newTrip.user);
@@ -86,7 +86,7 @@ TripManager.prototype.searchTrip = function(tripId,callback){
 					callback(true,sortedTrips);
 					return;
 				}
-			});			
+			});
 		}
 	});
 }
@@ -98,8 +98,8 @@ TripManager.prototype.searchSimilarTrip = function(tripId,callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
-		} 
+        	return;
+		}
 		else { //FindOne
 			Trip.find({}).populate('user').exec(function (err,allTrips){
 				if (err){
@@ -135,7 +135,7 @@ TripManager.prototype.searchSimilarTrip = function(tripId,callback){
 					callback(true,sortedTrips);
 					return;
 				}
-			});			
+			});
 		}
 	});
 }
@@ -145,7 +145,7 @@ TripManager.prototype.findOneTrip = function (tripId, callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
+        	return;
 		}
 		else {
 			callback(true,trip);
@@ -159,7 +159,7 @@ TripManager.prototype.findAllTripsByUser = function (userId, callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
+        	return;
 		}
 		else {
 			callback(true,trip);
@@ -173,7 +173,7 @@ TripManager.prototype.findAllTrips = function (callback){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
-        	return;		
+        	return;
 		}
 		else {
 			debug(trip);
@@ -184,12 +184,12 @@ TripManager.prototype.findAllTrips = function (callback){
 }
 
 function findDistance(trip1, trip2){
-	var lat1 = trip1.startPoint.latitude * Math.PI / 180; 
+	var lat1 = trip1.startPoint.latitude * Math.PI / 180;
 	var lat2 = trip2.startPoint.latitude * Math.PI / 180;
 	var lon1 = trip1.startPoint.longitude * Math.PI / 180;
 	var lon2 = trip2.startPoint.longitude * Math.PI / 180;
 	var d = findOneDistance(lat1,lat2,lon1,lon2);
-	lat1 = trip1.endPoint.latitude * Math.PI / 180; 
+	lat1 = trip1.endPoint.latitude * Math.PI / 180;
 	lat2 = trip2.endPoint.latitude * Math.PI / 180;
 	lon1 = trip1.endPoint.longitude * Math.PI / 180;
 	lon2 = trip2.endPoint.longitude * Math.PI / 180;
@@ -220,7 +220,7 @@ function getDistanceAndSort(newTrip, validTrips){
 			var temple = JSON.stringify(validTrips[i]);
 			temple = JSON.parse(temple);
 			temple['distance'] = d;
-			sortedTrips.push(temple);			
+			sortedTrips.push(temple);
 		}
 	}
 	//Sort the array by the distance element in the json object
@@ -231,3 +231,5 @@ function getDistanceAndSort(newTrip, validTrips){
 }
 
 module.exports = TripManager;
+module.exports.findOneDistance = findOneDistance;
+module.exports.findDistance = findDistance;

@@ -26,16 +26,23 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 			Feedback.resetCount(function(err, nextCount){});
 		}
 
+
 		/*** Validation Here ***/
-		if(typeof feedback.sender=="undefined"){
+		if(typeof feedback.sender != "number"
+			&& typeof feedback.sender != 'string'){
 			callback(false, "Feedback must have a sender.");
 			return;
 		}
-		if(typeof feedback.receiver=="undefined"){
+		if(typeof feedback.receiver !="string"
+			&& typeof feedback.sender != 'number'){
 			callback(false, "Feedback must have a receiver.");
 			return;
 		}
-		if(typeof feedback.comment=="undefined" && typeof feedback.rating=="undefined"){
+
+		if(feedback.comment==''
+			|| (typeof feedback.rating!="number"
+				&& typeof feedback.rating!="string")
+			||typeof feedback.comment=="undefined"){
 			callback(false, "Feedback must contain either comment or rating.");
 			return;
 		}
