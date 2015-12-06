@@ -19,7 +19,9 @@ function TripManager(url){
 }
 
 TripManager.prototype.updateTrip = function(trip,callback){
+	console.log(trip.searchDistance);
 	var newTrip = new Trip(trip);
+	console.log(newTrip.searchDistance);
 	newTrip.save(function(error,data){
 		if (error){
     		console.log("[ERROR]\t[TripManager.js]\tCannot save trip to database: " + error);
@@ -229,7 +231,10 @@ function getDistanceAndSort(newTrip, validTrips){
 	var sortedTrips = [];
 	for (var i in validTrips){
 		var d = findDistance(newTrip,validTrips[i]);
-		var smallestDistance = 50000;
+		var smallestDistance = newTrip.searchDistance * 1000;
+		if (newTrip.searchDistance == '' || newTrip.searchDistance == null){
+			smallestDistance = 30000;
+		}
 		if (d < smallestDistance){
 			var temple = JSON.stringify(validTrips[i]);
 			temple = JSON.parse(temple);

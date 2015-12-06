@@ -8,6 +8,8 @@ $(document).ready(function(){
 		var expectedDate = new Date(tempDate);
 		var reg = /^\d+$/;
 		var checkPrice = $('#expectedPrice').val();
+		var searchDistance = $('#searchDistance').val();
+		console.log(searchDistance);
 		if (currentTime > expectedDate || expectedDate == null){
 			//Check for date entered is after the time right now
 			alert("Please Select a Date After RIGHT NOW!");
@@ -20,11 +22,24 @@ $(document).ready(function(){
 		}
 		else if (checkPrice != ''){
 			if (!reg.test(checkPrice)){
-				alert("Please Input a NUMBER only/nothing for price");
+				alert("Please Input a NUMBER only or nothing for price");
+			}
+			else{
+				if (!reg.test(searchDistance)){
+					alert("Please Input a Number only or nothing for search offset");
+				}
+				else{
+					updateTrip(provider,expectedDate);
+				}
+			}
+		}
+		else if (searchDistance != ''){
+			if (!reg.test(searchDistance)){
+				alert("Please Input a Number only or nothing for search offset");
 			}
 			else{
 				updateTrip(provider,expectedDate);
-			}
+			}			
 		}
 		else{
 			updateTrip(provider,expectedDate);
@@ -99,8 +114,10 @@ function updateTrip(provider,expectedDate){
 		date: date,
 		price: $('#expectedPrice').val(),
 		provider: provider,
+		searchDistance: $('#searchDistance').val()
 	};
-
+	
+	console.log(trip.searchDistance);
 	$.ajax({
 		type: "GET",
 		url: "https://maps.googleapis.com/maps/api/geocode/json?address=" + startAddress + "&key=AIzaSyC9XO6VWQkwsUbXQi7WObMU1ekQFsIoKqk&language=en",

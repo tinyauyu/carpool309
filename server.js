@@ -18,7 +18,7 @@ app.use(compression());
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public',{
-	maxAge: 1//86400000
+	maxAge: 86400000
 }));
 
 app.use(bodyParser.json());
@@ -33,7 +33,6 @@ app.use(session({
   activeDuration: 5 * 60 * 1000,
   httpOnly: true
 }));
-
 
 var Ddos = require('ddos')
 var ddos = new Ddos({
