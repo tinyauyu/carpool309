@@ -20,11 +20,7 @@ var receiver;
 $(document).on('click', '#msgButton', function() {
     var msg = $('#msg').val();
     var attr = $('button#chat').attr('receiver');
-    if(typeof attr !== typeof undefined && attr !== false){
-        receiver =  $('button#chat').attr("receiver");
-    } else {
-        receiver = $('#resultPanel').attr('sendto');
-    };
+    receiver = $('#resultPanel').attr('sendto');
     var ele = $('<div id="chat-body" class="pull-right clearfix" style="width:260px">');
     var content =$('<div class="pull-left clearfix" style="width:200px">');
 
