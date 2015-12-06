@@ -1,4 +1,8 @@
 $(document).ready(function(){
+
+/*--------------------------------------------------------------------
+Click close button to delete specific trip
+---------------------------------------------------------------------*/
 	$('.deleteTrip').click(function(){
 		var id = $(this).data('id');
 		//alert(id);
@@ -18,6 +22,11 @@ $(document).ready(function(){
 		}
 	});
 
+/*--------------------------------------------------------------------
+Get the search criterai from the website
+And valid each of them, if they are valid, send to the server to corresponding functoin
+If not valid, alert user to get correct data.
+---------------------------------------------------------------------*/
 	$('#findTrip').click(function(){
 		var provider;
 		provider = $('input[name=type]:checked',"#tripForm").val();
@@ -64,17 +73,27 @@ $(document).ready(function(){
 		}
 	});
 
+/*--------------------------------------------------------------------
+If click list of trip, search for the clicked item
+---------------------------------------------------------------------*/
 	$('.trip-row').click(function(){
 	  var ids = $(this).data('id');
 	  var url = "/searchTrip/" + ids;
 	  window.location.href = url;
 	});
 
+/*--------------------------------------------------------------------
+If click on one user row, go to the user's profile
+---------------------------------------------------------------------*/
 	$('.user-row').click(function(){
   		var id = $(this).data('id');
 		window.location.href = "/users/"+id;
 	});	
 
+/*--------------------------------------------------------------------
+Search user take in the keyword to searc
+and return to the website of the searched resutl
+---------------------------------------------------------------------*/
 	$('#searchUser').click(function(){
 		$.ajax({
 			type: "GET",
@@ -98,6 +117,9 @@ $(document).ready(function(){
 	});
 });
 
+/*----------------------------------------------------------------
+Used to display htmls
+-----------------------------------------------------------------*/
 function showUsers(users){
 	var html = "";
 	for(i in users){
@@ -107,6 +129,7 @@ function showUsers(users){
 	}
 	return html;
 }
+
 
 //Helper function: Getting Lat Long Using Goolge API:
 function updateTrip(provider,expectedDate){
