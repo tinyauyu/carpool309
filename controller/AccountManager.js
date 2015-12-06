@@ -8,6 +8,11 @@ var xssFilters = require('xss-filters');
 
 var UserSchema, User;
 
+/*
+* constructor that create the Manager that control the
+* database
+* params: the url and port that the database manager listens to
+*/
 function AccountManager(url){  //mongodb://localhost/
 	mongoose.connect(url);
 	this.db = mongoose.connection;
@@ -24,6 +29,9 @@ function AccountManager(url){  //mongodb://localhost/
 
 }
 
+/*
+* check the validation of user login information
+*/
 AccountManager.prototype.login = function(profile, callback){
 	debug("Login attempt by " + profile.email);
 	User.findOne({ email: profile.email }, function(err, user) {
@@ -46,6 +54,9 @@ AccountManager.prototype.login = function(profile, callback){
 	});
 }
 
+/*
+* provide google login method for user
+*/
 AccountManager.prototype.loginGoogle = function(profile, callback){
 
 	var options = {
@@ -74,6 +85,9 @@ AccountManager.prototype.loginGoogle = function(profile, callback){
 	}).end();
 }
 
+/*
+* get all of the user list
+*/
 AccountManager.prototype.getUserList = function(callback){
 	User.find({},'_id email displayName', function(err, users){
 		if(err) {
@@ -84,6 +98,9 @@ AccountManager.prototype.getUserList = function(callback){
 	})
 }
 
+/*
+* get the user from user's email
+*/
 AccountManager.prototype.getUserByEmail = function(email, callback){
 	debug("Get user by email: "+email);
 	User.findOne({email: email}, function(err, user){
@@ -95,6 +112,11 @@ AccountManager.prototype.getUserByEmail = function(email, callback){
 		}
 	})
 }
+
+/*
+* get the user's picture from user's id
+* also check the validation of user
+*/
 AccountManager.prototype.getUserPic = function(id,callback){
 	User.findOne({_id: id},'profilePic', function(err, user){
 		if (err) {throw err;}
@@ -108,11 +130,16 @@ AccountManager.prototype.getUserPic = function(id,callback){
 	})
 }
 
+/*
+* create a new user and store into the database
+* params: profile object that include email, password, description, etc
+* and a callback function
+*/
 AccountManager.prototype.createUser = function(profile, callback){
 	debug("Creating user ("+profile.email+")");
 
 	User.count({}, function(err, count){
-
+		/*validation check*/
 		if(profile.email == ""){
 			callback(false,"Please fill in the email address!");
 			return;
@@ -148,7 +175,7 @@ AccountManager.prototype.createUser = function(profile, callback){
 
 				var salt = bcrypt.genSaltSync(10);
 				var passwordHash = bcrypt.hashSync(profile.password.plain, salt);
-
+				//construct a User object that fit into the schema
 				var newUser = new User({
 					userType: userType,
 					email: profile.email,
@@ -167,6 +194,7 @@ AccountManager.prototype.createUser = function(profile, callback){
 					oneStars: 0
 				});
 
+				//save into database
 				newUser.save(function(error, data){
 			    	if(error){
 			    		console.log("[ERROR]\t[AccountManager.js]\tCannot save user to database: " + error);
@@ -183,7 +211,10 @@ AccountManager.prototype.createUser = function(profile, callback){
 	});
 }
 
-
+/*
+*	if user use google login, then we need to initialize it and store into
+* the database, also need the profile object and callback function
+*/
 AccountManager.prototype.createUserGoogle = function(profile, callback){
 
 	var options = {
@@ -234,6 +265,7 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							userType = 2;
 						}
 
+						//initialize the profile to save in database
 						var newProfile = {
 							userType: userType,
 							email: email,
@@ -337,7 +369,7 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 			callback(false,"You have no right to update this profile!");
 			return;
 		} else {
-			
+
 			profile = filterUserProfile(profile);
 
 			// check field to update
