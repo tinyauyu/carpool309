@@ -34,7 +34,7 @@ app.use(session({
   httpOnly: true
 }));
 
-/*
+
 var Ddos = require('ddos')
 var ddos = new Ddos({
 	maxcount: 30,
@@ -45,7 +45,7 @@ var ddos = new Ddos({
 	errormessage : '[DDOS Alert] Please wait 120 seconds and try again!',
 	testmode: false
 });
-app.use(ddos.express)*/
+app.use(ddos.express)
 
 var server = app.listen(process.env.PORT || 3000, function () {
   var host = server.address().address;
