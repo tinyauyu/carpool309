@@ -1,4 +1,22 @@
 $(document).ready(function(){
+	$('.deleteTrip').click(function(){
+		var id = $(this).data('id');
+		//alert(id);
+		var c = confirm("Are you sure to delete this trip (#"+id+")?");
+		if(c){
+			$.ajax({
+				type: "DELETE",
+				url: "/api/trips/" + id,
+				success: function(){
+					$('.trip-row[data-id='+id+']').remove();
+				},
+				error: function(err){
+					alert(err);
+				}
+			})
+			
+		}
+	});
 
 	$('#findTrip').click(function(){
 		var provider;
@@ -77,16 +95,7 @@ $(document).ready(function(){
 				alert(err);
 			}
 		})
-	})
-
-	/*$('#searchFor').click(function(){
-		if ($('searchFor').val() == ''){
-			alert("Nothing to Serach For");
-		}
-		else {
-			console.log("I am here to search");
-		}
-	});*/
+	});
 });
 
 function showUsers(users){

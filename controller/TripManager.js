@@ -19,9 +19,7 @@ function TripManager(url){
 }
 
 TripManager.prototype.updateTrip = function(trip,callback){
-	console.log(trip.searchDistance);
 	var newTrip = new Trip(trip);
-	console.log(newTrip.searchDistance);
 	newTrip.save(function(error,data){
 		if (error){
     		console.log("[ERROR]\t[TripManager.js]\tCannot save trip to database: " + error);
