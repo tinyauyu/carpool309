@@ -1,5 +1,9 @@
 var profilePicBuffer = undefined;
 
+/*----------------------------------------------------------------
+update the imag/profile icon is upload succeed
+Helper function
+-----------------------------------------------------------------*/
 function updateResultPanel(data) {
     $("#resultPanel").html(data.window);
     $("#resultPanel").attr('sendto', data.user.email);
@@ -28,7 +32,9 @@ $(document).ready(function() {
     });
 })
 
+/*----------------------------------------------------------------
 
+-----------------------------------------------------------------*/
 function showPasswordInfo(type, msg){
   var head = "";
   if(type=="success"){
@@ -40,6 +46,10 @@ function showPasswordInfo(type, msg){
   $("#password-info").html("<div class='alert alert-"+type+" alert-dismissible' role='alert'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>"+head+" </strong>"+msg+"</div>");
 }
 
+/*----------------------------------------------------------------
+Check whether the profile is vlaid or not:
+description is less than 500 characters
+-----------------------------------------------------------------*/
 function isValidProfile(profile){
 
   // description
@@ -53,7 +63,9 @@ function isValidProfile(profile){
 
 }
 
-
+/*----------------------------------------------------------------
+Update the profile pic
+-----------------------------------------------------------------*/
 $(document).on('change', '#profilePic', function() {
   var reader = new FileReader();
 
@@ -98,6 +110,9 @@ $(document).on('change', '#profilePic', function() {
     //Post dataurl to the server with AJAX
 });
 
+/*----------------------------------------------------------------
+For user profile pictures and make elements editable for editing profile
+-----------------------------------------------------------------*/
 $( document ).ready( function(){
   $.ajax({
     type: "GET",
@@ -143,6 +158,9 @@ $( document ).ready( function(){
     $('.edit-menu').removeClass('hidden');
   });
 
+/*----------------------------------------------------------------
+if admin, we can delete user and reload the page
+-----------------------------------------------------------------*/
   $('#delete').click(function(){
     $.ajax({
       type: "DELETE",
@@ -156,10 +174,16 @@ $( document ).ready( function(){
     });
   });
 
+/*----------------------------------------------------------------
+Cancel the editing profiles by reloading the page
+-----------------------------------------------------------------*/
   $('#cancel').click(function(){
     location.reload();
   });
 
+/*----------------------------------------------------------------
+Submit the editing profile info to the server
+-----------------------------------------------------------------*/
   $('#submit').click(function(){
     $(".editableform-loading").removeClass('hidden');
     $(".edit-menu").addClass('hidden');
@@ -179,7 +203,10 @@ $( document ).ready( function(){
     if(profile.profilePic == undefined){
       delete profile.profilePic;
     }
-
+/*----------------------------------------------------------------
+If profile is valid
+cann the $.ajax call to update the profile
+-----------------------------------------------------------------*/
     if(isValidProfile(profile)){
       $.ajax({
         type: "PATCH",
@@ -199,6 +226,10 @@ $( document ).ready( function(){
 
   });
 
+/*----------------------------------------------------------------
+For chaing password which check the existing password and
+also confirm password matched
+-----------------------------------------------------------------*/
   $('#changePassword').click(function(){
 
     // check new password valid
@@ -229,7 +260,9 @@ $( document ).ready( function(){
         enabled: !$('#oldPassword').prop('disabled')
       }
     }
-
+/*----------------------------------------------------------------
+Updaing password infomation to server
+-----------------------------------------------------------------*/
     $.ajax({
       type: "PUT",
       url: "/api/changePassword",
@@ -534,9 +567,11 @@ var __slice = [].slice;
     })
 })(window.jQuery, window);
 
-/*
-* function that add delete the comment when click delete button
-*/
+
+/*----------------------------------------------------------------
+If admin, there is a delete button to delete the profile
+-----------------------------------------------------------------*/
+
 function addDeleteBtn(senderId, feedbackId, callback){
   $.ajax({
       type: 'GET',
