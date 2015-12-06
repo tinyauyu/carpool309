@@ -91,8 +91,8 @@ var FeedbackManager = require('./controller/FeedbackManager.js');
 var feedbackManager = new FeedbackManager(MONGODB_URL);
 
 var MessageManager = require('./controller/MessageManager.js');
-
 var msgManager = new MessageManager(MONGODB_URL, server);
+
 var TripManager =  require('./controller/TripManager.js');
 var tripManager = new TripManager(MONGODB_URL);
 
@@ -674,6 +674,17 @@ app.get('/api/trips', function(req,res){
 			res.send(trips)
 		} else {
 			res.writeHead(400,trips);
+			res.end(trips);
+		}
+	})
+})
+
+app.delete('/api/trips/:id', function(req,res){
+	tripManager.removeTrip(req.params.id, function(success,msg){
+		if(success){
+			res.send(msg)
+		} else {
+			res.writeHead(400,msg);
 			res.end(msg);
 		}
 	})

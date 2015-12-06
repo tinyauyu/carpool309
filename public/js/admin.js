@@ -25,6 +25,25 @@ $(document).ready(function(){
 		}
 	})
 
+	$('.delete-trip').click(function(){
+		var id = $(this).parent().parent().data('id');
+		//alert(id);
+		var c = confirm("Are you sure to delete this trip (#"+id+")?");
+		if(c){
+			$.ajax({
+				type: "DELETE",
+				url: "/api/trips/" + id,
+				success: function(){
+					$('.trip-row[data-id='+id+']').parent().remove();
+				},
+				error: function(err){
+					alert(err);
+				}
+			})
+			
+		}
+	})
+
 	/*
 		var id = $(this).data('id');
 		var c = confirm("Are you sure to delete this review (#"+id+")?");

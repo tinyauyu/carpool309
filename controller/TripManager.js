@@ -33,6 +33,20 @@ TripManager.prototype.updateTrip = function(trip,callback){
 	});
 }
 
+TripManager.prototype.removeTrip = function(tripId, callback){
+	Trip.findOneAndRemove({_id: tripId}, function(err) {
+		if(err){
+			console.log("[ERROR]\t[TripManager.js]\tCannot delete trip from database: " + err);
+			callback(false, "Internal Server Error");
+			return;
+		} else {
+			debug("Trip#"+tripId+" deleted");
+			callback(true,"trip#"+tripId+" deleted");
+			return;
+		}
+	});
+}
+
 TripManager.prototype.searchTrip = function(tripId,callback){
 	var currentTime = new Date();
 	var sortedTrips = [];
