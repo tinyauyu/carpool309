@@ -10,7 +10,7 @@ $(document).on('click','.slide' ,function() {
 
 $(document).on('click', '#removeBox', function () {
     $("#resultPanel").addClass("hidden");
-    //location.reload();
+    location.reload();
 });
 
 var sender = $('.navbar-brand').attr('loggedInUser');
@@ -43,8 +43,6 @@ $(document).on('click', '#msgButton', function() {
     socket.emit('chat message', data);
     $('#msg').val('');
 
-    $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
-    console.log('down');
     return false;
 });
 
@@ -63,5 +61,6 @@ socket.on('chat message', function(data) {
           url: "/api/markMsgRead/" + data.sender + "/" + data.receiver + "/",
           success: getUnreadMsgs
         });
+
     }
 });

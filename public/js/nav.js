@@ -50,9 +50,6 @@ function showChatWindow(data) {
       }
     }
 
-    $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
-    console.log('down')
-
     var displayName = data.user.displayName;
     if (!displayName) {
       displayName = sender;
@@ -68,6 +65,7 @@ function showChatWindow(data) {
         alert(errorThrown);
       }
     });
+
   };
 
   $.ajax({
@@ -108,6 +106,7 @@ function getUnreadMsgs() {
         var ele = $('<li>');
         ele.text(sender);
         $('#newMsgList').append(ele);
+
         ele.click(function() {
           ele.remove();
           var sender = ele.text();

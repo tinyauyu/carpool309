@@ -18,7 +18,7 @@ app.use(compression());
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 app.use(express.static(__dirname + '/public',{
-	maxAge: 86400000
+	maxAge: 1//86400000
 }));
 
 app.use(bodyParser.json());
@@ -42,7 +42,7 @@ var ddos = new Ddos({
 	limit: 8 * 30,
 	maxexpiry: 120,
 	checkinterval : 0.5,
-	errormessage : '[DDOS Alert] Please wait 120 seconds and try again!',
+	errormessage : '[DOS Alert] Please wait 120 seconds and try again!',
 	testmode: false
 });
 app.use(ddos.express)
