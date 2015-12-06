@@ -10,7 +10,7 @@ $(document).on('click','.slide' ,function() {
 
 $(document).on('click', '#removeBox', function () {
     $("#resultPanel").addClass("hidden");
-    //location.reload();
+    location.reload();
 });
 
 var sender = $('.navbar-brand').attr('loggedInUser');
@@ -67,7 +67,7 @@ socket.on('chat message', function(data) {
           success: getUnreadMsgs
         });
 
-        
+
       $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
       console.log('new msg')
     }
