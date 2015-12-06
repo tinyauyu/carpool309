@@ -90,6 +90,7 @@ function getUnreadMsgs() {
       var msgsLength = msgsJson.length;
       if (msgsLength == 0) {
         $('.W_new_count').addClass("hidden");
+        $('#newMsgList').addClass("hidden");
         return;
       }
       $('.W_new_count').removeClass("hidden");
