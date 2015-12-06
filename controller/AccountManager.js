@@ -4,7 +4,7 @@ var autoIncrement = require('mongoose-auto-increment');
 var path = require('path');
 var bcrypt = require('bcrypt');
 var https = require('https');
-var xss = require('xss');
+var xssFilters = require('xss-filters');
 
 var UserSchema, User;
 
@@ -128,9 +128,12 @@ AccountManager.prototype.createUser = function(profile, callback){
 
 		// handle profilePic
 		var profilePic = profile.profilePic
-		if(profilePic==null){
-
+		if(typeof profilePic === "undefined"){
+			profilePic = "/img/default_profilePic.png";
 		}
+
+		// xss-filter
+		profile = filterUserProfile(profile);
 
 		User.find({email: profile.email}, function(err, user){
 			if(user[0]){
@@ -150,8 +153,8 @@ AccountManager.prototype.createUser = function(profile, callback){
 					userType: userType,
 					email: profile.email,
 					password: {hash: passwordHash, enabled: true},
-					description: xss(profile.description),
-					displayName: xss(profile.displayName),
+					description: profile.description,
+					displayName: profile.displayName,
 					profilePic: profilePic,
 					admin: false,
 					totalRating: 0,
@@ -198,6 +201,11 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 			var email = data.email;
 			var profilePic = data.picture;
 
+			// handle no profilePic
+			if(typeof profilePic === "undefined"){
+				profilePic = "/img/default_profilePic.png";
+			}
+
 			debug("email: "+email)
 			debug("profilePic: "+profilePic)
 
@@ -226,12 +234,12 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							userType = 2;
 						}
 
-						var newUser = new User({
+						var newProfile = {
 							userType: userType,
 							email: email,
 							password: {enabled:false},
 							//description: profile.description,
-							displayName: xss(displayName),
+							displayName: displayName,
 							profilePic: profilePic,
 							admin: false,
 							totalRating: 0,
@@ -242,7 +250,11 @@ AccountManager.prototype.createUserGoogle = function(profile, callback){
 							threeStars: 0,
 							twoStars: 0,
 							oneStars: 0
-						});
+						}
+
+						// xss-filter
+						newProfile = filterUserProfile(newProfile);
+						var newUser = new User(newProfile);
 
 						newUser.save(function(error, data){
 					    	if(error){
@@ -325,13 +337,8 @@ AccountManager.prototype.updateProfile = function(user, profile, callback){
 			callback(false,"You have no right to update this profile!");
 			return;
 		} else {
-
-			for (var key in profile) {
-			   if (profile.hasOwnProperty(key)) {
-			   	profile[key] = xss(profile[key]);
-			   }
-			}
-
+			
+			profile = filterUserProfile(profile);
 
 			// check field to update
 			User.findOneAndUpdate({_id: profile._id}, profile, function(err){
@@ -520,6 +527,21 @@ AccountManager.prototype.searchUser = function(keyword, callback){
 		}
 	});
 	*/
+}
+
+function filterUserProfile(profile){
+	debug('filterUserProfile called!')
+	if(profile.hasOwnProperty("displayName")){
+		profile.displayName = xssFilters.inHTMLData(profile.displayName);
+	}
+	if(profile.hasOwnProperty("description")){
+		profile.description = xssFilters.inHTMLData(profile.description);
+	}
+	if(profile.hasOwnProperty("profilePic")){
+		profile.profilePic = xssFilters.uriPathInDoubleQuotedAttr(profile.profilePic);
+		profile.profilePic = profile.profilePic.replace("x-data", "data");
+	}
+	return profile;
 }
 
 module.exports = AccountManager;
