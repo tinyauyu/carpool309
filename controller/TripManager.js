@@ -33,6 +33,20 @@ TripManager.prototype.updateTrip = function(trip,callback){
 	});
 }
 
+TripManager.prototype.removeTrip = function(tripId, callback){
+	Trip.findOneAndRemove({_id: tripId}, function(err) {
+		if(err){
+			console.log("[ERROR]\t[TripManager.js]\tCannot delete trip from database: " + err);
+			callback(false, "Internal Server Error");
+			return;
+		} else {
+			debug("Trip#"+tripId+" deleted");
+			callback(true,"trip#"+tripId+" deleted");
+			return;
+		}
+	});
+}
+
 TripManager.prototype.searchTrip = function(tripId,callback){
 	var currentTime = new Date();
 	var sortedTrips = [];
@@ -169,7 +183,7 @@ TripManager.prototype.findAllTripsByUser = function (userId, callback){
 }
 
 TripManager.prototype.findAllTrips = function (callback){
-	Trip.find({}, function (err, trip){
+	Trip.find({}).populate('user').exec(function (err, trip){
 		if (err){
     		console.log("[ERROR]\t[TripManager.js]\tCannot find trip in database: " + error);
         	callback(false,"Internal Server Error");
@@ -215,7 +229,10 @@ function getDistanceAndSort(newTrip, validTrips){
 	var sortedTrips = [];
 	for (var i in validTrips){
 		var d = findDistance(newTrip,validTrips[i]);
-		var smallestDistance = 50000;
+		var smallestDistance = newTrip.searchDistance * 1000;
+		if (newTrip.searchDistance == '' || newTrip.searchDistance == null){
+			smallestDistance = 30000;
+		}
 		if (d < smallestDistance){
 			var temple = JSON.stringify(validTrips[i]);
 			temple = JSON.parse(temple);

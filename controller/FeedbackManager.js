@@ -1,7 +1,7 @@
 var debug = require('debug')('FeedbackManager.js');
 var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
-var xss = require('xss');
+var xssFilters = require('xss-filters');
 
 var FeedbackSchema;
 
@@ -63,7 +63,7 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 		}
 		/****validation end*********/
 
-		feedback.comment = xss(feedback.comment);//format the comment
+		feedback.comment = xssFilters.inHTMLData(feedback.comment);//format the comment
 
 		//create a new feedback object that fit in the schema
 		var newFeedback = new Feedback(feedback);

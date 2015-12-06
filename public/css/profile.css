@@ -99,7 +99,7 @@ dd{
 
 .jumboton2{
     margin-top:10px;
-    background-color: #B8B8B8 ;
+    background-color: #B8B8B8;
     padding:10px;
     border-radius: 10px;
 }
@@ -107,7 +107,7 @@ dd{
 .jumbotron3{
     border-radius: 10px;
     margin-bottom: 10px;
-    background-color: lightgrey ;
+    background-color: lightyellow;
 }
 
 #nav-profilePic{
@@ -150,6 +150,7 @@ dd{
     width: 30%;
     z-index: 9999;
     float: left;
+    border-radius: 15px;
 }
 
 #map2 {
@@ -157,6 +158,7 @@ dd{
     width: 30%;
     z-index: 9999;
     float: right;
+    border-radius: 15px;
 }
 
 #tripDescription {

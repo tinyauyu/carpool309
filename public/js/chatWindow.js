@@ -10,7 +10,7 @@ $(document).on('click','.slide' ,function() {
 
 $(document).on('click', '#removeBox', function () {
     $("#resultPanel").addClass("hidden");
-    //location.reload();
+    location.reload();
 });
 
 var sender = $('.navbar-brand').attr('loggedInUser');
@@ -20,11 +20,7 @@ var receiver;
 $(document).on('click', '#msgButton', function() {
     var msg = $('#msg').val();
     var attr = $('button#chat').attr('receiver');
-    if(typeof attr !== typeof undefined && attr !== false){
-        receiver =  $('button#chat').attr("receiver");
-    } else {
-        receiver = $('#resultPanel').attr('sendto');
-    };
+    receiver = $('#resultPanel').attr('sendto');
     var ele = $('<div id="chat-body" class="pull-right clearfix" style="width:260px">');
     var content =$('<div class="pull-left clearfix" style="width:200px">');
 
@@ -47,8 +43,6 @@ $(document).on('click', '#msgButton', function() {
     socket.emit('chat message', data);
     $('#msg').val('');
 
-    $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
-    console.log('down');
     return false;
 });
 
@@ -67,5 +61,6 @@ socket.on('chat message', function(data) {
           url: "/api/markMsgRead/" + data.sender + "/" + data.receiver + "/",
           success: getUnreadMsgs
         });
+
     }
 });

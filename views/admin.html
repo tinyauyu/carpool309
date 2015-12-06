@@ -64,7 +64,7 @@
           <ul class="dropdown-menu">
             <li><a href="/users/{{profile.id}}">Profile</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="/api/logout">Log out</a></li>
+            <li><a href="/api/logout">Sign out</a></li>
           </ul>
         </li>
       </ul>
@@ -136,7 +136,39 @@
       <h2 class="panel-title">Trips</h2>
     </div>
     <div class="panel-body table-responsive">
-        <div id="sortable"></div>
+      <div class="">
+        {% if (allTrips != '' || allTrips != null)%}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>From</th>
+                  <th>To</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for trip in allTrips %}
+                <tr class="" data-id="{{trip._id}}">
+                  <th class="trip-row" data-id="{{trip._id}}">{{trip.user.displayName || trip.user.email}} 
+                  {% if trip.provider %}
+                  <span class="label label-primary">Provider</span>
+                  {% else %}
+                  <span class="label label-info">Wanter</span>
+                  {% endif %}
+                  </th>
+                  <th class="trip-row" data-id="{{trip._id}}">{{trip.startPoint.text}}</th>
+                  <th class="trip-row" data-id="{{trip._id}}">{{trip.endPoint.text}}</th>
+                  <th><button type='button' class='delete-trip close' data-id="{{trip._id}}" aria-label='Close'><span aria-hidden='true'>&times;</span></button></th>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <span>No trip is searched for all users.</span>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

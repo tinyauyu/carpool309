@@ -195,7 +195,7 @@ $(document).ready(function(){
 		        flashVersion: flashVersion
 		    };
 		}(this));
-
+		/*
 		console.log(
 		    'OS: ' + jscd.os +' '+ jscd.osVersion + '\n' +
 		    'Browser: ' + jscd.browser +' '+ jscd.browserMajorVersion +
@@ -206,6 +206,7 @@ $(document).ready(function(){
 		    'Screen Size: ' + jscd.screen + '\n\n' +
 		    'Full User Agent: ' + navigator.userAgent
 		);
+		*/
 
 
 
@@ -228,10 +229,10 @@ $(document).ready(function(){
 			url: "/api/log",
 			data: {json: JSON.stringify(behavior)},
 			success: function(data){
-				console.log("log ok!");
+				//console.log("log ok!");
 			},
 			error: function(jqxhr, textStatus, errorThrown){
-				console.log("log failed: "+errorThrown);
+				//console.log("log failed: "+errorThrown);
 			}
 		});
 

@@ -54,7 +54,7 @@
               <ul class="dropdown-menu">
                 <li><a href="/users/{{profile.id}}">Profile</a></li>
                 <li role="separator" class="divider"></li>
-                <li><a href="/api/logout">Log out</a></li>
+                <li><a href="/api/logout">Sign out</a></li>
               </ul>
             </li>
           </ul>
@@ -71,7 +71,8 @@
 
         <div class="panel-body">
           {% if (trips == [] || trips == null) %}
-            <p>Sorry, No matches meet your criterias.</p>
+            <p>Sorry, No matches meet your criterias.
+               <br> Please try again, maybe enlarge the distacne offset or the price?!</p>
           {% else %}
             <div class="table-responsive">
               <table class="table table-hover">
@@ -108,12 +109,13 @@
       <div class="panel-head">
         <span class="glyphicon glyphicon-list"></span> 
         Wanna TEAM UP? or Compare the Price? <br>
-        There are People Who Share Similar Trip Request Like You:
+        There are People Having Similar Trip Request Like You:
       </div>
       <div class="panel-body">
           <ul class = "list-group">
             {% if (similarTrips == [] || similarTrips == null) %}
-              <p>Sorry, No recommendations for you.</p>
+              <p>Sorry, No recommendations for you now. <br>
+                 No simmilar users have found like you~</p>
             {% else %}
               {% for trip in similarTrips %}
                 <li class="list-group-item similar-trip-row" data-id="{{trip.user._id}}/?trip={{trip._id}}">{{trip.user.email}}</li>

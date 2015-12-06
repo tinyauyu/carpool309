@@ -65,7 +65,7 @@
           <ul class="dropdown-menu">
             <li><a href="/users/{{profile.id}}">Profile</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="/api/logout">Log out</a></li>
+            <li><a href="/api/logout">Sign out</a></li>
           </ul>
         </li>
       </ul>
@@ -127,10 +127,12 @@
           <input id="fromWhere" class="form-control" placeholder="From: eg.L4C 2C7 OR 123 Main Ave, Toronto, ON, CA" required autofocus>
           <label for="toWhere" class="control-label">To:</label>
           <input id="toWhere" class="form-control" placeholder="To: eg.L5C 7C8 OR Street# Stree, City, Country" required>
-          <label for="expectedPrice" class="control-label">Expected Price:</label>
-          <input id="expectedPrice" class="form-control" placeholder="$60, Default is All Price Range" required>
+          <label for="expectedPrice" class="control-label">Expected Price ($):</label>
+          <input id="expectedPrice" class="form-control" placeholder="60, Default is All Price Range" required>
           <label for="expectedDate" class="control-label">Expected Date (Minimum is Today):</label>
           <input type="datetime-local" id="expectedDate" class="form-control" min="2015-11-21" required>
+          <label for="searchDistance" class="control-label">Distance Offset in (km): </label>
+          <input id="searchDistance" class="form-control" placeholder="eg.30 (All trips searched should beinside 30km range of your trip)" required>
           <hr>
           <label for="tripProvider" class="control-label">Trip Provider? Or Trip Wanted:</label><br>
           <input type="radio" name="type" value="true"/> TripProvider
@@ -160,6 +162,7 @@
                   <th>Trip's Date</th>
                   <th>From</th>
                   <th>To</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -168,11 +171,7 @@
                   <th>{{trip.date}}</th>
                   <th>{{trip.startPoint.text}}</th>
                   <th>{{trip.endPoint.text}}</th>
-                  {#<!--{% if (trip.price == null) %}
-                  <th>Any</th>
-                  {% else %}
-                  <th>{{trip.price}}</th>
-                  {% endif %}-->#}
+                  <th><button class='close deleteTrip' data-id="{{trip._id}}" aria-label='Close'><span aria-hidden='true'>&times;</span></button><th>
                 </tr>
               {% endfor %}
               </tbody>
