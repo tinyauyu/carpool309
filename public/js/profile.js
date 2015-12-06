@@ -300,20 +300,32 @@ $( document ).ready( function(){
 
 $.fn.editable.defaults.mode = 'inline';
 
-var commentsPerPage = 3;
-//display comments and rating
+var commentsPerPage = 3; // constant that controls how many comments should
+//be displayed per page of the comment page
+
+/*
+* display comments and rating and inject them into the html page
+* params: the user id that we want to display, and a pageNumber that
+* tells which page on the comments we are on if there are multiple pages
+* of comments
+*/
 function displayComments(profile_id, pageNumber){
-  //console.log($('#sortable').html());
-  //display average rating
+
+  //use ajax to get the ratings for the user
   var request = $.ajax({
     type: 'GET',
     url: '/api/users/' + profile_id,
     async: true,
     success: function(user){
+      //after success we inject the data into the html elements
       $('#averageRating').html(user.averageRating.toFixed(2));
       $('#numberOfRating').html(user.numberOfRating);
-      var stars = "";
-      var intRating = Math.round( user.averageRating );
+
+      var stars = "";//info that will be inject to the rating part
+      var intRating = Math.round( user.averageRating );//convert rating to int
+
+      //display the average ratings' star by inserting corresponding empty stars
+      //and solid stars
       for(var i = 0; i < intRating; i++){
         stars += '<span class="glyphicon glyphicon-star"></span>';
       }
@@ -321,13 +333,15 @@ function displayComments(profile_id, pageNumber){
       for(var i = 0; i < emptystar; i++){
         stars +='<span class="glyphicon glyphicon-star-empty"></span>';
       }
-      $('#averageStars').html(stars);
-      //console.log("fivestars: " + user.fiveStars +" asd "+ user.fiveStars / user.numberOfRating);
+      $('#averageStars').html(stars);//inject in to html
+
+      //calculate the total numebr for each rating level
       var fiveStars = (user.fiveStars/user.numberOfRating * 100).toFixed(1);
       var fourStars = (user.fourStars/user.numberOfRating * 100).toFixed(1);
       var threeStars = (user.threeStars/user.numberOfRating * 100).toFixed(1);
       var twoStars = (user.twoStars/user.numberOfRating * 100).toFixed(1);
       var oneStars = (user.oneStars/user.numberOfRating * 100).toFixed(1);
+      //control the progress bar for them
       $('#fiveStars').attr( "style", "width:"+fiveStars+"%");
       $('#fourStars').attr( "style", "width:"+fourStars+"%");
       $('#threeStars').attr( "style", "width:"+threeStars+"%");
@@ -343,13 +357,18 @@ function displayComments(profile_id, pageNumber){
       alert(errorThrown);
     }
   });
+
+  //use ajax to get the comments for the user
   $.ajax({
     type: 'GET',
     url: "/api/users/" + profile_id + "/feedbacks",
     success: function(data){
-      var list = "";
+      var list = "";//data that will be inject as comments
+
+      //calculate number of pages for the comments
       var pages = Math.ceil(data.length/commentsPerPage);
-      var buttons = "";
+      var buttons = "";//buttons for page numbers to go to
+      //create the button html
       for (i =1; i <= pages; i++){
         if(i == pageNumber){
           buttons+="<label id='curPage' class='btn btn-primary btn-default'>"+i.toString() +"</label>"
@@ -358,7 +377,9 @@ function displayComments(profile_id, pageNumber){
           buttons += "<button class ='btn'>"+i.toString()+"</button>"
         }
       }
-      $('#pageNumbers').html(buttons);
+      $('#pageNumbers').html(buttons);//inject the buttons
+
+      //display the comments per page
       for(i = commentsPerPage*(pageNumber-1);
         i < Math.min(data.length,commentsPerPage*pageNumber);
         i++){
@@ -376,12 +397,12 @@ function displayComments(profile_id, pageNumber){
               '<span class="glyphicon glyphicon-time"></span>'
               +info.date + '</small>';
             list += '<br><br>';
-            //list += '<small>rating: ' + info.rating + '/5 </small><br>'
             list +='<br>';
             list+='</div>';
 
             $('#sortable').html(list);
 
+            //add button that delete the comment
             addDeleteBtn(info.sender._id, info._id, function(isAuth, id){
               if(isAuth){
                 console.log($('.feedback-row[data-id='+id+']'));
@@ -390,9 +411,9 @@ function displayComments(profile_id, pageNumber){
                 info._id+
                 '" aria-label="Close"><span aria-hidden="true">&times;</span></button>');
               }
+              //set the delete button action
               $('.delete-feedback[data-id='+id+']').click(function(){
                 var id = $(this).data('id');
-                //alert(id);
                 var c = confirm("Are you sure to delete this review (#"+id+")?");
                 if(c){
                   $.ajax({
@@ -419,7 +440,12 @@ function displayComments(profile_id, pageNumber){
   });
 }
 
-//for the star rating user click
+/*
+*for the star rating that when enter the commets
+*it get the number of stars the user clicked on and then
+*put it into the hidden form so we can get number of stars
+*it also control the animation of the stars
+*/
 var __slice = [].slice;
 (function(e, t) {
     var n;
@@ -506,6 +532,9 @@ var __slice = [].slice;
     })
 })(window.jQuery, window);
 
+/*
+* function that add delete the comment when click delete button
+*/
 function addDeleteBtn(senderId, feedbackId, callback){
   $.ajax({
       type: 'GET',

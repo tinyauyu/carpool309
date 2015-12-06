@@ -476,9 +476,13 @@ app.post('/api/log', function(req, res){
 
 /********************** User Account *************************/
 
+
 /********************** Feedback **********************/
+
+/*
+* create new Feedback api
+*/
 app.post('/api/users/:id/feedbacks', function(req, res){
-  //console.log("posting feedback");
 	var feedback = JSON.parse(req.body.json);
 	feedback['sender'] = req.session._id;
 	feedback['receiver'] = req.params.id;
@@ -487,7 +491,8 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 		if(success){
       //update rating for the user
       debug("feedback.receiver = "+feedback['receiver'])
-      acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
+      acManager.updateRating(feedback.rating, feedback['receiver'],
+				function(success,msg){
     		if(success){
     			res.send(msg);
     		} else {
@@ -503,8 +508,13 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 
 });
 
+/*
+* get feedbacks for a user id api
+*/
 app.get('/api/users/:id/feedbacks', function(req, res){
-	feedbackManager.getFeedbackByUser(req.params.id, function(success,feedbacks){
+	//use data manager to get data and then send
+	feedbackManager.getFeedbackByUser(req.params.id,
+			function(success,feedbacks){
 		if(success){
 			res.send(feedbacks);
 		} else {
@@ -514,7 +524,11 @@ app.get('/api/users/:id/feedbacks', function(req, res){
 	})
 });
 
+/*
+* get all feedbacks api
+*/
 app.get('/api/feedbacks', function(req, res){
+	//use data manager to get data and then send
 	feedbackManager.getAllFeedback(function(success,feedbacks){
 		if(success){
 			res.send(JSON.stringify(feedbacks));
@@ -522,10 +536,14 @@ app.get('/api/feedbacks', function(req, res){
 			res.writeHead(400,feedbacks);
 			res.end(feedbacks);
 		}
-	})
+	});
 });
 
+/*
+* get one feedback by it's id api
+*/
 app.get('/api/feedbacks/:id', function(req, res){
+	//use data manager to get data and then send
 	feedbackManager.getFeedbackById(req.params.id, function(success,feedback){
 		if(success){
 			res.send(JSON.stringify(feedback));
@@ -536,12 +554,15 @@ app.get('/api/feedbacks/:id', function(req, res){
 	})
 });
 
+/*
+* delete one feedback by it's id api
+*/
 app.delete('/api/feedbacks/:id', function(req, res){
 	feedbackManager.getFeedbackById(req.params.id, function(success, feedback){
 		debug(feedback)
 		debug(feedback.rating);
 		debug(feedback.receiver);
-      //update rating for the user
+      //remove rating for the user
       acManager.removeRating(feedback.rating, feedback.receiver, function(success,msg){
     		if(success){
     			feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){

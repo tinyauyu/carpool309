@@ -5,7 +5,13 @@ var xss = require('xss');
 
 var FeedbackSchema;
 
+/*
+* constructor that create the FeedbackManager that control the
+* database
+* params: the url and port that the database manager listens to
+*/
 function FeedbackManager(url){
+	//connect to the database
 	mongoose.createConnection(url);
 	this.db = mongoose.connection;
 	this.db.on('error', console.error.bind(console, 'connection error:'));
@@ -19,6 +25,11 @@ function FeedbackManager(url){
 	Feedback = mongoose.model('Feedback', FeedbackSchema);
 }
 
+/*
+* create a new feedback by passing in a new feedback object
+* the new feedback object contain sender, reciever, comment,
+* and rating
+*/
 FeedbackManager.prototype.createFeedback = function(feedback,callback){
 	Feedback.count({}, function(err, count){
 
@@ -28,17 +39,21 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 
 
 		/*** Validation Here ***/
+		//the sender must be either in string or number format
 		if(typeof feedback.sender != "number"
 			&& typeof feedback.sender != 'string'){
 			callback(false, "Feedback must have a sender.");
 			return;
 		}
+		//the reciever must be either in string or number format
 		if(typeof feedback.receiver !="string"
 			&& typeof feedback.sender != 'number'){
 			callback(false, "Feedback must have a receiver.");
 			return;
 		}
-
+		//the comment must be either in string format
+		//the comment cannot be empty
+		//the rating must be number or string format
 		if(feedback.comment==''
 			|| (typeof feedback.rating!="number"
 				&& typeof feedback.rating!="string")
@@ -46,12 +61,14 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 			callback(false, "Feedback must contain either comment or rating.");
 			return;
 		}
-		/***********************/
+		/****validation end*********/
 
-		feedback.comment = xss(feedback.comment);
+		feedback.comment = xss(feedback.comment);//format the comment
 
+		//create a new feedback object that fit in the schema
 		var newFeedback = new Feedback(feedback);
 
+		//save this to the database
 		newFeedback.save(function(error, data){
 	    	if(error){
 	    		console.log("[ERROR]\t[FeedbackManager.js]\tCannot save feedback to database: " + error);
@@ -67,6 +84,10 @@ FeedbackManager.prototype.createFeedback = function(feedback,callback){
 	});
 }
 
+/*
+* get all of the comments for a user id
+* params: the user id that recieves the comments and a callback function
+*/
 FeedbackManager.prototype.getFeedbackByUser = function(toUserId,callback){
 	Feedback.find({receiver:toUserId}).populate('sender receiver').exec(function(err, feedbacks) {
 		if(err){
@@ -81,6 +102,9 @@ FeedbackManager.prototype.getFeedbackByUser = function(toUserId,callback){
 	});
 }
 
+/*
+*	get one feedback given it's id
+*/
 FeedbackManager.prototype.getFeedbackById = function(id,callback){
 	Feedback.findOne({_id:id}, function(err, feedback) {
 		if(err){
@@ -95,6 +119,9 @@ FeedbackManager.prototype.getFeedbackById = function(id,callback){
 	});
 }
 
+/*
+* delete a feedback given it's feedbackId
+*/
 FeedbackManager.prototype.deleteFeedbackById = function(feedbackId,callback){
 	Feedback.findOneAndRemove({_id:feedbackId}, function(err) {
 		if(err){
@@ -109,6 +136,10 @@ FeedbackManager.prototype.deleteFeedbackById = function(feedbackId,callback){
 	});
 }
 
+/*
+* delete all of the feedbacks of a user
+* params: the user id, and a call back function
+*/
 FeedbackManager.prototype.deleteFeedbacksByUser = function(userId,callback){
 	Feedback.remove({receiver: userId}, function(err) {
 		if(err){
@@ -123,6 +154,10 @@ FeedbackManager.prototype.deleteFeedbacksByUser = function(userId,callback){
 	});
 }
 
+/*
+* get all of the feedbacks in the database
+* params: the callback funciton
+*/
 FeedbackManager.prototype.getAllFeedback = function(callback){
 	Feedback.find({}).populate('sender receiver').exec(function(err, feedbacks) {
 		if(err){
@@ -137,4 +172,5 @@ FeedbackManager.prototype.getAllFeedback = function(callback){
 	});
 }
 
+//export the module as a library
 module.exports = FeedbackManager;
