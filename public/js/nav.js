@@ -66,9 +66,6 @@ function showChatWindow(data) {
       }
     });
 
-    $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
-    console.log('when loaded down')
-
   };
 
   $.ajax({
