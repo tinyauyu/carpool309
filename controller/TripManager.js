@@ -1,9 +1,15 @@
+/*-------------------------------------------------------
+GLobal variables for db and auto increment
+--------------------------------------------------------*/
 var debug = require('debug')('TripManager.js');
 var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
 
 var TripSchema, Trip;
 
+/*-------------------------------------------------------
+Implement basic manager functions, including trip database
+--------------------------------------------------------*/
 //Get in where the database is mongodb://localhost/
 function TripManager(url){
 	mongoose.createConnection(url);
@@ -18,6 +24,11 @@ function TripManager(url){
 	Trip = mongoose.model('Trip',TripSchema);
 }
 
+/*-------------------------------------------------------
+Update trip function:
+take in the trip object
+and store it into the trip databse
+--------------------------------------------------------*/
 TripManager.prototype.updateTrip = function(trip,callback){
 	var newTrip = new Trip(trip);
 	newTrip.save(function(error,data){
@@ -33,6 +44,11 @@ TripManager.prototype.updateTrip = function(trip,callback){
 	});
 }
 
+/*-------------------------------------------------------
+Remove trip function:
+take in the trip ID and find it and
+delete it in the trip database
+--------------------------------------------------------*/
 TripManager.prototype.removeTrip = function(tripId, callback){
 	Trip.findOneAndRemove({_id: tripId}, function(err) {
 		if(err){
@@ -47,6 +63,11 @@ TripManager.prototype.removeTrip = function(tripId, callback){
 	});
 }
 
+/*-------------------------------------------------------
+Take in the trip id and search for the trip in database
+And meet all the criterias, comments inside the functions
+and return it to user
+--------------------------------------------------------*/
 TripManager.prototype.searchTrip = function(tripId,callback){
 	var currentTime = new Date();
 	var sortedTrips = [];
@@ -105,6 +126,10 @@ TripManager.prototype.searchTrip = function(tripId,callback){
 	});
 }
 
+/*-------------------------------------------------------
+Similar to the function above
+Just change one search condition to search for similar trips
+--------------------------------------------------------*/
 TripManager.prototype.searchSimilarTrip = function(tripId,callback){
 	var currentTime = new Date();
 	var sortedTrips = [];
@@ -154,6 +179,9 @@ TripManager.prototype.searchSimilarTrip = function(tripId,callback){
 	});
 }
 
+/*-------------------------------------------------------
+Given one trip ID find the corresponding trip in the database
+--------------------------------------------------------*/
 TripManager.prototype.findOneTrip = function (tripId, callback){
 	Trip.findOne({_id: tripId}, function (err, trip){
 		if (err){
@@ -168,6 +196,9 @@ TripManager.prototype.findOneTrip = function (tripId, callback){
 	});
 }
 
+/*-------------------------------------------------------
+Given the user ID, find all trips that this user has on record in trip database
+--------------------------------------------------------*/
 TripManager.prototype.findAllTripsByUser = function (userId, callback){
 	Trip.find({user: userId}, function (err, trip){
 		if (err){
@@ -182,6 +213,9 @@ TripManager.prototype.findAllTripsByUser = function (userId, callback){
 	});
 }
 
+/*-------------------------------------------------------
+Find all the trips in the databse and return to the user
+--------------------------------------------------------*/
 TripManager.prototype.findAllTrips = function (callback){
 	Trip.find({}).populate('user').exec(function (err, trip){
 		if (err){
@@ -197,6 +231,12 @@ TripManager.prototype.findAllTrips = function (callback){
 	});
 }
 
+/*-------------------------------------------------------
+Find the distance between two trips
+Which is the distance between startpoint
++ the distance between endpoint
+Using radians calculation algorithm
+--------------------------------------------------------*/
 function findDistance(trip1, trip2){
 	var lat1 = trip1.startPoint.latitude * Math.PI / 180;
 	var lat2 = trip2.startPoint.latitude * Math.PI / 180;
@@ -211,6 +251,9 @@ function findDistance(trip1, trip2){
 	return d;
 }
 
+/*-------------------------------------------------------
+Find one distance of two points
+--------------------------------------------------------*/
 function findOneDistance(lat1,lat2,lon1,lon2){
 	var R = 6371000; // metres
 	var φ1 = lat1;
@@ -225,6 +268,12 @@ function findOneDistance(lat1,lat2,lon1,lon2){
 	return d;
 }
 
+/*-------------------------------------------------------
+Get all the distance that is differ to newTrip
+and record into the databse and sort the json object
+by ascending order with distance
+And then return to the user.
+--------------------------------------------------------*/
 function getDistanceAndSort(newTrip, validTrips){
 	var sortedTrips = [];
 	for (var i in validTrips){
@@ -247,6 +296,9 @@ function getDistanceAndSort(newTrip, validTrips){
 	return sortedTrips;
 }
 
+/*-------------------------------------------------------
+Export for usage
+--------------------------------------------------------*/
 module.exports = TripManager;
 module.exports.findOneDistance = findOneDistance;
 module.exports.findDistance = findDistance;
