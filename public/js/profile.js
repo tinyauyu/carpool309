@@ -1,19 +1,6 @@
 var profilePicBuffer = undefined;
 
-function updateResultPanel(data) {
-    $("#resultPanel").html(data.window);
-    $("#resultPanel").attr('sendto', data.user.email);
-    $.ajax({
-      type: "GET",
-      url: "/api/users/"+data.user._id+"/profilePic",
-      success: function(img){
-        $('#receiverImg').attr("src", img);
-          },
-      error: function(jqxhr, textStatus, errorThrown){
-        alert(errorThrown);
-      }
-    });
-}
+//click the chat message button to show chat window
 $(document).ready(function() {
     $("#chat").click(function() {
       $("#chat").attr("disabled", true);

@@ -15,6 +15,7 @@ var socket = io();
 var sender = $('.navbar-brand').attr("loggedInUser");
 socket.emit('register', {sender: sender});
 
+//show chat window in page's resultPanel div
 function showChatWindow(data) {
   $("#resultPanel").removeClass("hidden");
 
@@ -29,6 +30,7 @@ function showChatWindow(data) {
       var ele;
       var content;
       if (msg.sender == receiver) {
+        //show messages you sent in chat body
         ele = $('<div id="chat-body" class="pull-right clearfix" style="width:260px">');
         content =$('<div class="pull-left clearfix" style="width:200px">');
         ele.append('<span class="chat-img pull-right"><img src="/img/me.png" alt="User Avatar" class="img-circle" /></span>');
@@ -37,8 +39,8 @@ function showChatWindow(data) {
         ele.append(content);
         $("#messages").append(ele);
 
-        //ele.attr('id', 'msgYouSend');
       } else {
+        //show messages you get in chat body
         ele = $('<div id="chat-body" class="pull-left clearfix" style="width:260px">');
         content =$('<div class="pull-right clearfix" style="width:200px">');
         ele.append('<span class="chat-img pull-left"><img src="/img/u.png" alt="User Avatar" class="img-circle" /></span>');
@@ -46,7 +48,6 @@ function showChatWindow(data) {
         content.append($('<p id="text" style="text-align:left">').text(msg.content));
         ele.append(content);
         $("#messages").append(ele);
-        //ele.attr('id', 'msgYouGet');
       }
     }
 
@@ -86,11 +87,15 @@ function getUnreadMsgs() {
       var msgsJson = JSON.parse(msgs);
 
       var msgsLength = msgsJson.length;
+      // no new message
       if (msgsLength == 0) {
+        //hide new icon and sender list of new messages
         $('.W_new_count').addClass("hidden");
         $('#newMsgList').addClass("hidden");
         return;
       }
+
+      //show ne icon and sender list
       $('.W_new_count').removeClass("hidden");
       $('#newMsgList').removeClass("hidden");
       $('#newMsgList').empty();
@@ -99,20 +104,24 @@ function getUnreadMsgs() {
       for (i = 0; i < msgsLength; i++) {
         var msg = msgsJson[i];
         var sender = msg.sender;
+        //if new message sender not already in the unreadUsers list
         if (unreadUsers.indexOf(sender) != -1) {
           continue;
         }
+        //add new messages senders to the list
         unreadUsers.push(sender);
         var ele = $('<li>');
         ele.text(sender);
         $('#newMsgList').append(ele);
 
+        //click to send ajax call to mark the message read
         ele.click(function() {
           ele.remove();
           var sender = ele.text();
           $.ajax({
             type: "POST",
             url: "/api/markMsgRead/" + sender + "/" + loggedInUser + "/",
+            //if success, call getUnreadMsgs again
             success: getUnreadMsgs
           });
           $.ajax({
@@ -125,6 +134,7 @@ function getUnreadMsgs() {
       }
     };
 
+    //load unread messages when login or when receive messages online.
     $.ajax({
       type: "GET",
       datatype: "json",
@@ -134,12 +144,15 @@ function getUnreadMsgs() {
 }
 
 socket.on('chat message', function(data) {
+  //if chat window is open when get sender's messages 
   if ($("#resultPanel").is(':visible') && $("#resultPanel").attr('sendto') == data.sender) {
+    // do not call getUnreadMsgs to show the notification
     return;
   }
   getUnreadMsgs();
 });
 
+//time stamp builder
 function dateToStr(date) {
     var month = date.getMonth() + 1;
     var day = date.getDate();
@@ -155,6 +168,5 @@ function dateToStr(date) {
     if (parseInt(min) < 10) {
         min = "0" + min;
     }
-
     return year + "-" + month + "-" + day + ", " + hour + ": " + min; 
 }

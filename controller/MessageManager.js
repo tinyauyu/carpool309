@@ -23,18 +23,20 @@ function MessageManager(url, server){
         socket.on('register', function(data) {
             cons[data.sender] = socket.id;
         });
-
+        //server receives messages from sender
         socket.on('chat message', function(data) {
              var newMsg = new Message({
                  sender: data.sender,
                  receiver: data.receiver,
                  content: data.msg
              });
+             //save the received messages to database
              newMsg.save(function(error, data) {
                  if(error) {
                     debug(error);
                     debug("Fail to save message");
                  } else {
+                    //server sends message to receiver
                     socket.to(cons[data.receiver]).emit('chat message', data);
                  }
              });
@@ -45,41 +47,6 @@ function MessageManager(url, server){
         });
     });
 };
-
-// MessageManager.prototype.sendMessage = function(message,callback){
-//     Message.count({}, function(err, count){
-
-//         if(count==0){
-//             Message.resetCount(function(err, nextCount){});
-//         }
-
-//         /*** Validation Here ***/
-//         if(typeof message.sender=="undefined"){
-//             callback(false, "Message must have a sender.");
-//             return;
-//         }
-//         if(typeof message.receiver=="undefined"){
-//             callback(false, "Message must have a receiver.");
-//             return;
-//         }
-//         /***********************/
-
-//         var newMessage = new Message(message);
-
-//         newMessage.save(function(error, data){
-//             if(error){
-//                 console.log("[ERROR]\t[MessageManager.js]\tCannot send message: " + error);
-//                 callback(false,"Internal Server Error");
-//                 return;
-//             } else {
-//                 debug("Message#"+data._id+" created")
-//                 callback(true,data._id.toString());
-//                 return;
-//             }
-//         });
-
-//     });
-// }
 
 MessageManager.prototype.getConversation = function(user1, user2, callback) {
     Message.find({$or:[{sender: user1, receiver: user2}, {sender: user2, receiver: user1}]}, null, {sort: {date: "ascending"}}, function(err, messages) {

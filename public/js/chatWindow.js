@@ -9,11 +9,13 @@ $(document).on('click','.slide' ,function() {
 
 
 $(document).on('click', '#removeBox', function () {
+    //click to close chat window
     $("#resultPanel").addClass("hidden");
     location.reload();
 });
 
 var sender = $('.navbar-brand').attr('loggedInUser');
+//register the logged in user as message sender when open the chat window
 socket.emit('register', {sender: sender});
 var receiver;
 
@@ -21,6 +23,7 @@ $(document).on('click', '#msgButton', function() {
     var msg = $('#msg').val();
     var attr = $('button#chat').attr('receiver');
     receiver = $('#resultPanel').attr('sendto');
+    //show chat body messages, time you sent
     var ele = $('<div id="chat-body" class="pull-right clearfix" style="width:260px">');
     var content =$('<div class="pull-left clearfix" style="width:200px">');
 
@@ -32,21 +35,23 @@ $(document).on('click', '#msgButton', function() {
     ele.append(content);
     $("#messages").append(ele);
 
-    //ele.attr('id', 'msgYouSend');
+    //build messages info
     var data = {
         sender: sender,
         receiver: receiver,
         msg: msg,
         date: curTime
     };
-
+    //emit the messages data you sent to server
     socket.emit('chat message', data);
     $('#msg').val('');
 
     return false;
 });
 
+// receive messages sent by others from server
 socket.on('chat message', function(data) {
+    //show chat body the messages you get
     if ($("#resultPanel").is(':visible') && $("#resultPanel").attr('sendto') == data.sender) {
         var ele = $('<div id="chat-body" class="pull-left clearfix" style="width:260px">');
         var content =$('<div class="pull-right clearfix" style="width:200px">');
@@ -55,12 +60,10 @@ socket.on('chat message', function(data) {
         content.append($('<p id="text" style="text-align:left">').text(data.content));
         ele.append(content);
         $("#messages").append(ele);
-        //ele.attr('id', 'msgYouGet');
         $.ajax({
           type: "POST",
           url: "/api/markMsgRead/" + data.sender + "/" + data.receiver + "/",
           success: getUnreadMsgs
         });
-
     }
 });
