@@ -662,7 +662,7 @@ app.delete('/api/feedbacks/:id', function(req, res){
 /********************** Feedback End**********************/
 
 /********************** Message **********************/
-
+/* get one chatWindow by it's email api */
 app.get('/api/users/:email/chatWindow/', function(req, res) {
 	var fs = require('fs');
 	fs.readFile(__dirname + '/views/chatWindow.html', 'utf8', function(err, data){
@@ -684,6 +684,7 @@ app.get('/api/users/:email/chatWindow/', function(req, res) {
 	});
 });
 
+/* get one's unreadmessage by it's email api */
 app.get('/api/unreadmessage/:email/', function(req, res) {
 	var email = req.params.email;
 	msgManager.getUnreadMsgsForUser(email, function(success, feedbacks) {
@@ -696,6 +697,7 @@ app.get('/api/unreadmessage/:email/', function(req, res) {
 	});
 });
 
+/* mark unread message to read by sender and receiver api */
 app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 	var sender = req.params.sender;
 	var receiver = req.params.receiver;
@@ -703,6 +705,7 @@ app.post('/api/markMsgRead/:sender/:receiver/', function(req, res) {
 	res.end();
 });
 
+/* get an conversation by user1 and user2 emails api */
 app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 	var user1 = req.params.user1;
 	var user2 = req.params.user2;
@@ -718,30 +721,6 @@ app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 	});
 });
 
-// app.post('/api/users/:id/messages', function(req, res){
-// 	var message = JSON.parse(req.body.json);
-// 	message['sender'] = req.session._id;
-// 	message['receiver'] = req.params.id;
-// 	msgManager.sendMessage(message, function(success,msg){
-// 		if(success){
-// 			res.send(msg);
-// 		} else {
-// 			res.writeHead(400,msg);
-// 			res.end(msg);
-// 		}
-// 	});
-// });
-
-// app.get('/api/users/:id/messages', function(req, res){
-// 	msgManager.getConversation(req.params.id, req.session._id, function(success,msg){
-// 		if(success){
-// 			res.send(msg);
-// 		} else {
-// 			res.writeHead(400,msg);
-// 			res.end(msg);
-// 		}
-// 	});
-// });
 /********************** Message End**********************/
 
 

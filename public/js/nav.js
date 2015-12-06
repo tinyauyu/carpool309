@@ -15,7 +15,7 @@ var socket = io();
 var sender = $('.navbar-brand').attr("loggedInUser");
 socket.emit('register', {sender: sender});
 
-//show chat window in page's resultPanel div
+/* show chat window in page's resultPanel div */
 function showChatWindow(data) {
   $("#resultPanel").removeClass("hidden");
 
@@ -152,7 +152,7 @@ socket.on('chat message', function(data) {
   getUnreadMsgs();
 });
 
-//time stamp builder
+/* time stamp builder */
 function dateToStr(date) {
     var month = date.getMonth() + 1;
     var day = date.getDate();

@@ -1,23 +1,6 @@
 var profilePicBuffer = undefined;
 
-/*----------------------------------------------------------------
-update the imag/profile icon is upload succeed
-Helper function
------------------------------------------------------------------*/
-function updateResultPanel(data) {
-    $("#resultPanel").html(data.window);
-    $("#resultPanel").attr('sendto', data.user.email);
-    $.ajax({
-      type: "GET",
-      url: "/api/users/"+data.user._id+"/profilePic",
-      success: function(img){
-        $('#receiverImg').attr("src", img);
-          },
-      error: function(jqxhr, textStatus, errorThrown){
-        alert(errorThrown);
-      }
-    });
-}
+/* click send message button to popup the chat window */
 $(document).ready(function() {
     $("#chat").click(function() {
       $("#chat").attr("disabled", true);
@@ -32,9 +15,6 @@ $(document).ready(function() {
     });
 })
 
-/*----------------------------------------------------------------
-
------------------------------------------------------------------*/
 function showPasswordInfo(type, msg){
   var head = "";
   if(type=="success"){
