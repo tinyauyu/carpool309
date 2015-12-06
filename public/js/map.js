@@ -1,4 +1,14 @@
+/*--------------------------------------------------------------
+Create tow map object to retrive map from googld
+---------------------------------------------------------------*/
 var map, map2;
+
+/*--------------------------------------------------------------
+Start the map defined in the google map api js
+Basicaly get latitude and longitude put them to the map
+In addition i have added some path arrows
+to show which one is from and which one is destinations
+---------------------------------------------------------------*/
 function initMap() {
   var data = $('#fromWhere').data('info');
   data = data.split(",");

@@ -1,8 +1,10 @@
+/*------------------------------------------------------
+Declare global variables
+-------------------------------------------------------*/
 var debug = require('debug')('server.js');
 var debug_http = require('debug')('http');
-
+//Debug option to print
 debug("Server initializing...");
-
 var mongoose = require('mongoose');
 var bcrypt = require('bcrypt');
 var bodyParser = require('body-parser');
@@ -11,14 +13,17 @@ var swig  = require('swig');
 var express = require('express');
 var app = express();
 var compression = require('compression');
-
 var ROOT = { root: __dirname+'/public' };
 
+/*------------------------------------------------------
+Declare what does express uses
+-------------------------------------------------------*/
 app.use(compression());
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
+//Performance cache
 app.use(express.static(__dirname + '/public',{
-	maxAge: 1//86400000
+	maxAge: 86400000
 }));
 
 app.use(bodyParser.json());
@@ -34,7 +39,7 @@ app.use(session({
   httpOnly: true
 }));
 
-
+//Ddos security frame work
 var Ddos = require('ddos')
 var ddos = new Ddos({
 	maxcount: 30,
@@ -47,6 +52,7 @@ var ddos = new Ddos({
 });
 app.use(ddos.express)
 
+//Server listen on 3000
 var server = app.listen(process.env.PORT || 3000, function () {
   var host = server.address().address;
   var port = server.address().port;
@@ -54,6 +60,12 @@ var server = app.listen(process.env.PORT || 3000, function () {
   debug('Server is now running at port '+port);
 });
 
+/*------------------------------------------------------
+Bascis login page interface
+Login succeed
+Login fail
+Register
+-------------------------------------------------------*/
 app.use(function(req, res, next) {
 
 	debug_http(req.method + ' ' + req.url);
@@ -79,11 +91,14 @@ app.use(function(req, res, next) {
 	}
 });
 
-
+/*------------------------------------------------------
+Managers:
+3 different functionalities with
+3 different controller
+3 different mongo db
+-------------------------------------------------------*/
 var MONGODB_URL = 'mongodb://localhost/';
 //var MONGODB_URL = 'mongodb://carpool309:muchbetterthanuber@ds055564.mongolab.com:55564/heroku_7wrc6q07';
-
-/********************** Managers **********************/
 var AccountManager = require('./controller/AccountManager.js');
 var acManager = new AccountManager(MONGODB_URL);
 
@@ -96,9 +111,10 @@ var msgManager = new MessageManager(MONGODB_URL, server);
 var TripManager =  require('./controller/TripManager.js');
 var tripManager = new TripManager(MONGODB_URL);
 
-/********************** Managers **********************/
 
-/********************** View *************************/
+/*------------------------------------------------------
+the start page allows to login/register
+-------------------------------------------------------*/
 app.all('/', function(req, res){
 	if(req.session._id || req.session._id == 0){
 		res.redirect('/users');
@@ -107,6 +123,12 @@ app.all('/', function(req, res){
 	}
 });
 
+/********************** User Account *************************/
+/*------------------------------------------------------
+if following get request
+Get the user id
+Then render the correspsongind profile.html
+-------------------------------------------------------*/
 app.get('/users/:id', function(req, res){
 	//var page = "/users/" + req.params.id;
 	var user = {
@@ -160,6 +182,10 @@ app.get('/users/:id', function(req, res){
 		});
 	}
 	else {
+		/*------------------------------------------------------
+		If there is anouther filed tripId, direct to a 
+		different version of profile page
+		-------------------------------------------------------*/
 		acManager.getUser(req.session._id,function(success,profile){
 			if(!success){
 				res.redirect('/users');
@@ -198,6 +224,10 @@ app.get('/users/:id', function(req, res){
 
 });
 
+/*------------------------------------------------------
+Get all user profiles in the database
+And pass into the render function for userList.html
+-------------------------------------------------------*/
 app.get('/users', function(req, res){
 	acManager.getUser(req.session._id,function(success, profile){
 		acManager.getUserList(function(users){
@@ -216,6 +246,10 @@ app.get('/users', function(req, res){
 
 });
 
+/*------------------------------------------------------
+Admin page get request
+Get all data from all database and render the html
+-------------------------------------------------------*/
 app.get('/admin', function(req,res){
 	acManager.getUser(req.session._id,function(success, profile){
 		if(profile.userType>=1){
@@ -233,9 +267,11 @@ app.get('/admin', function(req,res){
 		}
 	});
 });
-/********************** View *************************/
 
-/********************** User Account *************************/
+
+/*------------------------------------------------------
+Delete a speccific user by get the user's id through the request
+-------------------------------------------------------*/
 app.delete('/api/users/:id', function(req, res){
 	var user_id = req.session._id;
 	var profile_id = req.params.id;
@@ -257,6 +293,11 @@ app.delete('/api/users/:id', function(req, res){
 	})
 });
 
+/*------------------------------------------------------
+get the login data and check with the databse 
+if log in succeed go to certain page
+if not, report error message
+-------------------------------------------------------*/
 app.post('/api/login', function(req, res) {
 	if(req.query.type=="google"){
 		debug("GOOGLE LOGIN!")
@@ -300,6 +341,11 @@ app.post('/api/login', function(req, res) {
 	}
 });
 
+
+/*------------------------------------------------------
+Logout the user
+by reseting the session and redirect to the home page
+-------------------------------------------------------*/
 app.get('/api/logout', function(req, res) {
   req.session.reset();
   res.redirect('/');
@@ -338,6 +384,11 @@ app.post('/api/users', function (req, res){
 
 });
 
+/*------------------------------------------------------
+Get the data from the user
+And then update the user profile:
+name, email, icons
+-------------------------------------------------------*/
 app.patch('/api/users/:id', function (req, res){
 	var profile = JSON.parse(req.body.json);
 	profile['_id'] = req.params.id;
@@ -355,6 +406,10 @@ app.patch('/api/users/:id', function (req, res){
 	})
 });
 
+/*------------------------------------------------------
+Get the verified password from user
+And update the password in the database
+-------------------------------------------------------*/
 app.put('/api/changePassword', function (req, res){
 	var profile = JSON.parse(req.body.json);
 	var user = req.session;
@@ -369,7 +424,7 @@ app.put('/api/changePassword', function (req, res){
 		res.writeHead(400,"You have no right to change other user's password!");
 		res.end("You have no right to change other user's password!");
 	}
-
+	//Check for different conditions
 	if(profile.password.enabled){
 		acManager.login(loginProfile, function(success,msg){
 			if(!success){
@@ -406,6 +461,9 @@ app.put('/api/changePassword', function (req, res){
 });
 
 
+/*------------------------------------------------------
+GET command which send all users in the database to the client
+-------------------------------------------------------*/
 app.get('/api/users', function(req, res){
   //console.log('getting user api');
 	acManager.getUserList(function(users){
@@ -413,6 +471,9 @@ app.get('/api/users', function(req, res){
 	});
 });
 
+/*------------------------------------------------------
+GET command which return user who satisfy specifis search conditions
+-------------------------------------------------------*/
 app.get('/api/users/search', function(req, res){
 	acManager.searchUser(req.query.keyword, function(success, users){
 		if(success){
@@ -424,25 +485,36 @@ app.get('/api/users/search', function(req, res){
 	})
 });
 
+/*------------------------------------------------------
+Get the current user's data from databse and send to user
+-------------------------------------------------------*/
 app.get('/api/users/current', function(req,res){
 	acManager.getUser(req.session._id, function(success, user){
 		res.send(user);
 	});
 });
 
-
+/*------------------------------------------------------
+GET the user data accroding to user's ID
+-------------------------------------------------------*/
 app.get('/api/users/:id', function(req, res){
 	acManager.getUser(req.params.id, function(success, user){
 		res.send(user);
 	});
 });
 
+/*------------------------------------------------------
+Get the profile pic of the current user by knowing keyword current
+-------------------------------------------------------*/
 app.get('/api/users/current/profilePic', function(req, res){
 	acManager.getUserPic(req.session._id, function(pic){
 		res.send(pic);
 	})
 });
 
+/*------------------------------------------------------
+GET specific user's icon pic by user's ID
+-------------------------------------------------------*/
 app.get('/api/users/:id/profilePic', function(req, res){
 	acManager.getUserPic(req.params.id, function(pic){
 		//res.contentType('image/png');
@@ -450,6 +522,9 @@ app.get('/api/users/:id/profilePic', function(req, res){
 	})
 });
 
+/*------------------------------------------------------
+Enable to trace the most visited pages log
+-------------------------------------------------------*/
 app.post('/api/log', function(req, res){
 	var b = JSON.parse(req.body.json);
 
@@ -475,12 +550,15 @@ app.post('/api/log', function(req, res){
 		}
 	})
 });
+/********************** User Account End*************************/
 
-/********************** User Account *************************/
 
 /********************** Feedback **********************/
+
+/*
+* create new Feedback api
+*/
 app.post('/api/users/:id/feedbacks', function(req, res){
-  //console.log("posting feedback");
 	var feedback = JSON.parse(req.body.json);
 	feedback['sender'] = req.session._id;
 	feedback['receiver'] = req.params.id;
@@ -489,7 +567,8 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 		if(success){
       //update rating for the user
       debug("feedback.receiver = "+feedback['receiver'])
-      acManager.updateRating(feedback.rating, feedback['receiver'], function(success,msg){
+      acManager.updateRating(feedback.rating, feedback['receiver'],
+				function(success,msg){
     		if(success){
     			res.send(msg);
     		} else {
@@ -505,8 +584,13 @@ app.post('/api/users/:id/feedbacks', function(req, res){
 
 });
 
+/*
+* get feedbacks for a user id api
+*/
 app.get('/api/users/:id/feedbacks', function(req, res){
-	feedbackManager.getFeedbackByUser(req.params.id, function(success,feedbacks){
+	//use data manager to get data and then send
+	feedbackManager.getFeedbackByUser(req.params.id,
+			function(success,feedbacks){
 		if(success){
 			res.send(feedbacks);
 		} else {
@@ -516,7 +600,11 @@ app.get('/api/users/:id/feedbacks', function(req, res){
 	})
 });
 
+/*
+* get all feedbacks api
+*/
 app.get('/api/feedbacks', function(req, res){
+	//use data manager to get data and then send
 	feedbackManager.getAllFeedback(function(success,feedbacks){
 		if(success){
 			res.send(JSON.stringify(feedbacks));
@@ -524,10 +612,14 @@ app.get('/api/feedbacks', function(req, res){
 			res.writeHead(400,feedbacks);
 			res.end(feedbacks);
 		}
-	})
+	});
 });
 
+/*
+* get one feedback by it's id api
+*/
 app.get('/api/feedbacks/:id', function(req, res){
+	//use data manager to get data and then send
 	feedbackManager.getFeedbackById(req.params.id, function(success,feedback){
 		if(success){
 			res.send(JSON.stringify(feedback));
@@ -538,12 +630,15 @@ app.get('/api/feedbacks/:id', function(req, res){
 	})
 });
 
+/*
+* delete one feedback by it's id api
+*/
 app.delete('/api/feedbacks/:id', function(req, res){
 	feedbackManager.getFeedbackById(req.params.id, function(success, feedback){
 		debug(feedback)
 		debug(feedback.rating);
 		debug(feedback.receiver);
-      //update rating for the user
+      //remove rating for the user
       acManager.removeRating(feedback.rating, feedback.receiver, function(success,msg){
     		if(success){
     			feedbackManager.deleteFeedbackById(req.params.id, function(success,feedbacks){
@@ -564,7 +659,7 @@ app.delete('/api/feedbacks/:id', function(req, res){
       });
 	})
 });
-/********************** Feedback **********************/
+/********************** Feedback End**********************/
 
 /********************** Message **********************/
 
@@ -647,12 +742,13 @@ app.get('/api/getConversation/:user1/:user2/', function(req, res) {
 // 		}
 // 	});
 // });
-/********************** Message **********************/
+/********************** Message End**********************/
 
 
 /***********************Search&Trip*******************/
 /*---------------------------------------------------------
-Update trip to Trip db function by Steve
+Update trip to Trip db function
+update the trip save to the databse
 ----------------------------------------------------------*/
 app.post('/api/updateTrip', function(req,res){
 	var trip = req.body;
@@ -668,6 +764,9 @@ app.post('/api/updateTrip', function(req,res){
 	});
 });
 
+/*-----------------------------------------------------------
+GET all trips in the trip database and return to user
+------------------------------------------------------------*/
 app.get('/api/trips', function(req,res){
 	tripManager.findAllTrips(function(success, trips){
 		if(success){
@@ -679,6 +778,9 @@ app.get('/api/trips', function(req,res){
 	})
 })
 
+/*-----------------------------------------------------------
+Delete one specific trip by it's id
+------------------------------------------------------------*/
 app.delete('/api/trips/:id', function(req,res){
 	tripManager.removeTrip(req.params.id, function(success,msg){
 		if(success){
@@ -690,6 +792,9 @@ app.delete('/api/trips/:id', function(req,res){
 	})
 })
 
+/*-----------------------------------------------------------
+GET one trip in the database by giving it's id
+------------------------------------------------------------*/
 app.get('/searchTrip/:id', function(req,res){
 	var tripId = req.params.id;
 	req.session.tripId = tripId;
@@ -714,7 +819,9 @@ app.get('/searchTrip/:id', function(req,res){
 	});
 });
 
-
+/*-----------------------------------------------------------
+Close function
+------------------------------------------------------------*/
 exports.close = function(){
   server.close();
 }

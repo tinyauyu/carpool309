@@ -15,7 +15,8 @@ TripSchema = mongoose.Schema({
 	},
 	date: String,
 	price: Number,
-	provider: Boolean
+	provider: Boolean,
+	searchDistance: Number,
 });
 
 TripSchema.plugin(autoIncrement.plugin, 'Trip');

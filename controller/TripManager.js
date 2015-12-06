@@ -229,7 +229,10 @@ function getDistanceAndSort(newTrip, validTrips){
 	var sortedTrips = [];
 	for (var i in validTrips){
 		var d = findDistance(newTrip,validTrips[i]);
-		var smallestDistance = 50000;
+		var smallestDistance = newTrip.searchDistance * 1000;
+		if (newTrip.searchDistance == '' || newTrip.searchDistance == null){
+			smallestDistance = 30000;
+		}
 		if (d < smallestDistance){
 			var temple = JSON.stringify(validTrips[i]);
 			temple = JSON.parse(temple);
