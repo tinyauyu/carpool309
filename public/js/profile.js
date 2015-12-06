@@ -160,20 +160,6 @@ $( document ).ready( function(){
     location.reload();
   });
 
-   var entityMap = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': '&quot;',
-    "'": '&#39;'
-  };
-
-  function escapeHtml(string) {
-    return String(string).replace(/[&<>"'\/]/g, function (s) {
-      return entityMap[s];
-    });
-  }
-
   $('#submit').click(function(){
     $(".editableform-loading").removeClass('hidden');
     $(".edit-menu").addClass('hidden');
@@ -182,8 +168,8 @@ $( document ).ready( function(){
 
     var profile = {
       _id: $('#profile').data('value'),
-      displayName: escapeHtml($('#displayName').text()),
-      description: escapeHtml($('#description').text()),
+      displayName: $('#displayName').text(),
+      description: $('#description').text(),
       userType: userType,
       profilePic: profilePicBuffer
     }

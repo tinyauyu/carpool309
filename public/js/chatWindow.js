@@ -48,7 +48,6 @@ $(document).on('click', '#msgButton', function() {
     $('#msg').val('');
 
     $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
-    console.log('down');
     return false;
 });
 
@@ -67,5 +66,9 @@ socket.on('chat message', function(data) {
           url: "/api/markMsgRead/" + data.sender + "/" + data.receiver + "/",
           success: getUnreadMsgs
         });
+
+        
+      $('.panel-body').animate({ scrollTop: Number.POSITIVE_INFINITY});
+      console.log('new msg')
     }
 });
