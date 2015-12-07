@@ -760,7 +760,7 @@ app.get('/api/trips', function(req,res){
 /*-----------------------------------------------------------
 Delete one specific trip by it's id
 ------------------------------------------------------------*/
-app.delete('/api/trips/:id', function(req,res){
+app.delete('/api/trips/:id', function(req,res) {
 	tripManager.removeTrip(req.params.id, function(success,msg){
 		if(success){
 			res.send(msg)
@@ -774,7 +774,7 @@ app.delete('/api/trips/:id', function(req,res){
 /*-----------------------------------------------------------
 GET one trip in the database by giving it's id
 ------------------------------------------------------------*/
-app.get('/searchTrip/:id', function(req,res){
+app.get('/searchTrip/:id', function(req,res) {
 	var tripId = req.params.id;
 	req.session.tripId = tripId;
 	tripManager.searchTrip(tripId, function(success,trips){
@@ -797,7 +797,6 @@ app.get('/searchTrip/:id', function(req,res){
 		}
 	});
 });
-
 /*-----------------------------------------------------------
 Close function
 ------------------------------------------------------------*/
